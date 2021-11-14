@@ -4,6 +4,7 @@
  * and open the template in the editor.
  */
 package com.dom.ws.rest.bot.Services;
+import com.dom.ws.rest.bot.Controller.questionsController;
 import com.dom.ws.rest.bot.Request.answerReq;
 import com.dom.ws.rest.bot.Response.answerResp;
 import java.util.concurrent.ExecutorService;
@@ -43,8 +44,8 @@ public class api {
     private answerResp doQuestions (answerReq request) {
 
         answerResp response = new answerResp();
-        //registroUsuarioController ctrl = new registroUsuarioController();
-       // response = ctrl.crearUsuario(request);
+        questionsController ctrl = new questionsController();
+        response = ctrl.questionsBot(request);
         return response;
     }
     

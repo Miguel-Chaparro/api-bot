@@ -25,8 +25,8 @@ public class customerWhatsappDAO implements interfaces<customerWhatsappDTO> {
     private static final String SQL_UPDATE = "UPDATE customerWhatsapp SET questionId = ?, date = ?, "
             + "pendingState = ?, pendingDescription = ? "
             + "WHERE idWhatsapp = ?";
-    private static final String SQL_INSERT = "INSERT INTO customerWhatsapp (idWhatsapp, idCustomer, nameWAP) "
-            + "VALUES (?, ?, ?)";
+    private static final String SQL_INSERT = "INSERT INTO customerWhatsapp (idWhatsapp, idCustomer, nameWAP, questionId) "
+            + "VALUES (?, ?, ?, ?)";
     private static final String SQL_DELETE = "DELETE FROM customerWhatsapp WHERE idWhatsapp = ?";
     private static final String SQL_READMANY = "SELECT * FROM customerWhatsapp WHERE idCustomer = ? ";
     private static final String SQL_READMANYUSER = "";
@@ -44,6 +44,7 @@ public class customerWhatsappDAO implements interfaces<customerWhatsappDTO> {
             ps.setString(1, dto.getIdWhatsapp());
             ps.setString(2, dto.getIdCustomer());
             ps.setString(3, dto.getName());
+            ps.setString(4, "1");
             int i = 0;
             i = ps.executeUpdate();
 
@@ -114,7 +115,7 @@ public class customerWhatsappDAO implements interfaces<customerWhatsappDTO> {
             }
             if (i == 0) {
                 error.setCode(1);
-                error.setMessage("No existe nÃºmero registrado");
+                error.setMessage("No existe número registrado");
             } else {
                 error.setCode(0);
                 error.setMessage("");

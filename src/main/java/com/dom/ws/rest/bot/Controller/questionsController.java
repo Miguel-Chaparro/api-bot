@@ -39,17 +39,32 @@ public class questionsController {
         switch (dto.getError().getCode()) {
             case 0:
                 if (dto.getIdQuestions() == null) {
-
+                    question = buildNextQuestion(dto, 1);
+                    statesResp.setError(updateQuestionCustomer(dto,false));
+                    statesResp.setQuestion(question);
+                }else{
+                    statesResp = response(dto,req.getAnswer());
                 }
                 break;
             case 1:
-
+                dto.setIdWhatsapp(req.getWhatsappId());
+                dto.setName("");
+                dto.setIdCustomer("");
+                question = buildNextQuestion(dto, 1);
+                statesResp.setQuestion(question);
+                error.setCode(0);
+                error.setMessage("");
+                
                 break;
             default:
+                error.setCode(-1);
+                error.setMessage("? ¡Ups! Lo lamento, en estos momentos no puedo procesar la solicitud. \n Estoy aprendiendo día a día para no volver a repetir estos errores, favor intenta mas tarde");
                 break;
         }
+        statesResp.setError(error);
+        statesResp.setWhatsapp(req.getWhatsappId());
 
-        return null;
+        return statesResp;
     }
 
     private customerWhatsappDTO whatsappData(String Whatsapp) {
@@ -69,18 +84,27 @@ public class questionsController {
         List<answerDTO> answerList = new ArrayList();
         answerList = validateOptions(req, option);
         answerDTO val = new answerDTO();
+        answerResp resp = new answerResp();
+        questionsVO question = new questionsVO();
         val = answerList.get(0);
         switch (val.getError().getCode()) {
             case 1:
+                question = buildNextQuestion(req, 0);
                 break;
             case -1:
+                question.setQuestionDesc(val.getError().getMessage());
                 break;
             case 0:
-
+                question = buildNextQuestion(req, val.getAnswerId());
                 break;
             default:
+                question.setQuestionDesc(val.getError().getMessage()); 
                 break;
         }
+        resp.setQuestion(question);
+        
+        resp.setError(val.getError());
+        return resp;
     }
 
     private questionsVO buildNextQuestion(customerWhatsappDTO req, int option) {
@@ -92,10 +116,16 @@ public class questionsController {
         answerDTO optionDto = new answerDTO();
         answerDAO ansdao = new answerDAO();
         String questionId;
+        
         if (option == 0) {
             questionId = req.getIdQuestions().substring(req.getIdQuestions().length() - 2);
         } else {
-            questionId = req.getIdQuestions() + "." + option;
+            if (req.getIdQuestions() == null){
+                questionId = ""+option;
+            }else{
+                questionId = req.getIdQuestions() + "." + option;
+            }
+            
         }
 
         optionDto.setIdQuestion(questionId);
@@ -106,6 +136,7 @@ public class questionsController {
         response.setIdQuestion(questionId);
         response.setQuestionDesc(message(req.getName(), questionDto));
         response.setOptions(answerList);
+        
         return response;
     }
 
@@ -145,7 +176,7 @@ public class questionsController {
             response.setMessage("");
         } else {
             response.setCode(-1);
-            response.setMessage("ðŸ¤– Â¡Ups! Lo sentimos, en estos momenotos no podemos atenderlo, favor intente mas tarde");
+            response.setMessage("? ¡Ups! Lo lamento, en estos momentos no puedo procesar la solicitud. \n Estoy aprendiendo día a día para no volver a repetir estos errores, favor intenta mas tarde");
         }
         return response;
 
@@ -158,7 +189,6 @@ public class questionsController {
         req.setIdQuestion(dto.getIdQuestions());
         msgError rta = new msgError();
         answerList = dao.readMany(req);
-        int count = 0;
         int indicator;
         boolean flgOK = false;
         try {
@@ -169,13 +199,12 @@ public class questionsController {
             } else {
 
                 for (answerDTO q : answerList) {
-                    if (count == 0) {
-                        req = q;
-                        count++;
-                    }
-
+                 
                     if (q.getAnswerId() == indicator) {
                         flgOK = true;
+                        req.setAnswerId(indicator);
+                        req = q;
+                        break;
                     }
                 }
             }
@@ -186,15 +215,16 @@ public class questionsController {
                 rta = updateQuestionCustomer(dto, false);
             } else {
                 rta.setCode(-1);
-                rta.setMessage("ðŸ¤– Â¡Ups! Estoy aprendiendo dia a dia... por favor ingresa solo digitos");
+                rta.setMessage("? ¡Ups! Estoy aprendiendo a leer... por favor ingresa solo digitos");
             }
 
         }
         if (!flgOK) {
             rta.setCode(-1);
-            rta.setMessage("ðŸ¤– Â¡Ups! Lo siento esta opciÃ³n ingresada no es valida, Estoy aprendiendo dia a dia con el fin de garantizar un mejor servicio");
+            rta.setMessage("? ¡Ups! Lo siento esta opción ingresada no es valida, Estoy aprendiendo dia a dia con el fin de garantizar un mejor servicio");
         } else {
-            dto.setIdQuestions(dto.getIdQuestions() + "." + option);
+            req.setIdQuestion(dto.getIdQuestions() + "." + option);
+            
             rta = updateQuestionCustomer(dto, false);
         }
         req.setError(rta);
@@ -203,7 +233,5 @@ public class questionsController {
 
     }
     
-    private msgError validateCustomer (customerWhatsappDTO dto, String option){
-        
-    }
+ 
 }
