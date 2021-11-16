@@ -19,7 +19,9 @@ import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
-import org.apache.log4j.Logger;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 
 /**
  *
@@ -27,15 +29,18 @@ import org.apache.log4j.Logger;
  */
 public class questionsController {
 
-    static Logger log = Logger.getLogger(questionsController.class);
+    static final Logger logg = Logger.getLogger(questionsController.class.getName());
 
-    private msgError error;
+  
 
     public answerResp questionsBot(answerReq req) {
+        logg.info("*** Start questionsController questionsBot ***");
+        msgError error = new msgError();
         customerWhatsappDTO dto = new customerWhatsappDTO();
         dto = whatsappData(req.getWhatsappId());
         answerResp statesResp = new answerResp();
         questionsVO question = new questionsVO();
+        logg.log(Level.INFO, "DTO whatsappData *** {0}", dto.getError().getCode());
         switch (dto.getError().getCode()) {
             case 0:
                 if (dto.getIdQuestions() == null) {
@@ -51,10 +56,9 @@ public class questionsController {
                 dto.setName("");
                 dto.setIdCustomer("");
                 question = buildNextQuestion(dto, 1);
+                logg.log(Level.INFO, "Case 1 questionsBot *** {0}", question.getIdQuestion() + " Desc:   "+ question.getQuestionDesc());
                 statesResp.setQuestion(question);
-                error.setCode(0);
-                error.setMessage("");
-                
+                statesResp.setError(updateQuestionCustomer(dto,true));
                 break;
             default:
                 error.setCode(-1);
@@ -63,19 +67,19 @@ public class questionsController {
         }
         statesResp.setError(error);
         statesResp.setWhatsapp(req.getWhatsappId());
-
+        logg.log(Level.INFO, "{0}*** End questionsController whatsappData ***", statesResp.getError().getMessage());
+        logg.info("*** End questionsController whatsappData ***");
         return statesResp;
     }
 
     private customerWhatsappDTO whatsappData(String Whatsapp) {
-        log.info("*** Start questionsController whatsappData ***");
+        logg.info("*** Start questionsController whatsappData ***");
         customerWhatsappDAO customerWap = new customerWhatsappDAO();
         customerWhatsappDTO reqDTO = new customerWhatsappDTO();
         customerWhatsappDTO respDTO = new customerWhatsappDTO();
         reqDTO.setIdWhatsapp(Whatsapp);
         respDTO = customerWap.readOne(reqDTO);
-
-        log.info("*** Start questionsController whatsappData ***");
+        logg.info("*** End questionsController whatsappData ***");
         return respDTO;
 
     }
@@ -221,7 +225,7 @@ public class questionsController {
         }
         if (!flgOK) {
             rta.setCode(-1);
-            rta.setMessage("? ¡Ups! Lo siento esta opción ingresada no es valida, Estoy aprendiendo dia a dia con el fin de garantizar un mejor servicio");
+            rta.setMessage("? ¡Ups! Lo siento esta opción ingresada no es valida, Estoy aprendiendo día a día con el fin de garantizar un mejor servicio");
         } else {
             req.setIdQuestion(dto.getIdQuestions() + "." + option);
             

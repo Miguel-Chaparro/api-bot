@@ -53,7 +53,7 @@ public class conexionBD {
         /*servidor = atributosBD.getProperty("UrlBD");
         usuarioBD = atributosBD.getProperty("usuarioBD");
         contrasenaBD = atributosBD.getProperty("contrasena");*/
-        servidor = "jdbc:mysql://dommatos.cuof4cum3wbw.us-east-2.rds.amazonaws.com:3306/DommApi?autoReconnect=true";
+        servidor = "jdbc:mysql://localhost:3306/DommApi?autoReconnect=true";
         usuarioBD = "dommatos";
         contrasenaBD = "D0mm4t0s";
         logg.log(Level.INFO, System.getenv("RDS_HOSTNAME"));

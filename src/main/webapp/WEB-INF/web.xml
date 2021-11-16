@@ -6,11 +6,11 @@
     <display-name>Archetype Created Web Application</display-name>
   
     <servlet>
-        <servlet-name>Api</servlet-name>
+        <servlet-name>apiBot</servlet-name>
         <servlet-class>org.glassfish.jersey.servlet.ServletContainer</servlet-class>
         <init-param>
             <param-name>jersey.config.server.provider.packages</param-name>
-            <param-value>com.dom.ws.rest</param-value>
+            <param-value>com.dom.ws.rest.bot</param-value>
         </init-param>
         <init-param>
             <param-name>jersey.config.server.provider.classnames</param-name>
@@ -40,7 +40,7 @@
     -->
    
     <servlet-mapping>
-        <servlet-name>Bot</servlet-name>
+        <servlet-name>apiBot</servlet-name>
         <url-pattern>/services/*</url-pattern>
     </servlet-mapping>
     

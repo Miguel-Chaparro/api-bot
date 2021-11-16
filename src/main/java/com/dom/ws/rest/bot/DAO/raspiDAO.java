@@ -15,7 +15,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-import org.apache.log4j.Logger;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -34,7 +35,7 @@ public class raspiDAO implements interfaces<raspiDTO> {
     private static final String SQL_READALL = "SELECT * FROM customerWhatsapp";
     msgError error = new msgError();
     private final conexionBD con = conexionBD.saberEstado();
-    static Logger log = Logger.getLogger(raspiDAO.class);
+    static final Logger log = Logger.getLogger(raspiDAO.class.getName());
 
     @Override
     public boolean create(raspiDTO dto) {
@@ -54,7 +55,7 @@ public class raspiDAO implements interfaces<raspiDTO> {
                 valida = true;
             }
         } catch (SQLException ex) {
-            log.error("Error create raspiDAO " + ex);
+            log.log(Level.SEVERE, "Error create raspiDAO {0}", ex);
 
         } finally {
             con.cerrarConexion();
@@ -80,7 +81,7 @@ public class raspiDAO implements interfaces<raspiDTO> {
                 valida = true;
             }
         } catch (SQLException ex) {
-            log.error("Error create raspiDAO " + ex);
+            log.log(Level.SEVERE, "Error create raspiDAO {0}", ex);
 
         } finally {
             con.cerrarConexion();
@@ -125,7 +126,7 @@ public class raspiDAO implements interfaces<raspiDTO> {
                 }
             }
         } catch (SQLException ex) {
-            log.error("Error create raspiDAO " + ex);
+            log.log(Level.SEVERE, "Error create raspiDAO {0}", ex);
             error.setCode(-1);
             error.setMessage("Error: " + ex);
 

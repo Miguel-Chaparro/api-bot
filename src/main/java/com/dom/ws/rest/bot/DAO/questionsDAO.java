@@ -13,7 +13,8 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
-import org.apache.log4j.Logger;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -32,7 +33,7 @@ public class questionsDAO implements interfaces<questionsDTO> {
     private static final String SQL_READALL = "SELECT * FROM customerWhatsapp";
     msgError error = new msgError();
     private final conexionBD con = conexionBD.saberEstado();
-    static Logger log = Logger.getLogger(questionsDAO.class);
+    static final Logger log = Logger.getLogger(questionsDAO.class.getName());
 
     @Override
     public boolean create(questionsDTO dto) {
@@ -50,7 +51,7 @@ public class questionsDAO implements interfaces<questionsDTO> {
                 valida = true;
             }
         } catch (SQLException ex) {
-            log.error("Error create customerWhatsappDTO " + ex);
+            log.log(Level.SEVERE, "Error create customerWhatsappDTO {0}", ex);
 
         } finally {
             con.cerrarConexion();
@@ -75,7 +76,7 @@ public class questionsDAO implements interfaces<questionsDTO> {
                 valida = true;
             }
         } catch (SQLException ex) {
-            log.error("Error create customerWhatsappDTO " + ex);
+            log.log(Level.SEVERE, "Error create customerWhatsappDTO {0}", ex);
 
         } finally {
             con.cerrarConexion();
@@ -112,7 +113,7 @@ public class questionsDAO implements interfaces<questionsDTO> {
             }
 
         } catch (SQLException ex) {
-            log.error("Error create customerWhatsappDTO " + ex);
+            log.log(Level.SEVERE, "Error create customerWhatsappDTO {0}", ex);
             error.setCode(-1);
             error.setMessage("Error: " + ex);
 
