@@ -92,7 +92,7 @@ public class questionsDAO implements interfaces<questionsDTO> {
 
     @Override
     public questionsDTO readOne(questionsDTO dto) {
-        log.info("*** Start questionsDAO update ***");
+        log.info("*** Start questionsDAO readOne ***");
         PreparedStatement ps;
         ResultSet res;
         @SuppressWarnings("LocalVariableHidesMemberVariable")
@@ -101,12 +101,14 @@ public class questionsDAO implements interfaces<questionsDTO> {
         try {
             ps = con.getCnn().prepareStatement(SQL_READONE);
             ps.setString(1, dto.getIdQuestions());
+            log.log(Level.SEVERE, "Consulta  {0}\n", ps);
             res = ps.executeQuery();
             int i = 0;
             while (res.next()) {
                 questions = new questionsDTO(res.getString(1), res.getString(2));
                 i++;
             }
+            
             if (i == 0) {
                 error.setCode(1);
                 error.setMessage("No existe número registrado");
@@ -121,6 +123,7 @@ public class questionsDAO implements interfaces<questionsDTO> {
             con.cerrarConexion();
         }
         questions.setError(error);
+         log.info("*** End questionsDAO readOne ***");
         return questions;
     }
 
