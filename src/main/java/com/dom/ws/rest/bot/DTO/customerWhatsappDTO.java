@@ -20,7 +20,28 @@ public class customerWhatsappDTO {
     private Timestamp date;
     private int pendingState;
     private String pendingDescription; 
+    private int idProject;
     private msgError error;
+
+    public customerWhatsappDTO(String idWhatsapp, String name, String idCustomer, String idQuestions, Timestamp date, int pendingState, String pendingDescription, int idProject, msgError error) {
+        this.idWhatsapp = idWhatsapp;
+        this.name = name;
+        this.idCustomer = idCustomer;
+        this.idQuestions = idQuestions;
+        this.date = date;
+        this.pendingState = pendingState;
+        this.pendingDescription = pendingDescription;
+        this.idProject = idProject;
+        this.error = error;
+    }
+
+    public int getIdProject() {
+        return idProject;
+    }
+
+    public void setIdProject(int idProject) {
+        this.idProject = idProject;
+    }
 
     public customerWhatsappDTO(String idWhatsapp, String name, String idCustomer, String idQuestions, Timestamp date, int pendingState, String pendingDescription) {
         this.idWhatsapp = idWhatsapp;

@@ -35,7 +35,7 @@ public class api {
      * @param request
      */
     @POST
-    @Path(value = "/questions")
+    @Path(value = "/domBot")
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN})
     @Consumes({MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN})
 
@@ -56,4 +56,58 @@ public class api {
         return response;
     }
 
+    /**
+     *
+     * @param asyncResponse
+     * @param request
+     */
+    @POST
+    @Path(value = "/surveyBot")
+    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN})
+    @Consumes({MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN})
+
+    public void survey(@Suspended final AsyncResponse asyncResponse, final answerReq request) {
+        executorService.submit(new Runnable() {
+            @Override
+            public void run() {
+                asyncResponse.resume(doSurvey(request));
+            }
+        });
+    }
+
+    private answerResp doSurvey(answerReq request) { 
+
+        answerResp response = new answerResp();
+        questionsController ctrl = new questionsController();
+        response = ctrl.questionsBot(request);
+        return response;
+    }
+    
+    
+    /**
+     *
+     * @param asyncResponse
+     * @param request
+     */
+    @POST
+    @Path(value = "/raspi")
+    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN})
+    @Consumes({MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN})
+
+    public void raspi (@Suspended final AsyncResponse asyncResponse, final answerReq request) {
+        executorService.submit(new Runnable() {
+            @Override
+            public void run() {
+                asyncResponse.resume(doRaspi(request));
+            }
+        });
+    }
+
+    private answerResp doRaspi(answerReq request) {
+
+        answerResp response = new answerResp();
+        questionsController ctrl = new questionsController();
+        response = ctrl.questionsBot(request);
+        return response;
+    }
 }

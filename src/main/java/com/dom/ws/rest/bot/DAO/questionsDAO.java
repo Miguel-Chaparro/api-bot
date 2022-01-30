@@ -105,7 +105,7 @@ public class questionsDAO implements interfaces<questionsDTO> {
             res = ps.executeQuery();
             int i = 0;
             while (res.next()) {
-                questions = new questionsDTO(res.getString(1), res.getString(2));
+                questions = new questionsDTO(res.getString(1),res.getInt(2), res.getString(3),res.getInt(4),res.getInt(5),res.getInt(6),res.getInt(7),res.getInt(8));
                 i++;
             }
             

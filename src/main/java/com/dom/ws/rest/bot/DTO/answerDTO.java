@@ -14,6 +14,7 @@ import com.dom.ws.rest.bot.vo.msgError;
 public class answerDTO {
     private String idQuestion;
     private int answerId;
+    private int idProject;
     private String answerDesc;
     private msgError error;
 
@@ -25,6 +26,22 @@ public class answerDTO {
     }
 
     public void setError(msgError error) {
+        this.error = error;
+    }
+
+    public int getIdProject() {
+        return idProject;
+    }
+
+    public void setIdProject(int idProject) {
+        this.idProject = idProject;
+    }
+
+    public answerDTO(String idQuestion, int answerId, int idProject, String answerDesc, msgError error) {
+        this.idQuestion = idQuestion;
+        this.answerId = answerId;
+        this.idProject = idProject;
+        this.answerDesc = answerDesc;
         this.error = error;
     }
 
