@@ -63,7 +63,7 @@ public class conexionBD {
         try {
             //Class.forName("com.mysql.jdbc.Driver");//driver de conexion de la base de datos Mysql
             Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
-            cnn = DriverManager.getConnection(servidor, usuarioBD, contrasenaBD);
+            cnn = DriverManager.getConnection(servidor);
         } catch (ClassNotFoundException | SQLException ex) {
             //log.error("Erro Driver de Conexion BD" + ex);
             Logger.getLogger(conexionBD.class.getName()).log(Level.SEVERE, null, ex);
