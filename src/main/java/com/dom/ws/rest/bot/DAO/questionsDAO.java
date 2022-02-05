@@ -21,16 +21,16 @@ import java.util.logging.Logger;
  * @author MIGUEL
  */
 public class questionsDAO implements interfaces<questionsDTO> {
-
-    private static final String SQL_READONE = "SELECT * FROM questions WHERE id = ? ";
-    private static final String SQL_UPDATE = "UPDATE questions SET question = ? "
-            + "WHERE id = ?";
-    private static final String SQL_INSERT = "INSERT INTO questions (id, question) "
-            + "VALUES (?, ?)";
-    private static final String SQL_DELETE = "DELETE FROM customerWhatsapp WHERE idWhatsapp = ?";
-    private static final String SQL_READMANY = "SELECT * FROM answer WHERE idQuestion = ? ";
+ 
+    private static final String SQL_READONE = "SELECT * FROM dommapi.questions WHERE id = ? ";
+    private static final String SQL_UPDATE = "UPDATE dommapi.questions SET question = ?, nextQuestion = ?, multiAnswer = ?, minQuestion =?, openQuestion =?, endQuestion =? "
+            + "WHERE id = ? AND idProject = ?";
+    private static final String SQL_INSERT = "INSERT INTO dommapi.questions (id, question, idProject, nextQuestion, multiAnswer, minsQuestion, openQuestion, endQuestion ) "
+            + "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+    private static final String SQL_DELETE = "DELETE FROM dommapi.questions WHERE idWhatsapp = ?";
+    private static final String SQL_READMANY = "SELECT * FROM dommapi.questions answer WHERE idQuestion = ? ";
     private static final String SQL_READMANYUSER = "";
-    private static final String SQL_READALL = "SELECT * FROM customerWhatsapp";
+    private static final String SQL_READALL = "SELECT * FROM dommapi.questions ";
     msgError error = new msgError();
     private final conexionBD con = conexionBD.saberEstado();
     static final Logger log = Logger.getLogger(questionsDAO.class.getName());
@@ -44,6 +44,12 @@ public class questionsDAO implements interfaces<questionsDTO> {
             ps = con.getCnn().prepareStatement(SQL_INSERT);
             ps.setString(1, dto.getIdQuestions());
             ps.setString(2, dto.getQuestions());
+            ps.setInt(3, dto.getIdProject());
+            ps.setInt(4, dto.getNextQuestion());
+            ps.setInt(5, dto.getMultiAnswer());
+            ps.setInt(6, dto.getMinQuestions());
+            ps.setInt(7, dto.getOpenQuestion());
+            ps.setInt(8, dto.getEndQuestions());
             int i = 0;
             i = ps.executeUpdate();
 
@@ -111,7 +117,7 @@ public class questionsDAO implements interfaces<questionsDTO> {
             
             if (i == 0) {
                 error.setCode(1);
-                error.setMessage("No existe número registrado");
+                error.setMessage("No existe nï¿½mero registrado");
             }
 
         } catch (SQLException ex) {

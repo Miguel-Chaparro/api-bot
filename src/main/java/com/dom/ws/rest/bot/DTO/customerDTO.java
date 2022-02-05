@@ -34,6 +34,7 @@ public class customerDTO {
     private String empresa;
     private String raspi;
     private msgError error;
+    
 
     public customerDTO(String cedulaCliente, String nombreCliente, String telefonoPpal, String nodo, String correo, String empresa, String raspi, msgError error) {
         this.cedulaCliente = cedulaCliente;
@@ -262,5 +263,9 @@ public class customerDTO {
     }
 
     public customerDTO() {
+    }
+
+    public String getIdQuestion() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 }

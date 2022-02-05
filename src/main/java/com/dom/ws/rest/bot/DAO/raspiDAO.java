@@ -24,13 +24,13 @@ import java.util.logging.Logger;
  */
 public class raspiDAO implements interfaces<raspiDTO> {
 
-    private static final String SQL_READONE = "SELECT * FROM raspi WHERE idRaspi = ? ";
+    private static final String SQL_READONE = "SELECT * FROM dommapi.raspi WHERE idRaspi = ? ";
     private static final String SQL_UPDATE = "UPDATE raspi SET nodo = ? "
             + "WHERE idRaspi = ? AND ip = ?";
-    private static final String SQL_INSERT = "INSERT INTO raspi (idRaspi, ip, nodo, idGroup) "
+    private static final String SQL_INSERT = "INSERT INTO dommapi.raspi (idRaspi, ip, nodo, idGroup) "
             + "VALUES (?, ?, ?, ?)";
-    private static final String SQL_DELETE = "SELECT * FROM raspi WHERE idRaspi = ?";
-    private static final String SQL_READMANY = "SELECT * FROM answer WHERE idQuestion = ? ";
+    private static final String SQL_DELETE = "SELECT * FROM dommapi.raspi WHERE idRaspi = ?";
+    private static final String SQL_READMANY = "SELECT * FROM dommapi.raspi WHERE idQuestion = ? ";
     private static final String SQL_READMANYUSER = "";
     private static final String SQL_READALL = "SELECT * FROM customerWhatsapp";
     msgError error = new msgError();

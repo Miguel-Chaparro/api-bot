@@ -52,10 +52,11 @@ public class answerDTO {
         this.error = error;
     }
 
-    public answerDTO(String idQuestion, int answerId, String answerDesc) {
+    public answerDTO(String idQuestion, int answerId, String answerDesc,int idProject) {
         this.idQuestion = idQuestion;
         this.answerId = answerId;
         this.answerDesc = answerDesc;
+        this.idProject=idProject;
     }
 
     public String getIdQuestion() {
@@ -81,5 +82,7 @@ public class answerDTO {
     public void setAnswerDesc(String answerDesc) {
         this.answerDesc = answerDesc;
     }
+
+
     
 }
