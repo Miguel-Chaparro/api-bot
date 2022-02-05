@@ -53,22 +53,22 @@ public class conexionBD {
         /*servidor = atributosBD.getProperty("UrlBD");
         usuarioBD = atributosBD.getProperty("usuarioBD");
         contrasenaBD = atributosBD.getProperty("contrasena");*/
-        servidor = "jdbc:mysql://localhost:3306/DommApi?autoReconnect=true";
+        //servidor = "jdbc:mysql://localhost:3306/DommApi?autoReconnect=true";
+        servidor = "jdbc:sqlserver://apibot-database.database.windows.net:1433;database=apibot-database;user=apibot-database@apibot-database;password=Kelimporta0;encrypt=true;trustServerCertificate=false;hostNameInCertificate=*.database.windows.net;loginTimeout=30;";
         usuarioBD = "dommatos";
         contrasenaBD = "D0mm4t0s";
         logg.log(Level.INFO, System.getenv("RDS_HOSTNAME"));
         //log.debug("Datos de Conexión: Servidor = "+servidor + "Usuario: " + usuarioBD + "contrasena = "+ contrasenaBD);
         //String servidor = "jdbc:mysql://" + host + "/" + nombre_BD;
         try {
-            Class.forName("com.mysql.jdbc.Driver");//driver de conexion de la base de datos
-            cnn = DriverManager.getConnection(servidor, usuarioBD, contrasenaBD);
-        } catch (ClassNotFoundException ex) {
+            //Class.forName("com.mysql.jdbc.Driver");//driver de conexion de la base de datos Mysql
+            Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
+            cnn = DriverManager.getConnection(servidor);
+        } catch (ClassNotFoundException | SQLException ex) {
             //log.error("Erro Driver de Conexion BD" + ex);
             Logger.getLogger(conexionBD.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (SQLException ex) {
-            //log.error("Erro al Conexion BD " + ex);
-            Logger.getLogger(conexionBD.class.getName()).log(Level.SEVERE, null, ex);
         }
+        //log.error("Erro al Conexion BD " + ex);
         //log.error("Error Lectura de Properties BD "+ex);
         logg.info("*** Fin conexionBD ***");
     }
