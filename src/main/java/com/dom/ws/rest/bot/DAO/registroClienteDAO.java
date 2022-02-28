@@ -236,7 +236,8 @@ public class registroClienteDAO implements interfaces<customerDTO> {
             error.setMessage("Error: " + ex);
         }finally {
             con.cerrarConexion();
-        }customerVal.setError(error);
+        }
+        customerVal.setError(error);
         answerList.add(customerVal);
         log.info("*** end registroclienteDAO readAll ***");
         return answerList;    

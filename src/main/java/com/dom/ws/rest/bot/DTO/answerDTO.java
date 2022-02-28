@@ -14,8 +14,8 @@ import com.dom.ws.rest.bot.vo.msgError;
 public class answerDTO {
     private String idQuestion;
     private int answerId;
-    private int idProject;
     private String answerDesc;
+    private int idProject;
     private msgError error;
 
     public answerDTO() {

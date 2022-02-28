@@ -28,8 +28,9 @@ public class answerDAO implements interfaces<answerDTO> {
     private static final String SQL_INSERT = "INSERT INTO dommapi.answer (idQuestion, answerCode, answerdes, idproject) "
             + "VALUES (?, ?, ?, ?)";
     private static final String SQL_DELETE = "DELETE FROM dommapi.answer WHERE idQuestion = ? AND answerCode = ? AND idProject =?";
+    private static final String SQL_READALL = "SELECT * FROM dommapi.answer WHERE idproject = ?";
     private static final String SQL_READMANY = "SELECT * FROM dommapi.answer WHERE idQuestion = ? AND idproject = ? ";
-    private static final String SQL_READALL = "SELECT * FROM cdommapi.answer";
+    private static final String SQL_READMANYPROJECT = "SELECT * FROM dommapi.answer WHERE  idproject = ? ";
     msgError error = new msgError();
     private final conexionBD con = conexionBD.saberEstado();
     static final Logger log = Logger.getLogger(answerDAO.class.getName());
@@ -128,12 +129,20 @@ public class answerDAO implements interfaces<answerDTO> {
         ResultSet res;
         ArrayList<answerDTO> answerList = new ArrayList();
         answerDTO answerVal = new answerDTO();
+        int i = 0;
         try {
-            ps = con.getCnn().prepareStatement(SQL_READMANY);
-            ps.setString(1, dto.getIdQuestion());
-            ps.setInt(2, dto.getIdProject());
+            
+            if (dto.getAnswerId() == 100) {
+                ps = con.getCnn().prepareStatement(SQL_READMANYPROJECT);
+                ps.setInt(1, dto.getIdProject());
+            } else {
+                ps = con.getCnn().prepareStatement(SQL_READMANY);
+                ps.setString(1, dto.getIdQuestion());
+                ps.setInt(2, dto.getIdProject());
+            }
+
             res = ps.executeQuery();
-            int i = 0;
+
             while (res.next()) {
                 answerList.add(new answerDTO(res.getString(1), res.getInt(2),
                         res.getString(3), res.getInt(4)));
@@ -155,21 +164,30 @@ public class answerDAO implements interfaces<answerDTO> {
         } finally {
             con.cerrarConexion();
         }
-        answerVal.setError(error);
-        answerList.add(answerVal);
+
+        if (i == 0) {
+            answerVal.setError(error);
+            answerList.add(answerVal);
+        } else {
+            answerVal = answerList.get(0);
+            answerVal.setError(error);
+            answerList.set(0, answerVal);
+        }
+
         return answerList;
     }
 
     @Override
     public List<answerDTO> readAll() {
         log.info("*** Start answerDAO readAll ***");
-        
+
         PreparedStatement ps;
         ResultSet res;
         ArrayList<answerDTO> answerList = new ArrayList();
         answerDTO answerVal = new answerDTO();
         try {
             ps = con.getCnn().prepareStatement(SQL_READALL);
+
             res = ps.executeQuery();
             int i = 0;
             while (res.next()) {

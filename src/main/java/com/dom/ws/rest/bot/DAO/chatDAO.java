@@ -120,10 +120,9 @@ public class chatDAO implements interfaces<chatDTO> {
 
     @Override
     public List<chatDTO> readMany(chatDTO dto) {
-        log.info("***end chatDAO readMany***");
+        log.info("***start chatDAO readMany***");
         PreparedStatement ps;
         ResultSet res;
-        @SuppressWarnings("MismatchedQueryAndUpdateOfCollection")
         ArrayList<chatDTO> answerList = new ArrayList();
         chatDTO answerVal = new chatDTO();
         try {

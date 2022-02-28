@@ -5,9 +5,14 @@
  */
 package com.dom.ws.rest.bot.Services;
 
+import com.dom.ws.rest.bot.Controller.getQuestionsController;
+import com.dom.ws.rest.bot.Controller.projectController;
 import com.dom.ws.rest.bot.Controller.questionsController;
 import com.dom.ws.rest.bot.Request.answerReq;
+import com.dom.ws.rest.bot.Request.projectsReq;
 import com.dom.ws.rest.bot.Response.answerResp;
+import com.dom.ws.rest.bot.Response.getQuestionsResp;
+import com.dom.ws.rest.bot.Response.projectsResp;
 import java.util.concurrent.ExecutorService;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
@@ -108,6 +113,63 @@ public class api {
         answerResp response = new answerResp();
         questionsController ctrl = new questionsController();
         response = ctrl.questionsBot(request);
+        return response;
+    }
+    
+    
+    /**
+     *
+     * @param asyncResponse
+     * @param request
+     */
+    @POST
+    @Path(value = "/getProjects")
+    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN})
+    @Consumes({MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN})
+
+    public void getProjects (@Suspended final AsyncResponse asyncResponse, final projectsReq request) {
+        executorService.submit(new Runnable() {
+            @Override
+            public void run() {
+                asyncResponse.resume(doGetProjects(request));
+            }
+        });
+    }
+
+    private projectsResp doGetProjects (projectsReq request) {
+
+        projectsResp response = new projectsResp();
+        projectController ctrl = new projectController();
+        response = ctrl.getProjectUser(request);
+        return response;
+    }
+    
+    
+    
+    /**
+     *
+     * @param asyncResponse
+     * @param request
+     */
+    @POST
+    @Path(value = "/getQuestions")
+    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN})
+    @Consumes({MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN})
+
+    public void getQuestions (@Suspended final AsyncResponse asyncResponse, final projectsReq request) {
+        executorService.submit(new Runnable() {
+            @Override
+            public void run() {
+                asyncResponse.resume(doGetQuestions(request));
+            }
+        });
+    }
+
+    private getQuestionsResp doGetQuestions(projectsReq request) {
+
+        getQuestionsResp response = new getQuestionsResp();
+        getQuestionsController ctrl = new getQuestionsController();
+        response = ctrl.getQuestionAnswer(request);
         return response;
     }
 }

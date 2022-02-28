@@ -131,6 +131,7 @@ public class questionsController {
         answerDTO optionDto = new answerDTO();
         answerDAO ansdao = new answerDAO();
         String questionId = "";
+        optionDto.setAnswerId(0);
         logg.log(Level.INFO, "{0}***  buildNextQuestion ***\n", "Opción: " + req.getIdQuestions());
         if (option == 0) {
             logg.log(Level.INFO, "{0}***  buildNextQuestion ***\n", "TRUE: " + questionId);
@@ -180,6 +181,7 @@ public class questionsController {
         String question;
         String data;
         question = preview.getQuestions();
+
         logg.log(Level.INFO, "{0}***  Message ***\n", "name: -" + name + "-");
         if (name == null || "".equals(name)) {
             logg.log(Level.INFO, "{0}***  Message If true***\n", "name: " + name);
@@ -189,11 +191,18 @@ public class questionsController {
             data = " *" + name + "* ";
         }
         //Aca va el siwtch case para validar las preguntas
-        logg.log(Level.INFO, "{0}***  Message 2***\n", "preview: -" + preview.getIdQuestions() + "-" + question);
-        if (preview.getIdQuestions().equals("1") || preview.getIdQuestions() == null) {
-            logg.log(Level.INFO, "{0}***  Message 2 If true***\n", "preview: " + preview.getIdQuestions());
-            question = question.replaceFirst("##", data);
+        logg.log(Level.INFO, "{0}***  Message 2***\n", "preview: -" + preview.getIdQuestions() + "-");
+
+        if (null != question) {
+            if (question.split("##").length > 1) {
+                logg.log(Level.INFO, "{0}***  Message 2 If true***\n", "preview: " + preview.getIdQuestions());
+                question = question.replaceAll("##", data);
+            }
+
+        } else {
+            question = "Lo siento, encontraste un fallo en la matrix, estoy solucionandolo";
         }
+
         logg.info("*** END questionsController message ***");
         return question;
 
@@ -232,6 +241,7 @@ public class questionsController {
         answerDTO req = new answerDTO();
         List<answerDTO> answerList = new ArrayList();
         req.setIdQuestion(dto.getIdQuestions());
+        req.setAnswerId(0);
         msgError rta = new msgError();
         answerList = dao.readMany(req);
         int indicator = -1;

@@ -13,6 +13,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.function.Supplier;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -23,9 +24,11 @@ import java.util.logging.Logger;
 public class customerWhatsappDAO implements interfaces<customerWhatsappDTO> {
 
     private static final String SQL_READONE = "SELECT * FROM dommapi.customerWhatsapp WHERE idWhatsapp = ? ";
-    private static final String SQL_UPDATE = "UPDATE dommapi.customerWhatsapp SET questionId = ?, date = ?, nameWAP =?, idCustomer =?, idProject =? "
-            + "pendingState = ?, pendingDescription = ? "
-            + "WHERE idWhatsapp = ?";
+    private static final String SQL_UPDATE = "UPDATE dommapi.customerWhatsapp SET questionId = ?, date = ?,"
+            + "pendingState = ?, pendingDescription = ? WHERE idWhatsapp = ?";
+//    private static final String SQL_UPDATE = "UPDATE dommapi.customerWhatsapp SET questionId = ?, date = ?, nameWAP =?, idCustomer =?, idProject =? "
+//            + "pendingState = ?, pendingDescription = ? "
+//            + "WHERE idWhatsapp = ?";
     private static final String SQL_INSERT = "INSERT INTO dommapi.customerWhatsapp (idWhatsapp, idCustomer, nameWAP, questionId) "
             + "VALUES (?, ?, ?, ?)";
     private static final String SQL_DELETE = "DELETE FROM dommapi.customerWhatsapp WHERE idWhatsapp = ?";
@@ -71,9 +74,10 @@ public class customerWhatsappDAO implements interfaces<customerWhatsappDTO> {
             ps = con.getCnn().prepareStatement(SQL_UPDATE);
             ps.setString(1, dto.getIdQuestions());
             ps.setTimestamp(2, dto.getDate());
-            ps.setInt(3, dto.getPendingState());
+            ps.setInt(3, 0);
             ps.setString(4, dto.getPendingDescription());
             ps.setString(5, dto.getIdWhatsapp());
+            log.info("Script "+ ps);
             int i = 0;
             i = ps.executeUpdate();
 
@@ -82,7 +86,7 @@ public class customerWhatsappDAO implements interfaces<customerWhatsappDTO> {
             }
 
         } catch (SQLException ex) {
-            log.log(Level.SEVERE, "Error create customerWhatsappDTO {0}", ex);
+            log.log(Level.SEVERE, "Error update customerWhatsappDTO {0}", ex);
 
         } finally {
             con.cerrarConexion();

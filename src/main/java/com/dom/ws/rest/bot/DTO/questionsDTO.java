@@ -13,8 +13,8 @@ import com.dom.ws.rest.bot.vo.msgError;
  */
 public class questionsDTO {
     private String idQuestions;
-    private int idProject;
     private String questions;
+    private int idProject;    
     private int nextQuestion;
     private int multiAnswer;
     private int minQuestions;
@@ -95,7 +95,7 @@ public class questionsDTO {
 
  
 
-    public questionsDTO(String idQuestions, int idProject, String questions, int nextQuestion, int multiAnswer, int minQuestions,int openQuestion, int endQuestions) {
+    public questionsDTO(String idQuestions, String questions, int idProject, int nextQuestion, int multiAnswer, int minQuestions,int openQuestion, int endQuestions) {
         this.idQuestions = idQuestions;
         this.idProject = idProject;
         this.questions = questions;
