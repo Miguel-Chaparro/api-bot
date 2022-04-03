@@ -5,24 +5,21 @@
  */
 package com.dom.ws.rest.bot.Response;
 
+import com.dom.ws.rest.bot.DTO.answerDTO;
 import com.dom.ws.rest.bot.DTO.questionsDTO;
 import com.dom.ws.rest.bot.vo.msgError;
 import java.util.List;
 
 /**
  *
- * @author Miguel Ch
+ * @author Teletrabajo
  */
-public class getQuestionsResp {
-        private msgError error; 
-        private List<questionsDTO> questions;
+public class getQuestionsAnswerResp {
+    private msgError error; 
+    private List<questionsDTO> questions;
+    private List<answerDTO> answers;
 
-    public getQuestionsResp() {
-    }
-
-    public getQuestionsResp(msgError error, List<questionsDTO> questions) {
-        this.error = error;
-        this.questions = questions;
+    public getQuestionsAnswerResp() {
     }
 
     public msgError getError() {
@@ -40,6 +37,14 @@ public class getQuestionsResp {
     public void setQuestions(List<questionsDTO> questions) {
         this.questions = questions;
     }
-        
-        
+
+    public List<answerDTO> getAnswers() {
+        return answers;
+    }
+
+    public void setAnswers(List<answerDTO> answers) {
+        this.answers = answers;
+    }
+
+    
 }

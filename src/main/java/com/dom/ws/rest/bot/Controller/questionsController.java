@@ -11,7 +11,7 @@ import com.dom.ws.rest.bot.DAO.questionsDAO;
 import com.dom.ws.rest.bot.DTO.answerDTO;
 import com.dom.ws.rest.bot.DTO.customerWhatsappDTO;
 import com.dom.ws.rest.bot.DTO.questionsDTO;
-import com.dom.ws.rest.bot.Request.answerReq;
+import com.dom.ws.rest.bot.Request.questionsAnswersReq;
 import com.dom.ws.rest.bot.Response.answerResp;
 import com.dom.ws.rest.bot.vo.msgError;
 import com.dom.ws.rest.bot.vo.questionsVO;
@@ -30,7 +30,7 @@ public class questionsController {
 
     static final Logger logg = Logger.getLogger(questionsController.class.getName());
 
-    public answerResp questionsBot(answerReq req) {
+    public answerResp questionsBot(questionsAnswersReq req) {
         logg.info("*** Start questionsController questionsBot ***");
         msgError error = new msgError();
         customerWhatsappDTO dto = new customerWhatsappDTO();

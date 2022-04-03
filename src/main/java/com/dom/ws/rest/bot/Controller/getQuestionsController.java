@@ -9,11 +9,15 @@ import com.dom.ws.rest.bot.DAO.answerDAO;
 import com.dom.ws.rest.bot.DAO.questionsDAO;
 import com.dom.ws.rest.bot.DTO.answerDTO;
 import com.dom.ws.rest.bot.DTO.questionsDTO;
+import com.dom.ws.rest.bot.Request.answerReq;
 import com.dom.ws.rest.bot.Request.projectsReq;
+import com.dom.ws.rest.bot.Response.getAnswerResp;
+import com.dom.ws.rest.bot.Response.getQuestionsAnswerResp;
 import com.dom.ws.rest.bot.Response.getQuestionsResp;
 import com.dom.ws.rest.bot.vo.msgError;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -24,9 +28,9 @@ public class getQuestionsController {
     
     static final Logger log = Logger.getLogger(getQuestionsController.class.getName());
     
-    public getQuestionsResp getQuestionAnswer (projectsReq req){
+    public getQuestionsAnswerResp getQuestionAnswer (projectsReq req){
         log.info("***start getQuestionsController getProjectUser***");
-        getQuestionsResp resp = new getQuestionsResp();
+        getQuestionsAnswerResp resp = new getQuestionsAnswerResp();
         questionsDTO quesDto = new questionsDTO();
         answerDTO ansDto = new answerDTO();
         questionsDAO quesDao = new questionsDAO();
@@ -52,4 +56,47 @@ public class getQuestionsController {
         
     }
     
+    public getQuestionsResp getQuestions(projectsReq req){
+        log.info("***start getQuestionsController getQuestions***");
+        getQuestionsResp resp = new getQuestionsResp();
+        questionsDTO quesDto = new questionsDTO();
+        msgError errorQuery = new msgError();
+        quesDto.setIdProject(req.getIdCodeProject());
+        questionsDAO quesDao = new questionsDAO();
+        List<questionsDTO> arrayQuestion = new ArrayList();
+        arrayQuestion = quesDao.readMany(quesDto);
+        errorQuery = arrayQuestion.get(0).getError();
+        resp.setError(errorQuery);
+        resp.setQuestions(arrayQuestion);
+        log.info("***end getQuestionsController getQuestions***");
+        return resp;
+    }
+    
+    public getAnswerResp getAnswers(answerReq req){
+        log.info("***Start getQuestionsController getAnswers***");
+        getAnswerResp resp = new getAnswerResp();
+        answerDTO ansDto = new answerDTO();
+        answerDAO ansDAO = new answerDAO();
+        msgError errorQuery = new msgError();
+        List<answerDTO> arrayAnswer = new ArrayList();
+        ansDto.setIdProject(req.getIdProject());
+        try{
+            ansDto.setIdQuestion(req.getIdQuestion());
+            if(ansDto.getIdQuestion().equals("")){
+                ansDto.setAnswerId(100);
+            }else{
+                ansDto.setAnswerId(0);
+            }
+        }catch(Exception ex){
+            ansDto.setAnswerId(100);
+            log.log(Level.WARNING, "{0} Validatate req", ex);
+        }
+        
+        arrayAnswer = ansDAO.readMany(ansDto);
+        errorQuery = arrayAnswer.get(0).getError();
+        resp.setError(errorQuery);
+        resp.setAnswers(arrayAnswer);
+        log.info("***end getQuestionsController getAnswers***");
+        return resp;
+    }
 }

@@ -9,8 +9,11 @@ import com.dom.ws.rest.bot.Controller.getQuestionsController;
 import com.dom.ws.rest.bot.Controller.projectController;
 import com.dom.ws.rest.bot.Controller.questionsController;
 import com.dom.ws.rest.bot.Request.answerReq;
+import com.dom.ws.rest.bot.Request.questionsAnswersReq;
 import com.dom.ws.rest.bot.Request.projectsReq;
 import com.dom.ws.rest.bot.Response.answerResp;
+import com.dom.ws.rest.bot.Response.getAnswerResp;
+import com.dom.ws.rest.bot.Response.getQuestionsAnswerResp;
 import com.dom.ws.rest.bot.Response.getQuestionsResp;
 import com.dom.ws.rest.bot.Response.projectsResp;
 import java.util.concurrent.ExecutorService;
@@ -44,7 +47,7 @@ public class api {
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN})
     @Consumes({MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN})
 
-    public void questions(@Suspended final AsyncResponse asyncResponse, final answerReq request) {
+    public void questions(@Suspended final AsyncResponse asyncResponse, final questionsAnswersReq request) {
         executorService.submit(new Runnable() {
             @Override
             public void run() {
@@ -53,7 +56,7 @@ public class api {
         });
     }
 
-    private answerResp doQuestions(answerReq request) {
+    private answerResp doQuestions(questionsAnswersReq request) {
 
         answerResp response = new answerResp();
         questionsController ctrl = new questionsController();
@@ -71,7 +74,7 @@ public class api {
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN})
     @Consumes({MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN})
 
-    public void survey(@Suspended final AsyncResponse asyncResponse, final answerReq request) {
+    public void survey(@Suspended final AsyncResponse asyncResponse, final questionsAnswersReq request) {
         executorService.submit(new Runnable() {
             @Override
             public void run() {
@@ -80,7 +83,7 @@ public class api {
         });
     }
 
-    private answerResp doSurvey(answerReq request) { 
+    private answerResp doSurvey(questionsAnswersReq request) { 
 
         answerResp response = new answerResp();
         questionsController ctrl = new questionsController();
@@ -99,7 +102,7 @@ public class api {
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN})
     @Consumes({MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN})
 
-    public void raspi (@Suspended final AsyncResponse asyncResponse, final answerReq request) {
+    public void raspi (@Suspended final AsyncResponse asyncResponse, final questionsAnswersReq request) {
         executorService.submit(new Runnable() {
             @Override
             public void run() {
@@ -108,7 +111,7 @@ public class api {
         });
     }
 
-    private answerResp doRaspi(answerReq request) {
+    private answerResp doRaspi(questionsAnswersReq request) {
 
         answerResp response = new answerResp();
         questionsController ctrl = new questionsController();
@@ -152,6 +155,34 @@ public class api {
      * @param request
      */
     @POST
+    @Path(value = "/getQuestionsAnswers")
+    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN})
+    @Consumes({MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN})
+
+    public void getQuestionsAnswer (@Suspended final AsyncResponse asyncResponse, final projectsReq request) {
+        executorService.submit(new Runnable() {
+            @Override
+            public void run() {
+                asyncResponse.resume(doGetQuestionsAnswer(request));
+            }
+        });
+    }
+
+    private getQuestionsAnswerResp doGetQuestionsAnswer(projectsReq request) {
+
+        getQuestionsAnswerResp response = new getQuestionsAnswerResp();
+        getQuestionsController ctrl = new getQuestionsController();
+        response = ctrl.getQuestionAnswer(request);
+        return response;
+    }
+    
+    
+    /**
+     *
+     * @param asyncResponse
+     * @param request
+     */
+    @POST
     @Path(value = "/getQuestions")
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN})
     @Consumes({MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN})
@@ -169,7 +200,35 @@ public class api {
 
         getQuestionsResp response = new getQuestionsResp();
         getQuestionsController ctrl = new getQuestionsController();
-        response = ctrl.getQuestionAnswer(request);
+        response = ctrl.getQuestions(request);
+        return response;
+    }
+    
+    
+    /**
+     *
+     * @param asyncResponse
+     * @param request
+     */
+    @POST
+    @Path(value = "/getAnswers")
+    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN})
+    @Consumes({MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN})
+
+    public void getAnswers (@Suspended final AsyncResponse asyncResponse, final answerReq request) {
+        executorService.submit(new Runnable() {
+            @Override
+            public void run() {
+                asyncResponse.resume(doGetAnswer(request));
+            }
+        });
+    }
+
+    private getAnswerResp doGetAnswer(answerReq request) {
+
+        getAnswerResp response = new getAnswerResp();
+        getQuestionsController ctrl = new getQuestionsController();
+        response = ctrl.getAnswers(request);
         return response;
     }
 }

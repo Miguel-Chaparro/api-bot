@@ -7,34 +7,35 @@ package com.dom.ws.rest.bot.Request;
 
 /**
  *
- * @author MIGUEL
+ * @author Miguel Ch
  */
 public class answerReq {
-  private String whatsappId;
-  private String answer;
+
+    private int idProject;
+    private String idQuestion;
 
     public answerReq() {
     }
 
-    public answerReq(String whatsappId, String answer) {
-        this.whatsappId = whatsappId;
-        this.answer = answer;
+    public answerReq(int idProject, String idQuestion) {
+        this.idProject = idProject;
+        this.idQuestion = idQuestion;
     }
 
-    public String getWhatsappId() {
-        return whatsappId;
+    public int getIdProject() {
+        return idProject;
     }
 
-    public void setWhatsappId(String whatsappId) {
-        this.whatsappId = whatsappId;
+    public void setIdProject(int idProject) {
+        this.idProject = idProject;
     }
 
-    public String getAnswer() {
-        return answer;
+    public String getIdQuestion() {
+        return idQuestion;
     }
 
-    public void setAnswer(String answer) {
-        this.answer = answer;
+    public void setIdQuestion(String idQuestion) {
+        this.idQuestion = idQuestion;
     }
-  
+
 }
