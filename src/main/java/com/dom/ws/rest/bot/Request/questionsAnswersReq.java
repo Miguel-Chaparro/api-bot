@@ -10,8 +10,18 @@ package com.dom.ws.rest.bot.Request;
  * @author MIGUEL
  */
 public class questionsAnswersReq {
-  private String whatsappId;
-  private String answer;
+
+    private String whatsappId;
+    private String answer;
+    private String tokenId;
+
+    public String getTokenId() {
+        return tokenId;
+    }
+
+    public void setTokenId(String tokenId) {
+        this.tokenId = tokenId;
+    }
 
     public questionsAnswersReq() {
     }
@@ -36,5 +46,5 @@ public class questionsAnswersReq {
     public void setAnswer(String answer) {
         this.answer = answer;
     }
-  
+
 }

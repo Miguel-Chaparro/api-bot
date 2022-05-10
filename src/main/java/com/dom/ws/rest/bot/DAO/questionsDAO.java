@@ -118,7 +118,7 @@ public class questionsDAO implements interfaces<questionsDTO> {
             
             if (i == 0) {
                 error.setCode(1);
-                error.setMessage("No existe nï¿½mero registrado");
+                error.setMessage("No existe número registrado");
             }
 
         } catch (SQLException ex) {

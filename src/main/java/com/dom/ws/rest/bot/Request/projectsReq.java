@@ -13,7 +13,16 @@ public class projectsReq {
     
     private String idUser;
     private int idCodeProject;
+    private String tokenId;
 
+    public String getTokenId() {
+        return tokenId;
+    }
+
+    public void setTokenId(String tokenId) {
+        this.tokenId = tokenId;
+    }
+    
     public String getIdUser() {
         return idUser;
     }

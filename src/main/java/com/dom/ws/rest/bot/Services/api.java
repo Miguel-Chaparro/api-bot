@@ -8,6 +8,7 @@ package com.dom.ws.rest.bot.Services;
 import com.dom.ws.rest.bot.Controller.getQuestionsController;
 import com.dom.ws.rest.bot.Controller.projectController;
 import com.dom.ws.rest.bot.Controller.questionsController;
+import com.dom.ws.rest.bot.DTO.projectDTO;
 import com.dom.ws.rest.bot.Request.answerReq;
 import com.dom.ws.rest.bot.Request.questionsAnswersReq;
 import com.dom.ws.rest.bot.Request.projectsReq;
@@ -229,6 +230,33 @@ public class api {
         getAnswerResp response = new getAnswerResp();
         getQuestionsController ctrl = new getQuestionsController();
         response = ctrl.getAnswers(request);
+        return response;
+    }
+    
+    /**
+     *
+     * @param asyncResponse
+     * @param request
+     */
+    @POST
+    @Path(value = "/createProject")
+    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN})
+    @Consumes({MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN})
+
+    public void createProyect (@Suspended final AsyncResponse asyncResponse, final projectDTO request) {
+        executorService.submit(new Runnable() {
+            @Override
+            public void run() {
+                asyncResponse.resume(doCreateProject(request));
+            }
+        });
+    }
+
+    private projectDTO doCreateProject(projectDTO request) {
+
+        projectDTO response = new projectDTO();
+        projectController ctrl = new projectController();
+        response = ctrl.createProjects(request);
         return response;
     }
 }

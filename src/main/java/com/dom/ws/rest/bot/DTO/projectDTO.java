@@ -14,12 +14,39 @@ import java.sql.Timestamp;
  */
 public class projectDTO {
     private int idProject;
-    private String user;
+    private String idUser;
     private String projectDesc;
     private Timestamp dateProject;
     private int openProject;
     private Timestamp endProject;
+    private int statusProject;
+    private int flgEndProject;
     private msgError error;
+    private String tokenId;
+
+    public String getTokenId() {
+        return tokenId;
+    }
+
+    public void setTokenId(String tokenId) {
+        this.tokenId = tokenId;
+    }
+
+    public int getStatusProject() {
+        return statusProject;
+    }
+
+    public void setStatusProject(int statusProject) {
+        this.statusProject = statusProject;
+    }
+
+    public int getFlgEndProject() {
+        return flgEndProject;
+    }
+
+    public void setFlgEndProject(int flgEndProject) {
+        this.flgEndProject = flgEndProject;
+    }
 
     public Timestamp getDateProject() {
         return dateProject;
@@ -45,38 +72,46 @@ public class projectDTO {
         this.endProject = endProject;
     }
 
-    public projectDTO(int idProject, String user, String projectDesc, Timestamp dateProject, int openProject, Timestamp endProject, msgError error) {
-        this.idProject = idProject;
-        this.user = user;
-        this.projectDesc = projectDesc;
-        this.dateProject = dateProject;
-        this.openProject = openProject;
-        this.endProject = endProject;
-        this.error = error;
-    }
 
-    public projectDTO(int idProject, String user, String projectDesc, Timestamp dateProject, int openProject, Timestamp endProject) {
-        this.idProject = idProject;
-        this.user = user;
-        this.projectDesc = projectDesc;
-        this.dateProject = dateProject;
-        this.openProject = openProject;
-        this.endProject = endProject;
-    }
 
     
-    public projectDTO(int idProject, String user, String projectDesc) {
+    public projectDTO(int idProject, String idUser, String projectDesc) {
         this.idProject = idProject;
-        this.user = user;
+        this.idUser = idUser;
         this.projectDesc = projectDesc;
     }
 
-    public projectDTO(int idProject, String user, String projectDesc, msgError error) {
+    public projectDTO(int idProject, String idUser, String projectDesc, msgError error) {
         this.idProject = idProject;
-        this.user = user;
+        this.idUser = idUser;
         this.projectDesc = projectDesc;
         this.error = error;
     }
+
+    public projectDTO(int idProject, String idUser, String projectDesc, Timestamp dateProject, int openProject, Timestamp endProject, int statusProject, int flgEndProject, msgError error) {
+        this.idProject = idProject;
+        this.idUser = idUser;
+        this.projectDesc = projectDesc;
+        this.dateProject = dateProject;
+        this.openProject = openProject;
+        this.endProject = endProject;
+        this.statusProject = statusProject;
+        this.flgEndProject = flgEndProject;
+        this.error = error;
+    }
+
+    public projectDTO(int idProject, String idUser, String projectDesc, Timestamp dateProject, int openProject, Timestamp endProject, int statusProject, int flgEndProject) {
+        this.idProject = idProject;
+        this.idUser = idUser;
+        this.projectDesc = projectDesc;
+        this.dateProject = dateProject;
+        this.openProject = openProject;
+        this.endProject = endProject;
+        this.statusProject = statusProject;
+        this.flgEndProject = flgEndProject;
+    }
+    
+    
 
     public projectDTO() {
     }
@@ -89,12 +124,12 @@ public class projectDTO {
         this.idProject = idProject;
     }
 
-    public String getUser() {
-        return user;
+    public String getIdUser() {
+        return idUser;
     }
 
-    public void setUser(String user) {
-        this.user = user;
+    public void setUser(String idUser) {
+        this.idUser = idUser;
     }
 
     public String getProjectDesc() {
