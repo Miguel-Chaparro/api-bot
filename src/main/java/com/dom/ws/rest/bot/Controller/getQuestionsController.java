@@ -10,7 +10,7 @@ import com.dom.ws.rest.bot.DAO.questionsDAO;
 import com.dom.ws.rest.bot.DTO.answerDTO;
 import com.dom.ws.rest.bot.DTO.questionsDTO;
 import com.dom.ws.rest.bot.Request.answerReq;
-import com.dom.ws.rest.bot.Request.projectsReq;
+import com.dom.ws.rest.bot.Request.createProjectsReq;
 import com.dom.ws.rest.bot.Response.getAnswerResp;
 import com.dom.ws.rest.bot.Response.getQuestionsAnswerResp;
 import com.dom.ws.rest.bot.Response.getQuestionsResp;
@@ -28,7 +28,7 @@ public class getQuestionsController {
     
     static final Logger log = Logger.getLogger(getQuestionsController.class.getName());
     
-    public getQuestionsAnswerResp getQuestionAnswer (projectsReq req){
+    public getQuestionsAnswerResp getQuestionAnswer (createProjectsReq req){
         log.info("***start getQuestionsController getProjectUser***");
         getQuestionsAnswerResp resp = new getQuestionsAnswerResp();
         questionsDTO quesDto = new questionsDTO();
@@ -56,7 +56,7 @@ public class getQuestionsController {
         
     }
     
-    public getQuestionsResp getQuestions(projectsReq req){
+    public getQuestionsResp getQuestions(createProjectsReq req){
         log.info("***start getQuestionsController getQuestions***");
         getQuestionsResp resp = new getQuestionsResp();
         questionsDTO quesDto = new questionsDTO();

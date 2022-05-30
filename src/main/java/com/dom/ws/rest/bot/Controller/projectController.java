@@ -7,7 +7,7 @@ package com.dom.ws.rest.bot.Controller;
 
 import com.dom.ws.rest.bot.DAO.projectsDAO;
 import com.dom.ws.rest.bot.DTO.projectDTO;
-import com.dom.ws.rest.bot.Request.projectsReq;
+import com.dom.ws.rest.bot.Request.createProjectsReq;
 import com.dom.ws.rest.bot.Response.projectsResp;
 import com.dom.ws.rest.bot.vo.msgError;
 import java.util.ArrayList;
@@ -23,7 +23,7 @@ public class projectController {
 
     static final Logger log = Logger.getLogger(projectController.class.getName());
 
-    public projectsResp getProjectUser(projectsReq req) {
+    public projectsResp getProjectUser(createProjectsReq req) {
         log.info("***start projectController getProjectUser***");
         projectsResp resp = new projectsResp();
         List<projectDTO> array = new ArrayList();
@@ -59,12 +59,9 @@ public class projectController {
         if (statusCreate) {
             dto = req;
             response = dao.readOne(dto);
-        } else {
+        } else if(!statusError){
             error.setCode(-10);
             error.setMessage("Upss... No fue posible crear el proyecto, Favor contacta el Administrador");
-            statusError = true;
-        }
-        if (statusError) {
             response.setError(error);
         }
         log.info("***End projectController createProjects***");

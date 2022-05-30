@@ -60,7 +60,7 @@ public class questionsController {
                 break;
             default:
                 error.setCode(-1);
-                error.setMessage("? ¡Ups! Lo lamento, en estos momentos no puedo procesar la solicitud. \n Estoy aprendiendo día a día para no volver a repetir estos errores, favor intenta mas tarde");
+                error.setMessage("¡Ups! Lo lamento, en estos momentos no puedo procesar la solicitud. \n Estoy aprendiendo día a día para no volver a repetir estos errores, favor intenta mas tarde");
                 break;
         }
         statesResp.setError(error);

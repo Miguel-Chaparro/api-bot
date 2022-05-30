@@ -5,18 +5,23 @@
  */
 package com.dom.ws.rest.bot.Services;
 
+import com.dom.ws.rest.bot.Controller.createQuestionController;
 import com.dom.ws.rest.bot.Controller.getQuestionsController;
 import com.dom.ws.rest.bot.Controller.projectController;
 import com.dom.ws.rest.bot.Controller.questionsController;
 import com.dom.ws.rest.bot.DTO.projectDTO;
+import com.dom.ws.rest.bot.DTO.questionsDTO;
 import com.dom.ws.rest.bot.Request.answerReq;
 import com.dom.ws.rest.bot.Request.questionsAnswersReq;
-import com.dom.ws.rest.bot.Request.projectsReq;
+import com.dom.ws.rest.bot.Request.createProjectsReq;
+import com.dom.ws.rest.bot.Request.createQuestionsReq;
 import com.dom.ws.rest.bot.Response.answerResp;
+import com.dom.ws.rest.bot.Response.createQuestionsResp;
 import com.dom.ws.rest.bot.Response.getAnswerResp;
 import com.dom.ws.rest.bot.Response.getQuestionsAnswerResp;
 import com.dom.ws.rest.bot.Response.getQuestionsResp;
 import com.dom.ws.rest.bot.Response.projectsResp;
+import com.dom.ws.rest.bot.vo.msgError;
 import java.util.concurrent.ExecutorService;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
@@ -84,15 +89,14 @@ public class api {
         });
     }
 
-    private answerResp doSurvey(questionsAnswersReq request) { 
+    private answerResp doSurvey(questionsAnswersReq request) {
 
         answerResp response = new answerResp();
         questionsController ctrl = new questionsController();
         response = ctrl.questionsBot(request);
         return response;
     }
-    
-    
+
     /**
      *
      * @param asyncResponse
@@ -103,7 +107,7 @@ public class api {
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN})
     @Consumes({MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN})
 
-    public void raspi (@Suspended final AsyncResponse asyncResponse, final questionsAnswersReq request) {
+    public void raspi(@Suspended final AsyncResponse asyncResponse, final questionsAnswersReq request) {
         executorService.submit(new Runnable() {
             @Override
             public void run() {
@@ -119,8 +123,7 @@ public class api {
         response = ctrl.questionsBot(request);
         return response;
     }
-    
-    
+
     /**
      *
      * @param asyncResponse
@@ -131,7 +134,7 @@ public class api {
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN})
     @Consumes({MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN})
 
-    public void getProjects (@Suspended final AsyncResponse asyncResponse, final projectsReq request) {
+    public void getProjects(@Suspended final AsyncResponse asyncResponse, final createProjectsReq request) {
         executorService.submit(new Runnable() {
             @Override
             public void run() {
@@ -140,16 +143,14 @@ public class api {
         });
     }
 
-    private projectsResp doGetProjects (projectsReq request) {
+    private projectsResp doGetProjects(createProjectsReq request) {
 
         projectsResp response = new projectsResp();
         projectController ctrl = new projectController();
         response = ctrl.getProjectUser(request);
         return response;
     }
-    
-    
-    
+
     /**
      *
      * @param asyncResponse
@@ -160,7 +161,7 @@ public class api {
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN})
     @Consumes({MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN})
 
-    public void getQuestionsAnswer (@Suspended final AsyncResponse asyncResponse, final projectsReq request) {
+    public void getQuestionsAnswer(@Suspended final AsyncResponse asyncResponse, final createProjectsReq request) {
         executorService.submit(new Runnable() {
             @Override
             public void run() {
@@ -169,15 +170,14 @@ public class api {
         });
     }
 
-    private getQuestionsAnswerResp doGetQuestionsAnswer(projectsReq request) {
+    private getQuestionsAnswerResp doGetQuestionsAnswer(createProjectsReq request) {
 
         getQuestionsAnswerResp response = new getQuestionsAnswerResp();
         getQuestionsController ctrl = new getQuestionsController();
         response = ctrl.getQuestionAnswer(request);
         return response;
     }
-    
-    
+
     /**
      *
      * @param asyncResponse
@@ -188,7 +188,7 @@ public class api {
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN})
     @Consumes({MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN})
 
-    public void getQuestions (@Suspended final AsyncResponse asyncResponse, final projectsReq request) {
+    public void getQuestions(@Suspended final AsyncResponse asyncResponse, final createProjectsReq request) {
         executorService.submit(new Runnable() {
             @Override
             public void run() {
@@ -197,15 +197,14 @@ public class api {
         });
     }
 
-    private getQuestionsResp doGetQuestions(projectsReq request) {
+    private getQuestionsResp doGetQuestions(createProjectsReq request) {
 
         getQuestionsResp response = new getQuestionsResp();
         getQuestionsController ctrl = new getQuestionsController();
         response = ctrl.getQuestions(request);
         return response;
     }
-    
-    
+
     /**
      *
      * @param asyncResponse
@@ -216,7 +215,7 @@ public class api {
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN})
     @Consumes({MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN})
 
-    public void getAnswers (@Suspended final AsyncResponse asyncResponse, final answerReq request) {
+    public void getAnswers(@Suspended final AsyncResponse asyncResponse, final answerReq request) {
         executorService.submit(new Runnable() {
             @Override
             public void run() {
@@ -232,7 +231,7 @@ public class api {
         response = ctrl.getAnswers(request);
         return response;
     }
-    
+
     /**
      *
      * @param asyncResponse
@@ -243,7 +242,7 @@ public class api {
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN})
     @Consumes({MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN})
 
-    public void createProyect (@Suspended final AsyncResponse asyncResponse, final projectDTO request) {
+    public void createProyect(@Suspended final AsyncResponse asyncResponse, final projectDTO request) {
         executorService.submit(new Runnable() {
             @Override
             public void run() {
@@ -257,6 +256,60 @@ public class api {
         projectDTO response = new projectDTO();
         projectController ctrl = new projectController();
         response = ctrl.createProjects(request);
+        return response;
+    }
+
+    /**
+     *
+     * @param asyncResponse
+     * @param request
+     */
+    @POST
+    @Path(value = "/createUpdateManyQuestions")
+    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN})
+    @Consumes({MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN})
+
+    public void createManyQuestions(@Suspended final AsyncResponse asyncResponse, final createQuestionsReq request) {
+        executorService.submit(new Runnable() {
+            @Override
+            public void run() {
+                asyncResponse.resume(doCreateManyQuestions(request));
+            }
+        });
+    }
+
+    private createQuestionsResp doCreateManyQuestions(createQuestionsReq request) {
+
+        createQuestionsResp response = new createQuestionsResp();
+        createQuestionController ctrl = new createQuestionController();
+        response = ctrl.createQuestions(request);
+        return response;
+    }
+    
+    /**
+     *
+     * @param asyncResponse
+     * @param request
+     */
+    @POST
+    @Path(value = "/createUpdateOneQuestion")
+    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN})
+    @Consumes({MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN})
+
+    public void createOneQuestion(@Suspended final AsyncResponse asyncResponse, final questionsDTO request) {
+        executorService.submit(new Runnable() {
+            @Override
+            public void run() {
+                asyncResponse.resume(doCreateOneQuestions(request));
+            }
+        });
+    }
+
+    private msgError doCreateOneQuestions(questionsDTO request) {
+
+        msgError response = new msgError();
+        createQuestionController ctrl = new createQuestionController();
+        response = ctrl.createUpdateQuestions(request);
         return response;
     }
 }

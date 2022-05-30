@@ -23,10 +23,10 @@ import java.util.logging.Logger;
  */
 public class questionsDAO implements interfaces<questionsDTO> {
  
-    private static final String SQL_READONE = "SELECT [id],[question],[idProject],[nextQuestion],[multiAnswer],[minQuestion],[openQuestion],[endQuestion] FROM dommapi.questions WHERE id = ? ";
+    private static final String SQL_READONE = "SELECT [id],[question],[idProject],[nextQuestion],[multiAnswer],[minQuestion],[openQuestion],[endQuestion] FROM dommapi.questions WHERE id = ? AND idProject = ? ";
     private static final String SQL_UPDATE = "UPDATE dommapi.questions SET question = ?, nextQuestion = ?, multiAnswer = ?, minQuestion =?, openQuestion =?, endQuestion =? "
             + "WHERE id = ? AND idProject = ?";
-    private static final String SQL_INSERT = "INSERT INTO dommapi.questions (id, question, idProject, nextQuestion, multiAnswer, minsQuestion, openQuestion, endQuestion ) "
+    private static final String SQL_INSERT = "INSERT INTO dommapi.questions (id, question, idProject, nextQuestion, multiAnswer, minQuestion, openQuestion, endQuestion ) "
             + "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
     private static final String SQL_DELETE = "DELETE FROM dommapi.questions WHERE idWhatsapp = ?";
     private static final String SQL_READMANY = "SELECT [id],[question],[idProject],[nextQuestion],[multiAnswer],[minQuestion],[openQuestion],[endQuestion] FROM dommapi.questions  WHERE idProject = ? ";
@@ -75,7 +75,13 @@ public class questionsDAO implements interfaces<questionsDTO> {
         try {
             ps = con.getCnn().prepareStatement(SQL_UPDATE);
             ps.setString(1, dto.getQuestions());
-            ps.setString(2, dto.getIdQuestions());
+            ps.setInt(2, dto.getNextQuestion());
+            ps.setInt(3, dto.getMultiAnswer());
+            ps.setInt(4, dto.getMinQuestions());
+            ps.setInt(5, dto.getOpenQuestion());
+            ps.setInt(6, dto.getEndQuestions());
+            ps.setString(7, dto.getIdQuestions());
+            ps.setInt(8, dto.getIdProject());
             int i = 0;
             i = ps.executeUpdate();
 
@@ -107,6 +113,7 @@ public class questionsDAO implements interfaces<questionsDTO> {
         try {
             ps = con.getCnn().prepareStatement(SQL_READONE);
             ps.setString(1, dto.getIdQuestions());
+            ps.setInt(2, dto.getIdProject());
             
             log.log(Level.SEVERE, "Consulta  {0}\n", ps);
             res = ps.executeQuery();
@@ -118,7 +125,7 @@ public class questionsDAO implements interfaces<questionsDTO> {
             
             if (i == 0) {
                 error.setCode(1);
-                error.setMessage("No existe número registrado");
+                error.setMessage("No existe pregunta");
             }
 
         } catch (SQLException ex) {

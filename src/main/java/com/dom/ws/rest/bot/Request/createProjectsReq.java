@@ -9,7 +9,7 @@ package com.dom.ws.rest.bot.Request;
  *
  * @author Teletrabajo
  */
-public class projectsReq {
+public class createProjectsReq {
     
     private String idUser;
     private int idCodeProject;
@@ -39,12 +39,12 @@ public class projectsReq {
         this.idCodeProject = idCodeProject;
     }
 
-    public projectsReq(String idUser, int idCodeProject) {
+    public createProjectsReq(String idUser, int idCodeProject) {
         this.idUser = idUser;
         this.idCodeProject = idCodeProject;
     }
 
-    public projectsReq() {
+    public createProjectsReq() {
     }
     
 }
