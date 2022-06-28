@@ -23,10 +23,10 @@ import java.util.logging.Logger;
  */
 public class answerDAO implements interfaces<answerDTO> {
 
-    private static final String SQL_UPDATE = "UPDATE dommapi.answer SET  answerdes = ?"
+    private static final String SQL_UPDATE = "UPDATE dommapi.answer SET  answerdes = ?, command = ?, flg_end = ?, flg_command = ? "
             + "WHERE idQuestion = ? AND answerCode = ? AND idProject =? ";
-    private static final String SQL_INSERT = "INSERT INTO dommapi.answer (idQuestion, answerCode, answerdes, idproject) "
-            + "VALUES (?, ?, ?, ?)";
+    private static final String SQL_INSERT = "INSERT INTO dommapi.answer (idQuestion, answerCode, answerdes, idproject, command, flg_end, flg_command) "
+            + "VALUES (?, ?, ?, ?, ?, ?, ?)";
     private static final String SQL_DELETE = "DELETE FROM dommapi.answer WHERE idQuestion = ? AND answerCode = ? AND idProject =?";
     private static final String SQL_READALL = "SELECT * FROM dommapi.answer WHERE idproject = ?";
     private static final String SQL_READMANY = "SELECT * FROM dommapi.answer WHERE idQuestion = ? AND idproject = ? ";
@@ -46,6 +46,9 @@ public class answerDAO implements interfaces<answerDTO> {
             ps.setInt(2, dto.getAnswerId());
             ps.setString(3, dto.getAnswerDesc());
             ps.setInt(4, dto.getIdProject());
+            ps.setString(5, dto.getCommand());
+            ps.setInt(6, dto.getFlgEnd());
+            ps.setInt(7, dto.getFlgCommand());
             int i = 0;
             i = ps.executeUpdate();
 
@@ -69,11 +72,13 @@ public class answerDAO implements interfaces<answerDTO> {
         boolean valida = false;
         try {
             ps = con.getCnn().prepareStatement(SQL_UPDATE);
-
-            ps.setInt(3, dto.getAnswerId());
-            ps.setString(2, dto.getIdQuestion());
             ps.setString(1, dto.getAnswerDesc());
-            ps.setInt(4, dto.getIdProject());
+            ps.setString(2, dto.getCommand());
+            ps.setInt(3, dto.getFlgEnd());
+            ps.setInt(4, dto.getFlgCommand());            
+            ps.setString(5, dto.getIdQuestion());
+            ps.setInt(6, dto.getAnswerId());
+            ps.setInt(7, dto.getIdProject());
             int i = 0;
             i = ps.executeUpdate();
 
@@ -81,7 +86,7 @@ public class answerDAO implements interfaces<answerDTO> {
                 valida = true;
             }
         } catch (SQLException ex) {
-            log.log(Level.SEVERE, "Error create answerDAO {0}", ex);
+            log.log(Level.SEVERE, "Error Update answerDAO {0}", ex);
 
         } finally {
             con.cerrarConexion();
@@ -103,7 +108,7 @@ public class answerDAO implements interfaces<answerDTO> {
             int i = 0;
             i = ps.executeUpdate();
 
-            if (1 > 0) {
+            if (i > 0) {
                 valida = true;
             }
         } catch (SQLException ex) {
@@ -131,7 +136,7 @@ public class answerDAO implements interfaces<answerDTO> {
         answerDTO answerVal = new answerDTO();
         int i = 0;
         try {
-            
+
             if (dto.getAnswerId() == 100) {
                 ps = con.getCnn().prepareStatement(SQL_READMANYPROJECT);
                 ps.setInt(1, dto.getIdProject());
@@ -145,7 +150,7 @@ public class answerDAO implements interfaces<answerDTO> {
 
             while (res.next()) {
                 answerList.add(new answerDTO(res.getString(1), res.getInt(2),
-                        res.getString(3), res.getInt(4)));
+                        res.getString(3), res.getInt(4), res.getString(5), res.getInt(6), res.getInt(7)));
                 i++;
 
             }
@@ -191,7 +196,7 @@ public class answerDAO implements interfaces<answerDTO> {
             res = ps.executeQuery();
             int i = 0;
             while (res.next()) {
-                answerList.add(new answerDTO(res.getString(1), res.getInt(2), res.getString(3), res.getInt(4)));
+                answerList.add(new answerDTO(res.getString(1), res.getInt(2), res.getString(3), res.getInt(4), res.getString(5), res.getInt(6), res.getInt(7)));
                 i++;
 
             }

@@ -5,10 +5,12 @@
  */
 package com.dom.ws.rest.bot.Services;
 
+import com.dom.ws.rest.bot.Controller.answerController;
 import com.dom.ws.rest.bot.Controller.createQuestionController;
 import com.dom.ws.rest.bot.Controller.getQuestionsController;
 import com.dom.ws.rest.bot.Controller.projectController;
 import com.dom.ws.rest.bot.Controller.questionsController;
+import com.dom.ws.rest.bot.DTO.answerDTO;
 import com.dom.ws.rest.bot.DTO.projectDTO;
 import com.dom.ws.rest.bot.DTO.questionsDTO;
 import com.dom.ws.rest.bot.Request.answerReq;
@@ -310,6 +312,33 @@ public class api {
         msgError response = new msgError();
         createQuestionController ctrl = new createQuestionController();
         response = ctrl.createUpdateQuestions(request);
+        return response;
+    }
+    
+    /**
+     *
+     * @param asyncResponse
+     * @param request
+     */
+    @POST
+    @Path(value = "/createUpdateOneAnswer")
+    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN})
+    @Consumes({MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN})
+
+    public void createOneAnswer(@Suspended final AsyncResponse asyncResponse, final answerDTO request) {
+        executorService.submit(new Runnable() {
+            @Override
+            public void run() {
+                asyncResponse.resume(doCreateOneAnswer(request));
+            }
+        });
+    }
+
+    private msgError doCreateOneAnswer(answerDTO request) {
+
+        msgError response = new msgError();
+        answerController ctrl = new answerController();
+        response = ctrl.updateCreateAnswers(request);
         return response;
     }
 }

@@ -16,11 +16,35 @@ public class answerDTO {
     private int answerId;
     private String answerDesc;
     private int idProject;
+    private String command;
+    private int flgEnd;
+    private int flgCommand;
     private msgError error;
 
     public answerDTO() {
     }
 
+    public answerDTO(String idQuestion, int answerId, String answerDesc, int idProject, String command, int flgEnd, int flgCommand, msgError error) {
+        this.idQuestion = idQuestion;
+        this.answerId = answerId;
+        this.answerDesc = answerDesc;
+        this.idProject = idProject;
+        this.command = command;
+        this.flgEnd = flgEnd;
+        this.flgCommand = flgCommand;
+        this.error = error;
+    }
+
+    public answerDTO(String idQuestion, int answerId, String answerDesc, int idProject, String command, int flgEnd, int flgCommand) {
+        this.idQuestion = idQuestion;
+        this.answerId = answerId;
+        this.answerDesc = answerDesc;
+        this.idProject = idProject;
+        this.command = command;
+        this.flgEnd = flgEnd;
+        this.flgCommand = flgCommand;
+    }
+    
     public msgError getError() {
         return error;
     }
@@ -37,27 +61,31 @@ public class answerDTO {
         this.idProject = idProject;
     }
 
-    public answerDTO(String idQuestion, int answerId, int idProject, String answerDesc, msgError error) {
-        this.idQuestion = idQuestion;
-        this.answerId = answerId;
-        this.idProject = idProject;
-        this.answerDesc = answerDesc;
-        this.error = error;
+    public String getCommand() {
+        return command;
     }
 
-    public answerDTO(String idQuestion, int answerId, String answerDesc, msgError error) {
-        this.idQuestion = idQuestion;
-        this.answerId = answerId;
-        this.answerDesc = answerDesc;
-        this.error = error;
+    public void setCommand(String command) {
+        this.command = command;
     }
 
-    public answerDTO(String idQuestion, int answerId, String answerDesc,int idProject) {
-        this.idQuestion = idQuestion;
-        this.answerId = answerId;
-        this.answerDesc = answerDesc;
-        this.idProject=idProject;
+    public int getFlgEnd() {
+        return flgEnd;
     }
+
+    public void setFlgEnd(int flgEnd) {
+        this.flgEnd = flgEnd;
+    }
+
+    public int getFlgCommand() {
+        return flgCommand;
+    }
+
+    public void setFlgCommand(int flgCommand) {
+        this.flgCommand = flgCommand;
+    }
+
+   
 
     public String getIdQuestion() {
         return idQuestion;
