@@ -68,4 +68,22 @@ public class projectController {
 
         return response;
     }
+    
+    public msgError updateProject (projectDTO req){
+        log.info("***start projectController updateProject***");
+        projectsDAO dao = new projectsDAO();
+        msgError response = new msgError();
+        String msj = "";
+        int code = 0;
+        boolean status = false;
+        status = dao.update(req);
+        if(!status){
+            code = -1;
+            msj = "Error actualizando proyecto, por favor valida nuevamente";
+        }
+        response.setCode(code);
+        response.setMessage(msj);
+        log.info("***end projectController updateProject***");        
+        return response;
+    }
 }

@@ -7,7 +7,6 @@ package com.dom.ws.rest.bot.DAO;
 
 import com.dom.ws.rest.bot.Conexion.conexionBD;
 import com.dom.ws.rest.bot.Conexion.interfaces;
-import static com.dom.ws.rest.bot.DAO.chatDAO.log;
 import com.dom.ws.rest.bot.DTO.projectDTO;
 import com.dom.ws.rest.bot.vo.msgError;
 import java.sql.PreparedStatement;
@@ -29,6 +28,8 @@ public class projectsDAO implements interfaces<projectDTO> {
     private static final String SQL_READ = "SELECT * FROM dommapi.project WHERE [idUser] = ? AND [idProject] = ? ";
     private static final String SQL_CREATE = "INSERT INTO [dommapi].[project] ([idUser] ,[projectDesc] ,[dateProject] ,[openProject] ,[endProject] ,[statusProject] ,[flgEndProject]) "
             + "VALUES (?, ?, ?, ?, ?, ?, ?)";
+    private static final String SQL_UPDATE = "UPDATE raspi SET [idUser] = ?,[projectDesc]  = ?,[dateProject]  = ?,[openProject]  = ?,[endProject]  = ?,[statusProject]  = ?,[flgEndProject] = ? "
+            + "WHERE idproject = ?";
     private final conexionBD con = conexionBD.saberEstado();
     static final Logger log = Logger.getLogger(projectsDAO.class.getName());
 
@@ -63,7 +64,32 @@ public class projectsDAO implements interfaces<projectDTO> {
 
     @Override
     public boolean update(projectDTO dto) {
-        return false;
+        log.info("*** Start projectsDAO Update ***");
+        boolean status = false;
+        PreparedStatement ps;
+        try {
+            ps = con.getCnn().prepareStatement(SQL_UPDATE);
+            ps.setString(1, dto.getIdUser());
+            ps.setString(2, dto.getProjectDesc());
+            ps.setTimestamp(3, dto.getDateProject());
+            ps.setInt(4, dto.getOpenProject());
+            ps.setTimestamp(5, dto.getEndProject());
+            ps.setInt(6, dto.getStatusProject());
+            ps.setInt(7, dto.getFlgEndProject());
+            ps.setInt(8, dto.getIdProject());
+            int i = 0;
+            i = ps.executeUpdate();
+
+            if (i > 0) {
+                status = true;
+            }
+        } catch (SQLException ex) {
+            log.log(Level.SEVERE, "Error update projectsDAO {0}", ex);
+        } finally {
+            con.cerrarConexion();
+        }
+        log.info("*** End projectsDAO update ***");
+        return status;
     }
 
     @Override

@@ -25,12 +25,12 @@ import java.util.logging.Logger;
 public class raspiDAO implements interfaces<raspiDTO> {
 
     private static final String SQL_READONE = "SELECT * FROM dommapi.raspi WHERE idRaspi = ? ";
-    private static final String SQL_UPDATE = "UPDATE raspi SET nodo = ? "
-            + "WHERE idRaspi = ? AND ip = ?";
-    private static final String SQL_INSERT = "INSERT INTO dommapi.raspi (idRaspi, ip, nodo, idGroup) "
-            + "VALUES (?, ?, ?, ?)";
+    private static final String SQL_UPDATE = "UPDATE raspi SET idRaspi = ?, ip = ?, nodo = ?, idGroup = ?, topic = ?, id_channel = ?, id_chat = ?, flg_main = ? "
+            + "WHERE id_device = ?";
+    private static final String SQL_INSERT = "INSERT INTO dommapi.raspi (idRaspi, ip, nodo, idGroup, topic, id_channel, id_chat, flg_main) "
+            + "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
     private static final String SQL_DELETE = "SELECT * FROM dommapi.raspi WHERE idRaspi = ?";
-    private static final String SQL_READMANY = "SELECT * FROM dommapi.raspi WHERE idQuestion = ? ";
+    private static final String SQL_READMANY = "SELECT * FROM dommapi.raspi WHERE idRaspi = ? ";
     private static final String SQL_READMANYUSER = "";
     private static final String SQL_READALL = "SELECT * FROM customerWhatsapp";
     msgError error = new msgError();
@@ -48,6 +48,10 @@ public class raspiDAO implements interfaces<raspiDTO> {
             ps.setString(2, dto.getIp());
             ps.setString(3, dto.getNodeIp());
             ps.setString(4, dto.getGroupId());
+            ps.setString(5, dto.getTopic());
+            ps.setInt(6, dto.getIdChannel());
+            ps.setString(7, dto.getIdChat());
+            ps.setInt(8, dto.getFlgMain());
             int i = 0;
             i = ps.executeUpdate();
 
@@ -71,9 +75,15 @@ public class raspiDAO implements interfaces<raspiDTO> {
         boolean valida = false;
         try {
             ps = con.getCnn().prepareStatement(SQL_UPDATE);
-            ps.setString(2, dto.getRaspi());
-            ps.setString(3, dto.getIp());
-            ps.setString(1, dto.getNodeIp());
+            ps.setString(1, dto.getRaspi());
+            ps.setString(2, dto.getIp());
+            ps.setString(3, dto.getNodeIp());
+            ps.setString(4, dto.getGroupId());
+            ps.setString(5, dto.getTopic());
+            ps.setInt(6, dto.getIdChannel());
+            ps.setString(7, dto.getIdChat());
+            ps.setInt(8, dto.getFlgMain());
+            ps.setInt(9, dto.getIdDevices());
             int i = 0;
             i = ps.executeUpdate();
 
@@ -105,36 +115,43 @@ public class raspiDAO implements interfaces<raspiDTO> {
         log.info("*** end raspiDAO readMany ***");
         PreparedStatement ps;
         ResultSet res;
-        @SuppressWarnings("MismatchedQueryAndUpdateOfCollection")
         ArrayList<raspiDTO> raspiList = new ArrayList();
         raspiDTO raspiVal = new raspiDTO();
+        int i = 0;
         try {
             ps = con.getCnn().prepareStatement(SQL_READMANY);
             ps.setString(1, dto.getRaspi());
             res = ps.executeQuery();
-            int i = 0;
+
             while (res.next()) {
                 raspiList.add(new raspiDTO(res.getString(1), res.getString(2),
-                        res.getString(3), res.getString(4)));
+                        res.getString(3), res.getString(4), res.getString(5), res.getInt(6), res.getString(7), res.getInt(8), res.getInt(9)));
                 i++;
-                if (i > 0) {
-                    error.setCode(0);
-                    error.setMessage("");
-                } else {
-                    error.setCode(11);
-                    error.setMessage("Error no data found");
-                }
+            }
+            if (i > 0) {
+                error.setCode(0);
+                error.setMessage("");
+            } else {
+                error.setCode(11);
+                error.setMessage("Error no data found");
             }
         } catch (SQLException ex) {
-            log.log(Level.SEVERE, "Error create raspiDAO {0}", ex);
+            log.log(Level.SEVERE, "Error readMany raspiDAO {0}", ex);
             error.setCode(-1);
             error.setMessage("Error: " + ex);
 
         } finally {
             con.cerrarConexion();
         }
-        raspiVal.setError(error);
-        raspiList.add(raspiVal);
+        if (i == 0) {
+            raspiVal.setError(error);
+            raspiList.add(raspiVal);
+        } else {
+            raspiVal = raspiList.get(0);
+            raspiVal.setError(error);
+            raspiList.set(0, raspiVal);
+        }
+
         return raspiList;
     }
 

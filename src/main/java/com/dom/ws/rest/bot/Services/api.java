@@ -7,22 +7,26 @@ package com.dom.ws.rest.bot.Services;
 
 import com.dom.ws.rest.bot.Controller.answerController;
 import com.dom.ws.rest.bot.Controller.createQuestionController;
+import com.dom.ws.rest.bot.Controller.devicesConfigController;
 import com.dom.ws.rest.bot.Controller.getQuestionsController;
 import com.dom.ws.rest.bot.Controller.projectController;
 import com.dom.ws.rest.bot.Controller.questionsController;
 import com.dom.ws.rest.bot.DTO.answerDTO;
 import com.dom.ws.rest.bot.DTO.projectDTO;
 import com.dom.ws.rest.bot.DTO.questionsDTO;
+import com.dom.ws.rest.bot.DTO.raspiDTO;
 import com.dom.ws.rest.bot.Request.answerReq;
 import com.dom.ws.rest.bot.Request.questionsAnswersReq;
 import com.dom.ws.rest.bot.Request.createProjectsReq;
 import com.dom.ws.rest.bot.Request.createQuestionsReq;
+import com.dom.ws.rest.bot.Request.raspiReq;
 import com.dom.ws.rest.bot.Response.answerResp;
 import com.dom.ws.rest.bot.Response.createQuestionsResp;
 import com.dom.ws.rest.bot.Response.getAnswerResp;
 import com.dom.ws.rest.bot.Response.getQuestionsAnswerResp;
 import com.dom.ws.rest.bot.Response.getQuestionsResp;
 import com.dom.ws.rest.bot.Response.projectsResp;
+import com.dom.ws.rest.bot.Response.raspiResp;
 import com.dom.ws.rest.bot.vo.msgError;
 import java.util.concurrent.ExecutorService;
 import javax.ws.rs.Consumes;
@@ -339,6 +343,87 @@ public class api {
         msgError response = new msgError();
         answerController ctrl = new answerController();
         response = ctrl.updateCreateAnswers(request);
+        return response;
+    }
+    
+        /**
+     *
+     * @param asyncResponse
+     * @param request
+     */
+    @POST
+    @Path(value = "/updateProject")
+    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN})
+    @Consumes({MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN})
+
+    public void updateProject (@Suspended final AsyncResponse asyncResponse, final projectDTO request) {
+        executorService.submit(new Runnable() {
+            @Override
+            public void run() {
+                asyncResponse.resume(doUpdateProject(request));
+            }
+        });
+    }
+
+    private msgError doUpdateProject (projectDTO request) {
+
+        msgError response = new msgError();
+        projectController ctrl = new projectController();
+        response = ctrl.updateProject(request);
+        return response;
+    }
+    
+    
+        /**
+     *
+     * @param asyncResponse
+     * @param request
+     */
+    @POST
+    @Path(value = "/configDevices")
+    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN})
+    @Consumes({MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN})
+
+    public void configDevices (@Suspended final AsyncResponse asyncResponse, final raspiReq request) {
+        executorService.submit(new Runnable() {
+            @Override
+            public void run() {
+                asyncResponse.resume(doConfigDevices(request));
+            }
+        });
+    }
+
+    private raspiResp doConfigDevices (raspiReq request) {
+        raspiResp response = new raspiResp();
+        devicesConfigController ctrl = new devicesConfigController();
+        response = ctrl.getConfigDevice(request);
+        return response;
+    }
+    
+        /**
+     *
+     * @param asyncResponse
+     * @param request
+     */
+    @POST
+    @Path(value = "/createConfigDevices")
+    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN})
+    @Consumes({MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN})
+
+    public void createConfigDevices (@Suspended final AsyncResponse asyncResponse, final raspiDTO request) {
+        executorService.submit(new Runnable() {
+            @Override
+            public void run() {
+                asyncResponse.resume(doCreateConfigDevices(request));
+            }
+        });
+    }
+
+    private msgError doCreateConfigDevices(raspiDTO request) {
+
+        msgError response = new msgError();
+        devicesConfigController ctrl = new devicesConfigController();
+        response = ctrl.createConfigDevices(request);
         return response;
     }
 }

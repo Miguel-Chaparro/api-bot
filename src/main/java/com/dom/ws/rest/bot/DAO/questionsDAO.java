@@ -108,7 +108,7 @@ public class questionsDAO implements interfaces<questionsDTO> {
         log.info("*** Start questionsDAO readOne ***");
         PreparedStatement ps;
         ResultSet res;
-        msgError error = new msgError();
+        msgError errorRead = new msgError();
         questionsDTO questions = new questionsDTO();
         try {
             ps = con.getCnn().prepareStatement(SQL_READONE);
@@ -124,19 +124,19 @@ public class questionsDAO implements interfaces<questionsDTO> {
             }
             
             if (i == 0) {
-                error.setCode(1);
-                error.setMessage("No existe pregunta");
+                errorRead.setCode(1);
+                errorRead.setMessage("No existe pregunta");
             }
 
         } catch (SQLException ex) {
             log.log(Level.SEVERE, "Error create customerWhatsappDTO {0}", ex);
-            error.setCode(-1);
-            error.setMessage("Error: " + ex);
+            errorRead.setCode(-1);
+            errorRead.setMessage("Error: " + ex);
 
         } finally {
             con.cerrarConexion();
         }
-        questions.setError(error);
+        questions.setError(errorRead);
          log.info("*** End questionsDAO readOne ***");
         return questions;
     }

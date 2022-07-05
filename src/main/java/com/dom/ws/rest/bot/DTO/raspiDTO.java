@@ -12,10 +12,16 @@ import com.dom.ws.rest.bot.vo.msgError;
  * @author MIGUEL
  */
 public class raspiDTO {
+
     private String raspi;
     private String ip;
-    private String groupId;
     private String nodeIp;
+    private String groupId;
+    private String topic;
+    private int idChannel;
+    private String idChat;
+    private int flgMain;
+    private int idDevices;
     private msgError error;
 
     public msgError getError() {
@@ -26,22 +32,45 @@ public class raspiDTO {
         this.error = error;
     }
 
-    public raspiDTO(String raspi, String ip, String groupId, String nodeIp, msgError error) {
-        this.raspi = raspi;
-        this.ip = ip;
-        this.groupId = groupId;
-        this.nodeIp = nodeIp;
-        this.error = error;
+    public int getIdDevices() {
+        return idDevices;
     }
 
-    public raspiDTO() {
+    public void setIdDevices(int idDevices) {
+        this.idDevices = idDevices;
+    }
+    
+
+    public String getTopic() {
+        return topic;
     }
 
-    public raspiDTO(String raspi, String ip, String groupId, String nodeIp) {
-        this.raspi = raspi;
-        this.ip = ip;
-        this.groupId = groupId;
-        this.nodeIp = nodeIp;
+    public void setTopic(String topic) {
+        this.topic = topic;
+    }
+
+    public int getIdChannel() {
+        return idChannel;
+    }
+
+    public void setIdChannel(int idChannel) {
+        this.idChannel = idChannel;
+    }
+
+    public String getIdChat() {
+        return idChat;
+    }
+
+    public void setIdChat(String idChat) {
+        this.idChat = idChat;
+    }
+
+    public int getFlgMain() {
+        return flgMain;
+    }
+
+    public void setFlgMain(int flgMain) {
+        this.flgMain = flgMain;
     }
 
     public String getRaspi() {
@@ -75,4 +104,35 @@ public class raspiDTO {
     public void setNodeIp(String nodeIp) {
         this.nodeIp = nodeIp;
     }
+
+    public raspiDTO() {
+    }
+
+    public raspiDTO(String raspi, String ip, String nodeIp, String groupId, String topic, int idChannel, String idChat, int flgMain, int idDevices, msgError error) {
+        this.raspi = raspi;
+        this.ip = ip;
+        this.nodeIp = nodeIp;
+        this.groupId = groupId;
+        this.topic = topic;
+        this.idChannel = idChannel;
+        this.idChat = idChat;
+        this.flgMain = flgMain;
+        this.idDevices = idDevices;
+        this.error = error;
+    }
+
+    public raspiDTO(String raspi, String ip, String nodeIp, String groupId, String topic, int idChannel, String idChat, int flgMain, int idDevices) {
+        this.raspi = raspi;
+        this.ip = ip;
+        this.nodeIp = nodeIp;
+        this.groupId = groupId;
+        this.topic = topic;
+        this.idChannel = idChannel;
+        this.idChat = idChat;
+        this.flgMain = flgMain;
+        this.idDevices = idDevices;
+    }
+
+
+
 }
