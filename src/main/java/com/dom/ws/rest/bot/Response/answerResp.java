@@ -16,6 +16,8 @@ public class answerResp {
     private msgError error;          
     private String whatsapp;
     private String raspi;
+    private String flgCommand;
+    private String command;
     private questionsVO question;
 
     public msgError getError() {
@@ -53,16 +55,30 @@ public class answerResp {
     public answerResp() {
     }
 
-    public answerResp(msgError error, String whatsapp, String raspi, questionsVO question) {
+    public answerResp(msgError error, String whatsapp, String raspi, String flgCommand, String command, questionsVO question) {
         this.error = error;
         this.whatsapp = whatsapp;
         this.raspi = raspi;
+        this.flgCommand = flgCommand;
+        this.command = command;
         this.question = question;
     }
-    
-    
-    
 
-   
+    public String getFlgCommand() {
+        return flgCommand;
+    }
 
+    public void setFlgCommand(String flgCommand) {
+        this.flgCommand = flgCommand;
+    }
+
+    public String getCommand() {
+        return command;
+    }
+
+    public void setCommand(String command) {
+        this.command = command;
+    }
+
+    
 }

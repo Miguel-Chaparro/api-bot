@@ -23,7 +23,7 @@ public class devicesConfigController {
     public raspiResp getConfigDevice(raspiReq req){
         log.info("***start devicesConfigController getConfigDevice***"); 
         raspiResp response = new raspiResp();
-        List<raspiDTO> lista = new ArrayList();
+        List<raspiDTO> lista = new ArrayList<>();
         msgError errorDAO = new msgError();
         raspiDTO dto = new raspiDTO();
         raspiDAO dao = new raspiDAO();

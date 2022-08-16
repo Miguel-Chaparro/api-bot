@@ -31,4 +31,9 @@ public class msgError {
     public void setMessage(String message) {
         this.message = message;
     }
+
+    public msgError(int code, String message) {
+        this.code = code;
+        this.message = message;
+    }
 }

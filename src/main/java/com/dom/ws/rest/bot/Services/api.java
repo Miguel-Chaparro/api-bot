@@ -30,6 +30,7 @@ import com.dom.ws.rest.bot.Response.raspiResp;
 import com.dom.ws.rest.bot.vo.msgError;
 import java.util.concurrent.ExecutorService;
 import javax.ws.rs.Consumes;
+import javax.ws.rs.CookieParam;
 import javax.ws.rs.POST;
 
 import javax.ws.rs.Path;
@@ -50,7 +51,7 @@ public class api {
     private final ExecutorService executorService = java.util.concurrent.Executors.newCachedThreadPool();
 
     /**
-     *
+     * agregar cookie para autenticacion
      * @param asyncResponse
      * @param request
      */
@@ -59,10 +60,19 @@ public class api {
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN})
     @Consumes({MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN})
 
-    public void questions(@Suspended final AsyncResponse asyncResponse, final questionsAnswersReq request) {
+    public void questions(@Suspended final AsyncResponse asyncResponse, final questionsAnswersReq request,@CookieParam("session") String session) {
         executorService.submit(new Runnable() {
             @Override
             public void run() {
+           /*      try {
+                    questionsController controller = new questionsController();
+                    getQuestionsAnswerResp response = controller.questions(request,session);
+                    asyncResponse.resume(response);
+                } catch (Exception e) {
+                    msgError error = new msgError();
+                    error.setError(e.getMessage());
+                    asyncResponse.resume(error);
+                } */
                 asyncResponse.resume(doQuestions(request));
             }
         });

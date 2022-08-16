@@ -13,7 +13,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
-import java.util.function.Supplier;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -25,16 +24,22 @@ public class customerWhatsappDAO implements interfaces<customerWhatsappDTO> {
 
     private static final String SQL_READONE = "SELECT * FROM dommapi.customerWhatsapp WHERE idWhatsapp = ? ";
     private static final String SQL_UPDATE = "UPDATE dommapi.customerWhatsapp SET questionId = ?, date = ?,"
-            + "pendingState = ?, pendingDescription = ? WHERE idWhatsapp = ?";
-//    private static final String SQL_UPDATE = "UPDATE dommapi.customerWhatsapp SET questionId = ?, date = ?, nameWAP =?, idCustomer =?, idProject =? "
-//            + "pendingState = ?, pendingDescription = ? "
-//            + "WHERE idWhatsapp = ?";
-    private static final String SQL_INSERT = "INSERT INTO dommapi.customerWhatsapp (idWhatsapp, idCustomer, nameWAP, questionId) "
-            + "VALUES (?, ?, ?, ?)";
-    private static final String SQL_DELETE = "DELETE FROM dommapi.customerWhatsapp WHERE idWhatsapp = ?";
-    private static final String SQL_READMANY = "SELECT * FROM dommapi.customerWhatsapp WHERE idCustomer = ? ";
-    private static final String SQL_READMANYUSER = "";
-    private static final String SQL_READALL = "SELECT * FROM dommapi.customerWhatsapp";
+            + "pendingState = ?, pendingDescription = ?, idProject = ?, devices = ?, command = ? WHERE idWhatsapp = ?";
+    // private static final String SQL_UPDATE = "UPDATE dommapi.customerWhatsapp SET
+    // questionId = ?, date = ?, nameWAP =?, idCustomer =?, idProject =? "
+    // + "pendingState = ?, pendingDescription = ? "
+    // + "WHERE idWhatsapp = ?";
+    private static final String SQL_INSERT = "INSERT INTO dommapi.customerWhatsapp (idWhatsapp, idCustomer, nameWAP, questionId, idProject) "
+            + "VALUES (?, ?, ?, ?, ?)";
+    /*
+     * private static final String SQL_DELETE =
+     * "DELETE FROM dommapi.customerWhatsapp WHERE idWhatsapp = ?";
+     * private static final String SQL_READMANY =
+     * "SELECT * FROM dommapi.customerWhatsapp WHERE idCustomer = ? ";
+     * private static final String SQL_READMANYUSER = "";
+     * private static final String SQL_READALL =
+     * "SELECT * FROM dommapi.customerWhatsapp";
+     */
     private final conexionBD con = conexionBD.saberEstado();
     static final Logger log = Logger.getLogger(customerWhatsappDAO.class.getName());
 
@@ -48,7 +53,8 @@ public class customerWhatsappDAO implements interfaces<customerWhatsappDTO> {
             ps.setString(1, dto.getIdWhatsapp());
             ps.setString(2, dto.getIdCustomer());
             ps.setString(3, dto.getName());
-            ps.setString(4, "1");
+            ps.setString(4, dto.getIdQuestions());
+            ps.setInt(5, dto.getIdProject());
             int i = 0;
             i = ps.executeUpdate();
 
@@ -76,8 +82,11 @@ public class customerWhatsappDAO implements interfaces<customerWhatsappDTO> {
             ps.setTimestamp(2, dto.getDate());
             ps.setInt(3, 0);
             ps.setString(4, dto.getPendingDescription());
-            ps.setString(5, dto.getIdWhatsapp());
-            log.info("Script "+ ps);
+            ps.setInt(5, dto.getIdProject());
+            ps.setString(6, dto.getDevices());
+            ps.setString(7, dto.getCommand());
+            ps.setString(8, dto.getIdWhatsapp());
+            log.info("Script " + ps);
             int i = 0;
             i = ps.executeUpdate();
 
@@ -101,18 +110,18 @@ public class customerWhatsappDAO implements interfaces<customerWhatsappDTO> {
         PreparedStatement ps;
         boolean valida = false;
         try {
-            ps=con.getCnn().prepareStatement(SQL_INSERT);
+            ps = con.getCnn().prepareStatement(SQL_INSERT);
             ps.setString(1, dto.getIdWhatsapp());
-            int i= 0;
+            int i = 0;
             i = ps.executeUpdate();
-            
-            if (i>0) {
-                valida =true;
+
+            if (i > 0) {
+                valida = true;
             }
         } catch (SQLException ex) {
             log.log(Level.SEVERE, "Error delete customerWhatsappDAO {0}", ex);
-            
-        }finally {
+
+        } finally {
             con.cerrarConexion();
         }
         log.info("***end customerWhatsappDAO uptade ***");
@@ -133,7 +142,8 @@ public class customerWhatsappDAO implements interfaces<customerWhatsappDTO> {
             int i = 0;
             while (res.next()) {
                 customer = new customerWhatsappDTO(res.getString(1), res.getString(2),
-                        res.getString(3), res.getString(4), res.getTimestamp(5), res.getInt(6), res.getString(7));
+                        res.getString(3), res.getString(4), res.getTimestamp(5), res.getInt(6), res.getString(7),
+                        res.getInt(8), res.getInt(9), res.getString(10), res.getString(11));
                 i++;
             }
             if (i == 0) {

@@ -23,7 +23,7 @@ import java.util.ArrayList;
  */
 public class chatDAO implements interfaces<chatDTO> {
 
-    private static final String SQL_READONE = "SELECT * FROM dommapi.chat WHERE idWhatsapp = ? ";
+    //private static final String SQL_READONE = "SELECT * FROM dommapi.chat WHERE idWhatsapp = ? ";
     private static final String SQL_UPDATE = "UPTADE dommapi.chat SET chatmessage =?, idcustomer =?, time=? WHERE idWhatsapp =? ";
     private static final String SQL_INSERT = "INSERT INTO dommapi.chat ( idWhatsapp, chatmessage, idcustomer, time )"
             + "VALUES (?, ?, ?, ?)";
@@ -123,7 +123,7 @@ public class chatDAO implements interfaces<chatDTO> {
         log.info("***start chatDAO readMany***");
         PreparedStatement ps;
         ResultSet res;
-        ArrayList<chatDTO> answerList = new ArrayList();
+        ArrayList<chatDTO> answerList = new ArrayList<>();
         chatDTO answerVal = new chatDTO();
         try {
             ps = con.getCnn().prepareStatement(SQL_READMANY);
@@ -160,7 +160,7 @@ public class chatDAO implements interfaces<chatDTO> {
         PreparedStatement ps;
         ResultSet res;
         @SuppressWarnings("MismatchedQueryAndUpdateOfCollection")
-        ArrayList<chatDTO> answerList = new ArrayList();
+        ArrayList<chatDTO> answerList = new ArrayList<>();
         chatDTO answerVal = new chatDTO();
         try {
             ps = con.getCnn().prepareStatement(SQL_READALL);

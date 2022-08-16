@@ -12,7 +12,6 @@ import com.dom.ws.rest.bot.Response.createQuestionsResp;
 import com.dom.ws.rest.bot.vo.msgError;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -26,7 +25,7 @@ public class createQuestionController {
     public createQuestionsResp createQuestions(createQuestionsReq req) {
         log.info("***start createQuestionController createQuestions***");
         createQuestionsResp response = new createQuestionsResp();
-        List<questionsDTO> listQuestions = new ArrayList();
+        List<questionsDTO> listQuestions = new ArrayList<>();
         questionsDTO valPreview = new questionsDTO();
         int countErrors = 0;
         int countQuestions = 0;

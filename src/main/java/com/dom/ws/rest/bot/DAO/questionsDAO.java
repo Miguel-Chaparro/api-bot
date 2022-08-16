@@ -28,10 +28,10 @@ public class questionsDAO implements interfaces<questionsDTO> {
             + "WHERE id = ? AND idProject = ?";
     private static final String SQL_INSERT = "INSERT INTO dommapi.questions (id, question, idProject, nextQuestion, multiAnswer, minQuestion, openQuestion, endQuestion ) "
             + "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
-    private static final String SQL_DELETE = "DELETE FROM dommapi.questions WHERE idWhatsapp = ?";
+   // private static final String SQL_DELETE = "DELETE FROM dommapi.questions WHERE idWhatsapp = ?";
     private static final String SQL_READMANY = "SELECT [id],[question],[idProject],[nextQuestion],[multiAnswer],[minQuestion],[openQuestion],[endQuestion] FROM dommapi.questions  WHERE idProject = ? ";
-    private static final String SQL_READMANYUSER = "";
-    private static final String SQL_READALL = "SELECT * FROM dommapi.questions ";
+    /* private static final String SQL_READMANYUSER = "";
+    private static final String SQL_READALL = "SELECT * FROM dommapi.questions "; */
     msgError error = new msgError();
     private final conexionBD con = conexionBD.saberEstado();
     static final Logger log = Logger.getLogger(questionsDAO.class.getName());
@@ -146,7 +146,7 @@ public class questionsDAO implements interfaces<questionsDTO> {
         log.info("***start questionsDAO readMany***");
         PreparedStatement ps;
         ResultSet res;
-        List<questionsDTO> resp = new ArrayList();
+        List<questionsDTO> resp = new ArrayList<>();
         questionsDTO objDto = new questionsDTO();
         msgError errorQuery = new msgError();
         int i = 0;

@@ -14,11 +14,11 @@ import java.util.List;
  * @author MIGUEL
  */
 public class requestDAO implements interfaces<requestDTO>{
-    
+/*     
     private static String SQL_READMANY = "";
     private static String SQL_INSERT = "";
     private static String SQL_UPDATE = "";
-    private static String SQL_READALL = "";
+    private static String SQL_READALL = ""; */
     
 
     @Override

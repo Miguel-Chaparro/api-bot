@@ -25,7 +25,7 @@ public class projectsDAO implements interfaces<projectDTO> {
 
     private static final String SQL_READMANY = "SELECT * FROM dommapi.project WHERE [idUser] = ? ";
     private static final String SQL_READ_VALIDATE = "SELECT * FROM dommapi.project WHERE [idUser] = ? AND [projectDesc] = ?";
-    private static final String SQL_READ = "SELECT * FROM dommapi.project WHERE [idUser] = ? AND [idProject] = ? ";
+    //private static final String SQL_READ = "SELECT * FROM dommapi.project WHERE [idUser] = ? AND [idProject] = ? ";
     private static final String SQL_CREATE = "INSERT INTO [dommapi].[project] ([idUser] ,[projectDesc] ,[dateProject] ,[openProject] ,[endProject] ,[statusProject] ,[flgEndProject]) "
             + "VALUES (?, ?, ?, ?, ?, ?, ?)";
     private static final String SQL_UPDATE = "UPDATE dommapi.project SET [idUser] = ?,[projectDesc]  = ?,[dateProject]  = ?,[openProject]  = ?,[endProject]  = ?,[statusProject]  = ?,[flgEndProject] = ? "
@@ -143,7 +143,7 @@ public class projectsDAO implements interfaces<projectDTO> {
         log.info("***start projectDAO readMany***");
         PreparedStatement ps;
         ResultSet res;
-        ArrayList<projectDTO> resp = new ArrayList();
+        ArrayList<projectDTO> resp = new ArrayList<>();
         projectDTO objDto = new projectDTO();
         msgError error = new msgError();
         int i = 0;
@@ -187,7 +187,7 @@ public class projectsDAO implements interfaces<projectDTO> {
 
     @Override
     public List<projectDTO> readAll() {
-        List<projectDTO> resp = new ArrayList();
+        List<projectDTO> resp = new ArrayList<>();
         return resp;
     }
 }

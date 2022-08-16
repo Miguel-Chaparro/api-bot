@@ -24,7 +24,7 @@ public class getProjectController {
         projectsResp resp = new projectsResp();
         projectsDAO dao = new projectsDAO();
         projectDTO dto = new projectDTO();
-        List<projectDTO> projects = new ArrayList();
+        List<projectDTO> projects = new ArrayList<>();
         dto.setIdProject(req.getIdCodeProject());
         dto.setUser(req.getIdUser());
         projects = dao.readMany(dto);

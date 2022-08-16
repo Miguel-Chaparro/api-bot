@@ -19,11 +19,16 @@ public class customerWhatsappDTO {
     private String idQuestions;
     private Timestamp date;
     private int pendingState;
-    private String pendingDescription; 
+    private String pendingDescription;
     private int idProject;
+    private int flg_devices;
+    private String devices;
+    private String command;
     private msgError error;
 
-    public customerWhatsappDTO(String idWhatsapp, String name, String idCustomer, String idQuestions, Timestamp date, int pendingState, String pendingDescription, int idProject, msgError error) {
+    public customerWhatsappDTO(String idWhatsapp, String name, String idCustomer, String idQuestions, Timestamp date,
+            int pendingState, String pendingDescription, int idProject, int flg_devices, String device, String command,
+            msgError error) {
         this.idWhatsapp = idWhatsapp;
         this.name = name;
         this.idCustomer = idCustomer;
@@ -32,6 +37,9 @@ public class customerWhatsappDTO {
         this.pendingState = pendingState;
         this.pendingDescription = pendingDescription;
         this.idProject = idProject;
+        this.flg_devices = flg_devices;
+        this.devices = device;
+        this.command = command;
         this.error = error;
     }
 
@@ -43,7 +51,8 @@ public class customerWhatsappDTO {
         this.idProject = idProject;
     }
 
-    public customerWhatsappDTO(String idWhatsapp, String name, String idCustomer, String idQuestions, Timestamp date, int pendingState, String pendingDescription) {
+    public customerWhatsappDTO(String idWhatsapp, String name, String idCustomer, String idQuestions, Timestamp date,
+            int pendingState, String pendingDescription, int idProject, int flg_devices, String device, String command) {
         this.idWhatsapp = idWhatsapp;
         this.name = name;
         this.idCustomer = idCustomer;
@@ -51,12 +60,18 @@ public class customerWhatsappDTO {
         this.date = date;
         this.pendingState = pendingState;
         this.pendingDescription = pendingDescription;
+        this.idProject = idProject;
+        this.flg_devices = flg_devices;
+        this.devices = device;
+        this.command = command;
+        
     }
 
     public customerWhatsappDTO() {
     }
 
-    public customerWhatsappDTO(String idWhatsapp, String name, String idCustomer, String idQuestions, Timestamp date, int pendingState, String pendingDescription, msgError error) {
+    public customerWhatsappDTO(String idWhatsapp, String name, String idCustomer, String idQuestions, Timestamp date,
+            int pendingState, String pendingDescription, msgError error) {
         this.idWhatsapp = idWhatsapp;
         this.name = name;
         this.idCustomer = idCustomer;
@@ -131,7 +146,28 @@ public class customerWhatsappDTO {
         this.error = error;
     }
 
-   
-    
-    
+    public int getFlg_devices() {
+        return flg_devices;
+    }
+
+    public void setFlg_devices(int flg_devices) {
+        this.flg_devices = flg_devices;
+    }
+
+    public String getDevices() {
+        return devices;
+    }
+
+    public void setDevices(String devices) {
+        this.devices = devices;
+    }
+
+    public String getCommand() {
+        return command;
+    }
+
+    public void setCommand(String command) {
+        this.command = command;
+    }
+
 }

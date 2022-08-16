@@ -39,8 +39,8 @@ public class getQuestionsController {
         ansDto.setAnswerId(100);
         ansDto.setIdProject(req.getIdCodeProject());
         quesDto.setIdProject(req.getIdCodeProject());
-        List<questionsDTO> arrayQuestion = new ArrayList();
-        List<answerDTO> arrayAnswer = new ArrayList();
+        List<questionsDTO> arrayQuestion = new ArrayList<>();
+        List<answerDTO> arrayAnswer = new ArrayList<>();
         arrayQuestion = quesDao.readMany(quesDto);
         arrayAnswer = ansDAO.readMany(ansDto);
         errorQuery = arrayQuestion.get(0).getError();
@@ -63,7 +63,7 @@ public class getQuestionsController {
         msgError errorQuery = new msgError();
         quesDto.setIdProject(req.getIdCodeProject());
         questionsDAO quesDao = new questionsDAO();
-        List<questionsDTO> arrayQuestion = new ArrayList();
+        List<questionsDTO> arrayQuestion = new ArrayList<>();
         arrayQuestion = quesDao.readMany(quesDto);
         errorQuery = arrayQuestion.get(0).getError();
         resp.setError(errorQuery);
@@ -78,7 +78,7 @@ public class getQuestionsController {
         answerDTO ansDto = new answerDTO();
         answerDAO ansDAO = new answerDAO();
         msgError errorQuery = new msgError();
-        List<answerDTO> arrayAnswer = new ArrayList();
+        List<answerDTO> arrayAnswer = new ArrayList<>();
         ansDto.setIdProject(req.getIdProject());
         try{
             ansDto.setIdQuestion(req.getIdQuestion());

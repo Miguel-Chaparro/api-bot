@@ -12,7 +12,6 @@ import com.dom.ws.rest.bot.Response.projectsResp;
 import com.dom.ws.rest.bot.vo.msgError;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -26,7 +25,7 @@ public class projectController {
     public projectsResp getProjectUser(createProjectsReq req) {
         log.info("***start projectController getProjectUser***");
         projectsResp resp = new projectsResp();
-        List<projectDTO> array = new ArrayList();
+        List<projectDTO> array = new ArrayList<>();
         projectDTO dto = new projectDTO();
         dto.setUser(req.getIdUser());
         projectsDAO dao = new projectsDAO();

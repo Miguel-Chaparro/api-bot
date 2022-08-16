@@ -30,9 +30,9 @@ public class registroClienteDAO implements interfaces<customerDTO> {
     private static final String SQL_INSERT = "INSERT INTO dommapi.registrocliente (cedulaCliente, nombreCliente, telefonoPpal, telefonoOpc, fechaCreacion, departamento, ciudad,"
             + "direccion, plan, ip, ppoe, descripcion, idTecnico, latitud, longitud, nodo,  pago, correo, empresa, raspi) "
             + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-    private static final String SQL_DELETE = "SELECT * FROM dommapi.registrocliente WHERE idRaspi = ?";
+/*     private static final String SQL_DELETE = "SELECT * FROM dommapi.registrocliente WHERE idRaspi = ?";
     private static final String SQL_READMANY = "SELECT * FROM dommapi.registrocliente WHERE idQuestion = ? ";
-    private static final String SQL_READMANYUSER = "";
+    private static final String SQL_READMANYUSER = ""; */
     private static final String SQL_READALL = "SELECT * FROM dommapi.registrocliente";
     msgError error = new msgError();
     private final conexionBD con = conexionBD.saberEstado();
@@ -158,7 +158,7 @@ public class registroClienteDAO implements interfaces<customerDTO> {
         log.info("*** Start registroclienteDAO readOne ***");
         PreparedStatement ps;
         ResultSet res;
-        msgError Error = new msgError();
+        //msgError Error = new msgError();
         customerDTO customer = new customerDTO();
         try {
             ps=con.getCnn().prepareStatement(SQL_READONE);
@@ -210,7 +210,7 @@ public class registroClienteDAO implements interfaces<customerDTO> {
         PreparedStatement ps;
         ResultSet res;
         
-        ArrayList<customerDTO> answerList = new ArrayList();
+        ArrayList<customerDTO> answerList = new ArrayList<>();
         customerDTO customerVal = new customerDTO ();
         try{
             ps= con.getCnn().prepareStatement(SQL_READALL);

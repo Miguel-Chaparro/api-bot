@@ -22,6 +22,7 @@ public class raspiDTO {
     private String idChat;
     private int flgMain;
     private int idDevices;
+    private String descDevices;
     private msgError error;
 
     public msgError getError() {
@@ -32,6 +33,14 @@ public class raspiDTO {
         this.error = error;
     }
 
+    public String getDescDevices() {
+        return descDevices;
+    }
+
+    public void setDescDevices(String descDevices) {
+        this.descDevices = descDevices;
+    }
+
     public int getIdDevices() {
         return idDevices;
     }
@@ -39,7 +48,6 @@ public class raspiDTO {
     public void setIdDevices(int idDevices) {
         this.idDevices = idDevices;
     }
-    
 
     public String getTopic() {
         return topic;
@@ -108,7 +116,8 @@ public class raspiDTO {
     public raspiDTO() {
     }
 
-    public raspiDTO(String raspi, String ip, String nodeIp, String groupId, String topic, int idChannel, String idChat, int flgMain, int idDevices, msgError error) {
+    public raspiDTO(String raspi, String ip, String nodeIp, String groupId, String topic, int idChannel, String idChat,
+            int flgMain, int idDevices, String descDevices, msgError error) {
         this.raspi = raspi;
         this.ip = ip;
         this.nodeIp = nodeIp;
@@ -118,10 +127,12 @@ public class raspiDTO {
         this.idChat = idChat;
         this.flgMain = flgMain;
         this.idDevices = idDevices;
+        this.descDevices = descDevices;
         this.error = error;
     }
 
-    public raspiDTO(String raspi, String ip, String nodeIp, String groupId, String topic, int idChannel, String idChat, int flgMain, int idDevices) {
+    public raspiDTO(String raspi, String ip, String nodeIp, String groupId, String topic, int idChannel, String idChat,
+            int flgMain, int idDevices, String descDevices) {
         this.raspi = raspi;
         this.ip = ip;
         this.nodeIp = nodeIp;
@@ -131,8 +142,7 @@ public class raspiDTO {
         this.idChat = idChat;
         this.flgMain = flgMain;
         this.idDevices = idDevices;
+        this.descDevices = descDevices;
     }
-
-
 
 }

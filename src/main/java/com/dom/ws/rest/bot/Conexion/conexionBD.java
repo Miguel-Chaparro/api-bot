@@ -27,15 +27,15 @@ public class conexionBD {
     Properties atributosBD = new Properties();
 
     //ServletContext context = event.getServletContext();
-    private final String usuario = "udsbr";
-    //Contraseña si tiene, si no tiene entonces dejar en blanco
+/*     private final String usuario = "udsbr";
+    //Contraseï¿½a si tiene, si no tiene entonces dejar en blanco
     // private final String pass = "GDXmix14318";
     private final String pass = "udsbr#01";
     //Servidor (localhost si lo tenemos local) o puede ser un servidor remoto, vinajo
     // private final String host = "mysql23332-env-1119869.j.facilcloud.com";
     private final String host = "localHost";
     //Nombre de la base de datos a la cual queremos conectarnos
-    private final String nombre_BD = "udsbr";
+    private final String nombre_BD = "udsbr"; */
     URL fileLocation = getClass().getClassLoader().getResource("configBD.properties");
 
     public static conexionBD instance;
@@ -46,8 +46,8 @@ public class conexionBD {
 
         //PropertyConfigurator.configure("log4j.properties");
         logg.log(Level.INFO, "*** Inicio conexionBD ***");
-        String servidor, usuarioBD, contrasenaBD;
-        //log.debug("localización URL configDB "+fileLocation.getPath());
+        String servidor /*, usuarioBD, contrasenaBD */;
+        //log.debug("localizaciï¿½n URL configDB "+fileLocation.getPath());
         //atributosBD.load(new FileReader("/home/gidenutas/Dommatos/config/configBD.properties"));
         //servidor = "jdbc:mysql://" + atributosBD.getProperty("host") + "/" + atributosBD.getProperty("nombreBD") ;
         /*servidor = atributosBD.getProperty("UrlBD");
@@ -55,10 +55,10 @@ public class conexionBD {
         contrasenaBD = atributosBD.getProperty("contrasena");*/
         //servidor = "jdbc:mysql://localhost:3306/DommApi?autoReconnect=true";
         servidor = "jdbc:sqlserver://apibot-database.database.windows.net:1433;database=apibot-database;user=apibot-database@apibot-database;password=Kelimporta0;encrypt=true;trustServerCertificate=false;hostNameInCertificate=*.database.windows.net;loginTimeout=30;";
-        usuarioBD = "dommatos";
-        contrasenaBD = "D0mm4t0s";
+        /* usuarioBD = "dommatos";
+        contrasenaBD = "D0mm4t0s"; */
         logg.log(Level.INFO, System.getenv("RDS_HOSTNAME"));
-        //log.debug("Datos de Conexión: Servidor = "+servidor + "Usuario: " + usuarioBD + "contrasena = "+ contrasenaBD);
+        //log.debug("Datos de Conexiï¿½n: Servidor = "+servidor + "Usuario: " + usuarioBD + "contrasena = "+ contrasenaBD);
         //String servidor = "jdbc:mysql://" + host + "/" + nombre_BD;
         try {
             //Class.forName("com.mysql.jdbc.Driver");//driver de conexion de la base de datos Mysql

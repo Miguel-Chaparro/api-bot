@@ -132,7 +132,7 @@ public class answerDAO implements interfaces<answerDTO> {
         log.info("*** end answerDAO readMany ***");
         PreparedStatement ps;
         ResultSet res;
-        ArrayList<answerDTO> answerList = new ArrayList();
+        ArrayList<answerDTO> answerList = new ArrayList<>();
         answerDTO answerVal = new answerDTO();
         int i = 0;
         try {
@@ -188,7 +188,7 @@ public class answerDAO implements interfaces<answerDTO> {
 
         PreparedStatement ps;
         ResultSet res;
-        ArrayList<answerDTO> answerList = new ArrayList();
+        ArrayList<answerDTO> answerList = new ArrayList<>();
         answerDTO answerVal = new answerDTO();
         try {
             ps = con.getCnn().prepareStatement(SQL_READALL);

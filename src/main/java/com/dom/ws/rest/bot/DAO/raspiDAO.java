@@ -7,7 +7,6 @@ package com.dom.ws.rest.bot.DAO;
 
 import com.dom.ws.rest.bot.Conexion.conexionBD;
 import com.dom.ws.rest.bot.Conexion.interfaces;
-import static com.dom.ws.rest.bot.DAO.raspiDAO.log;
 import com.dom.ws.rest.bot.DTO.raspiDTO;
 import com.dom.ws.rest.bot.vo.msgError;
 import java.sql.PreparedStatement;
@@ -24,15 +23,15 @@ import java.util.logging.Logger;
  */
 public class raspiDAO implements interfaces<raspiDTO> {
 
-    private static final String SQL_READONE = "SELECT * FROM dommapi.raspi WHERE idRaspi = ? ";
-    private static final String SQL_UPDATE = "UPDATE raspi SET idRaspi = ?, ip = ?, nodo = ?, idGroup = ?, topic = ?, id_channel = ?, id_chat = ?, flg_main = ? "
+    //private static final String SQL_READONE = "SELECT * FROM dommapi.raspi WHERE idRaspi = ? ";
+    private static final String SQL_UPDATE = "UPDATE raspi SET idRaspi = ?, ip = ?, nodo = ?, idGroup = ?, topic = ?, id_channel = ?, id_chat = ?, flg_main = ?, desc_device = ? "
             + "WHERE id_device = ?";
-    private static final String SQL_INSERT = "INSERT INTO dommapi.raspi (idRaspi, ip, nodo, idGroup, topic, id_channel, id_chat, flg_main) "
-            + "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
-    private static final String SQL_DELETE = "SELECT * FROM dommapi.raspi WHERE idRaspi = ?";
+    private static final String SQL_INSERT = "INSERT INTO dommapi.raspi (idRaspi, ip, nodo, idGroup, topic, id_channel, id_chat, flg_main, desc_device) "
+            + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+    //private static final String SQL_DELETE = "SELECT * FROM dommapi.raspi WHERE idRaspi = ?";
     private static final String SQL_READMANY = "SELECT * FROM dommapi.raspi WHERE idRaspi = ? ";
-    private static final String SQL_READMANYUSER = "";
-    private static final String SQL_READALL = "SELECT * FROM customerWhatsapp";
+   /*  private static final String SQL_READMANYUSER = "";
+    private static final String SQL_READALL = "SELECT * FROM customerWhatsapp"; */
     msgError error = new msgError();
     private final conexionBD con = conexionBD.saberEstado();
     static final Logger log = Logger.getLogger(raspiDAO.class.getName());
@@ -52,6 +51,7 @@ public class raspiDAO implements interfaces<raspiDTO> {
             ps.setInt(6, dto.getIdChannel());
             ps.setString(7, dto.getIdChat());
             ps.setInt(8, dto.getFlgMain());
+            ps.setString(9, dto.getDescDevices());
             int i = 0;
             i = ps.executeUpdate();
 
@@ -83,7 +83,8 @@ public class raspiDAO implements interfaces<raspiDTO> {
             ps.setInt(6, dto.getIdChannel());
             ps.setString(7, dto.getIdChat());
             ps.setInt(8, dto.getFlgMain());
-            ps.setInt(9, dto.getIdDevices());
+            ps.setString(9, dto.getDescDevices());
+            ps.setInt(10, dto.getIdDevices());
             int i = 0;
             i = ps.executeUpdate();
 
@@ -115,7 +116,7 @@ public class raspiDAO implements interfaces<raspiDTO> {
         log.info("*** end raspiDAO readMany ***");
         PreparedStatement ps;
         ResultSet res;
-        ArrayList<raspiDTO> raspiList = new ArrayList();
+        ArrayList<raspiDTO> raspiList = new ArrayList<>();
         raspiDTO raspiVal = new raspiDTO();
         int i = 0;
         try {
@@ -125,7 +126,7 @@ public class raspiDAO implements interfaces<raspiDTO> {
 
             while (res.next()) {
                 raspiList.add(new raspiDTO(res.getString(1), res.getString(2),
-                        res.getString(3), res.getString(4), res.getString(5), res.getInt(6), res.getString(7), res.getInt(8), res.getInt(9)));
+                        res.getString(3), res.getString(4), res.getString(5), res.getInt(6), res.getString(7), res.getInt(8), res.getInt(9), res.getString(10)));
                 i++;
             }
             if (i > 0) {
