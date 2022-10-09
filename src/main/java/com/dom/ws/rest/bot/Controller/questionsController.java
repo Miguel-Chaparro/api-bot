@@ -46,7 +46,7 @@ public class questionsController {
                 dto.setIdWhatsapp(req.getWhatsappId());
                 dto.setIdCustomer("");
                 dto.setName("");
-                dto.setIdProject(0);
+                dto.setIdProject(1);
                 dto.setPendingState(0);
                 statesResp.setError(updateQuestionCustomer(dto, true));
                 question = buildNextQuestion(dto, 1, true, new msgError(0, ""));
@@ -460,7 +460,7 @@ public class questionsController {
         for (raspiDTO raspiDTO : listRaspiDTO) {
             answerDTO answerDTO = new answerDTO();
             answerDTO.setAnswerId(raspiDTO.getIdDevices());
-            answerDTO.setAnswerDesc(raspiDTO.getDescDevices());
+            answerDTO.setAnswerDesc(raspiDTO.getRaspi());
             listAnswerDTO.add(answerDTO);
         }
         logg.info("*** End questionsController convertListRaspiDTOtoListAnswerDTO ***");

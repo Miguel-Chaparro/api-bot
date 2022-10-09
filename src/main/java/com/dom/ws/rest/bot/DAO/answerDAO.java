@@ -129,7 +129,7 @@ public class answerDAO implements interfaces<answerDTO> {
 
     @Override
     public List<answerDTO> readMany(answerDTO dto) {
-        log.info("*** end answerDAO readMany ***");
+        log.info("*** Start answerDAO readMany ***");
         PreparedStatement ps;
         ResultSet res;
         ArrayList<answerDTO> answerList = new ArrayList<>();
@@ -178,7 +178,7 @@ public class answerDAO implements interfaces<answerDTO> {
             answerVal.setError(error);
             answerList.set(0, answerVal);
         }
-
+        log.info("*** End answerDAO readMany ***");
         return answerList;
     }
 
