@@ -311,6 +311,7 @@ public class questionsController {
         List<answerDTO> answerList = new ArrayList<>();
         req.setIdQuestion(dto.getIdQuestions());
         req.setAnswerId(0);
+        req.setIdProject(dto.getIdProject());
         msgError rta = new msgError();
         answerList = dao.readMany(req);
         int indicator = -1;
