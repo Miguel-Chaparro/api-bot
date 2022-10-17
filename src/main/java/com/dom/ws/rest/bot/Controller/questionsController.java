@@ -317,14 +317,13 @@ public class questionsController {
         int indicator = -1;
         int count = 1;
         String command = "", pending = "";
-        if (dto.getCommand().equals("") || dto.getCommand() == null) {
-            command = "";
-        } else {
+        logg.info("*** dto ***"+dto.getIdWhatsapp());
+        if (dto.getCommand() != null) {
+            logg.info("*** 1 Entro al IF por NULL***");
             command = dto.getCommand() + "-";
-        }
-        if (dto.getPendingDescription().equals("") || dto.getPendingDescription() == null) {
-            pending = "";
-        } else {
+        } 
+        if ( dto.getPendingDescription() != null) {
+            logg.info("*** 2 Entro al IF ***");
             pending = dto.getPendingDescription() + " ";
         }
         try {
