@@ -170,4 +170,10 @@ public class customerWhatsappDTO {
         this.command = command;
     }
 
+    public String toString() {
+        return "customerWhatsappDTO{" + "idWhatsapp=" + idWhatsapp + ", name=" + name + ", idCustomer=" + idCustomer
+                + ", idQuestions=" + idQuestions + ", date=" + date + ", pendingState=" + pendingState
+                + ", pendingDescription=" + pendingDescription + ", idProject=" + idProject + ", flg_devices="
+                + flg_devices + ", devices=" + devices + ", command=" + command + ", error=" + error + '}';
+    }
 }

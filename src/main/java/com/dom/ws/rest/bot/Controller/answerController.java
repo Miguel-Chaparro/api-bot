@@ -27,15 +27,15 @@ public class answerController {
         statusUpdate = dao.update(req);
         if (statusUpdate) {
             codeResp = 0;
-            msjResponse = "Actualización Exitosa";
+            msjResponse = "ActualizaciÃ³n Exitosa";
         } else {
             statusUpdate = dao.create(req);
             if (statusUpdate) {
                 codeResp = 0;
-                msjResponse = "Creación Exitosa";
+                msjResponse = "CreaciÃ³n Exitosa";
             }else{
                 codeResp = -1;
-                msjResponse = "Upss Se presento un error en la creación de la respuesta";
+                msjResponse = "Upss Se presento un error en la creaciÃ³n de la respuesta";
             }
         }
         response.setCode(codeResp);

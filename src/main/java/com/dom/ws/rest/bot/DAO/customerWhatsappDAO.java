@@ -80,7 +80,7 @@ public class customerWhatsappDAO implements interfaces<customerWhatsappDTO> {
             ps = con.getCnn().prepareStatement(SQL_UPDATE);
             ps.setString(1, dto.getIdQuestions());
             ps.setTimestamp(2, dto.getDate());
-            ps.setInt(3, 0);
+            ps.setInt(3, dto.getPendingState());
             ps.setString(4, dto.getPendingDescription());
             ps.setInt(5, dto.getIdProject());
             ps.setString(6, dto.getDevices());

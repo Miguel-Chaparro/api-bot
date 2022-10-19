@@ -89,22 +89,24 @@ public class questionsController {
         Date date = new Date();
         List<raspiDTO> listRaspiDTO = new ArrayList<>();
         raspiDTO dto = new raspiDTO();
-
         // sumale 3 horas a la fecha actual
         date.setTime(date.getTime() - (1000 * 60 * 60 * 3));
         Timestamp ts = new Timestamp(date.getTime());
-        if (req.getDate() == null || req.getDate().getTime() > ts.getTime()) {
+        logg.info("Fecha actual: " +  ts.getTime() + " Fecha de la ultima pregunta: " + ts);
+        logg.info("Fecha req: " + req.getDate().getTime() + " Fecha de la ultima pregunta: " + req.getDate());
+        if (req.getDate() == null || req.getDate().getTime() < ts.getTime()) {
+            logg.info("Valida si la fecha es mayor a la actual");
             val.setError(new msgError(2, ""));
             if (req.getFlg_devices() > 0 && req.getPendingState() == 3) {
                 req.setIdQuestions("0");
                 req.setPendingState(2);
-            } else {
+            } else if (req.getPendingState() !=2){
                 req.setIdQuestions("1");
             }
             updateQuestionCustomer(req, false);
         }
-
-        if (req.getFlg_devices() > 0 && req.getPendingState() == 2 && req.getIdQuestions() == "0") {
+        if (req.getFlg_devices() > 0 && req.getPendingState() == 2 && req.getIdQuestions().equals("0")) {
+            logg.info("Valida si el usuario tiene dispositivos");
             listRaspiDTO = readRaspi(req.getIdWhatsapp());
             answerList = convertListRaspiDTOtoListAnswerDTO(listRaspiDTO);
             req.setPendingState(3);
@@ -113,7 +115,8 @@ public class questionsController {
             question.setQuestionDesc(
                     "🤖 Hola Estos son los dispositivos que tienes registrados en el sistema, Digita el número de uno de ellos para continuar ...");
             question.setOptions(answerList);
-        } else if (req.getFlg_devices() > 0 && req.getPendingState() == 3 && req.getIdQuestions() == "0") {
+        } else if (req.getFlg_devices() > 0 && req.getPendingState() == 3 && req.getIdQuestions().equals("0")) {
+            logg.info("Valida si el usuario tiene dispositivos y selecciono correctamente");
             dto = compareDevices(req.getIdWhatsapp(), option);
             if (dto.getError().getCode() == 0) {
                 req.setIdQuestions("1");
@@ -268,7 +271,7 @@ public class questionsController {
             }
 
         } else {
-            question = "🤖Lo siento, encontraste un fallo, Se esta cargando nuevamente en *La Matrix*... No es facíl";
+            question = "🤖Lo siento, encontraste un fallo,  --- Se esta cargando nuevamente *La Matrix*... \n No es facíl";
         }
 
         logg.info("*** END questionsController message ***");
@@ -428,7 +431,7 @@ public class questionsController {
             idDevice = Integer.parseInt(idRaspi);
             req.setIdDevices(idDevice);
             raspiList = readRaspi(idChat);
-            req.setError(new msgError(1, "🤖Ups! Lo siento esta opción ingresada no es valida"));
+            req.setError(new msgError(1, "🤖Ups! Lo siento esta opción ingresada no es valida --- _Elige tu opción ingresando el identificador númerico (Sólo dígitos)_"));
             for (raspiDTO r : raspiList) {
                 if (r.getIdDevices() == idDevice) {
                     req = r;
@@ -437,7 +440,7 @@ public class questionsController {
                 }
             }
         } catch (NumberFormatException ex) {
-            req.setError(new msgError(-1, "🤖 Ups!  Aún no reconozco textos, por favor ingresa solo digitos"));
+            req.setError(new msgError(-1, "🤖 Ups!  Aún no reconozco textos, por favor ingresa solo digitos --- _Elige tu opción ingresando el identificador númerico (Sólo dígitos)_"));
         }
         logg.info("*** End questionsController compareDevices ***");
         return req;
@@ -463,6 +466,7 @@ public class questionsController {
             answerDTO.setAnswerDesc(raspiDTO.getRaspi());
             listAnswerDTO.add(answerDTO);
         }
+        logg.info(""+listAnswerDTO.size());
         logg.info("*** End questionsController convertListRaspiDTOtoListAnswerDTO ***");
         return listAnswerDTO;
     }

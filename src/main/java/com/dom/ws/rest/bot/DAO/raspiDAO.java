@@ -23,15 +23,20 @@ import java.util.logging.Logger;
  */
 public class raspiDAO implements interfaces<raspiDTO> {
 
-    //private static final String SQL_READONE = "SELECT * FROM dommapi.raspi WHERE idRaspi = ? ";
+    // private static final String SQL_READONE = "SELECT * FROM dommapi.raspi WHERE
+    // idRaspi = ? ";
     private static final String SQL_UPDATE = "UPDATE raspi SET idRaspi = ?, ip = ?, nodo = ?, idGroup = ?, topic = ?, id_channel = ?, id_chat = ?, flg_main = ?, desc_device = ? "
             + "WHERE id_device = ?";
     private static final String SQL_INSERT = "INSERT INTO dommapi.raspi (idRaspi, ip, nodo, idGroup, topic, id_channel, id_chat, flg_main, desc_device) "
             + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
-    //private static final String SQL_DELETE = "SELECT * FROM dommapi.raspi WHERE idRaspi = ?";
+    // private static final String SQL_DELETE = "SELECT * FROM dommapi.raspi WHERE
+    // idRaspi = ?";
     private static final String SQL_READMANY = "SELECT * FROM dommapi.raspi WHERE idRaspi = ? ";
-   /*  private static final String SQL_READMANYUSER = "";
-    private static final String SQL_READALL = "SELECT * FROM customerWhatsapp"; */
+    private static final String SQL_READMANY_CHAT = "SELECT * FROM dommapi.raspi WHERE id_chat = ? ";
+    /*
+     * private static final String SQL_READMANYUSER = "";
+     * private static final String SQL_READALL = "SELECT * FROM customerWhatsapp";
+     */
     msgError error = new msgError();
     private final conexionBD con = conexionBD.saberEstado();
     static final Logger log = Logger.getLogger(raspiDAO.class.getName());
@@ -120,13 +125,20 @@ public class raspiDAO implements interfaces<raspiDTO> {
         raspiDTO raspiVal = new raspiDTO();
         int i = 0;
         try {
-            ps = con.getCnn().prepareStatement(SQL_READMANY);
-            ps.setString(1, dto.getRaspi());
+
+            if (dto.getRaspi() != null) {
+                ps = con.getCnn().prepareStatement(SQL_READMANY);
+                ps.setString(1, dto.getRaspi());
+            } else {
+                ps = con.getCnn().prepareStatement(SQL_READMANY_CHAT);
+                ps.setString(1, dto.getIdChat());
+            }
             res = ps.executeQuery();
 
             while (res.next()) {
                 raspiList.add(new raspiDTO(res.getString(1), res.getString(2),
-                        res.getString(3), res.getString(4), res.getString(5), res.getInt(6), res.getString(7), res.getInt(8), res.getInt(9), res.getString(10)));
+                        res.getString(3), res.getString(4), res.getString(5), res.getInt(6), res.getString(7),
+                        res.getInt(8), res.getInt(9), res.getString(10)));
                 i++;
             }
             if (i > 0) {
