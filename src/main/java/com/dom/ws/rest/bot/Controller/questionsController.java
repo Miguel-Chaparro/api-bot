@@ -54,6 +54,7 @@ public class questionsController {
                 break;
             case 0:
                 statesResp = response(dto, req.getAnswer());
+                error = statesResp.getError();
                 break;
             default:
                 error.setCode(-1);
@@ -113,7 +114,7 @@ public class questionsController {
             updateQuestionCustomer(req, false);
             resp.setError(new msgError(0, "OK"));
             question.setQuestionDesc(
-                    "🤖 Hola Estos son los dispositivos que tienes registrados en el sistema, Digita el número de uno de ellos para continuar ...");
+                    "🤖 ¡Hola *"+req.getName()+"!* Estos son los dispositivos que tienes registrados en el sistema, Digita el número de uno de ellos para continuar ...");
             question.setOptions(answerList);
         } else if (req.getFlg_devices() > 0 && req.getPendingState() == 3 && req.getIdQuestions().equals("0")) {
             logg.info("Valida si el usuario tiene dispositivos y selecciono correctamente");
@@ -125,7 +126,7 @@ public class questionsController {
                 resp.setRaspi(dto.getRaspi());
                 resp.setError(new msgError(0, "OK"));
                 updateQuestionCustomer(req, false);
-                question = buildNextQuestion(req, val.getAnswerId(), false, new msgError(3, ""));
+                question = buildNextQuestion(req, 1, false, new msgError(3, ""));
             } else {
                 resp.setError(dto.getError());
                 listRaspiDTO = readRaspi(req.getIdWhatsapp());
@@ -149,7 +150,7 @@ public class questionsController {
                 updateQuestionCustomer(req, false);
                 resp.setError(new msgError(0, "OK"));
                 question.setQuestionDesc(
-                        "🤖 Hola Estos son los dispositivos que tienes registrados en el sistema, Digita el número de uno de ellos para continuar ...");
+                        "🤖 ¡Hola *"+req.getName()+"!* Estos son los dispositivos que tienes registrados en el sistema, Digita el número de uno de ellos para continuar ...");
                 question.setOptions(answerList);
             } else {
                 switch (val.getError().getCode()) {
@@ -160,7 +161,7 @@ public class questionsController {
                         resp.setRaspi(req.getDevices());
                         resp.setCommand(val.getError().getMessage());
                         question.setQuestionDesc(
-                                "🤖 Nos estamos Comunicando con el Dispositivo, favor espera un momento ...");
+                                "🤖 *"+req.getName()+"!* Nos estamos Comunicando con el Dispositivo, favor espera un momento ...");
                         break;
                     case 3:
                         resp.setRaspi(req.getDevices());
@@ -175,13 +176,13 @@ public class questionsController {
                     case 6:
                         resp.setError(new msgError(6, "OK"));
                         question.setQuestionDesc(
-                                "🤖 Gracias por utilizar nuestro servicio, En estos momentos un asesor estará atendiendo a tu solicitud ... Pronto te contactaremos");
+                                "🤖 *"+req.getName()+"!* Gracias por utilizar nuestro servicio, En estos momentos un asesor estará atendiendo a tu solicitud ... Pronto te contactaremos");
                         break;
 
                     default:
                         resp.setError(new msgError(7, "Error"));
                         question.setQuestionDesc(
-                                "🤖 Lamentamos informarte que no hemos podido procesar tu solicitud, favor intenta de nuevo ...");
+                                "🤖 *"+req.getName()+"!* Lamentamos informarte que no hemos podido procesar tu solicitud, favor intenta de nuevo ...");
                         break;
                 }
 
@@ -222,7 +223,7 @@ public class questionsController {
             }
         }
         if (questionId == null || questionId.equals("")) {
-            response.setQuestionDesc("Para continuar debes seleccionar algunas de estas opciones:");
+            response.setQuestionDesc(" *"+req.getName()+"!* Para continuar debes seleccionar algunas de estas opciones:");
             optionDto.setIdQuestion("1");
             optionDto.setIdProject(req.getIdProject());
             optionDto.setAnswerId(0);
@@ -333,7 +334,7 @@ public class questionsController {
             indicator = Integer.parseInt(option);
             rta.setCode(-1);
             rta.setMessage(
-                    "🤖Ups! Lo siento esta opción ingresada no es valida, Estoy aprendiendo día a día con el fin de garantizar un mejor servicio");
+                    "🤖 Ups! *"+dto.getName()+"!* Lo sentimos esta opción ingresada no es valida, Estoy aprendiendo día a día con el fin de garantizar un mejor servicio");
             if (indicator == 0) {
                 logg.info("*** INDICADOR 0 ***");
 
@@ -361,7 +362,7 @@ public class questionsController {
                             dto.setIdQuestions("1");
                             updateQuestionCustomer(dto, false);
                             rta.setMessage(
-                                    "🤖 ¡Gracias por utilizar nuestros servicios!, Recurda que puedes escribinos en cualquier momento... 🤗🤗🤗");
+                                    "🤖 *"+dto.getName()+"!* Gracias por utilizar nuestros servicios!, Recurda que puedes escribinos en cualquier momento... 🤗🤗🤗");
                         } else if (q.getFlgEnd() == 2) {
                             rta.setCode(5);
                             rta.setMessage("");
@@ -394,7 +395,7 @@ public class questionsController {
 
             } else {
                 rta.setCode(-1);
-                rta.setMessage("🤖Ups! Estoy aprendiendo a leer... por favor ingresa solo digitos");
+                rta.setMessage("🤖Ups! *"+dto.getName()+"!* Estoy aprendiendo a leer... por favor ingresa solo digitos");
             }
 
         }
