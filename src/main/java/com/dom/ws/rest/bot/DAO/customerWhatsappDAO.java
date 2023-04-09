@@ -22,15 +22,15 @@ import java.util.logging.Logger;
  */
 public class customerWhatsappDAO implements interfaces<customerWhatsappDTO> {
 
-    private static final String SQL_READONE = "SELECT * FROM dommapi.customerWhatsapp WHERE idWhatsapp = ? ";
+    private static final String SQL_READONE = "SELECT * FROM dommapi.customerWhatsapp WHERE idWhatsapp = ? AND idFrom = ? ";
     private static final String SQL_UPDATE = "UPDATE dommapi.customerWhatsapp SET questionId = ?, date = ?,"
-            + "pendingState = ?, pendingDescription = ?, idProject = ?, devices = ?, command = ? WHERE idWhatsapp = ?";
+            + "pendingState = ?, pendingDescription = ?, idProject = ?, devices = ?, command = ? WHERE idWhatsapp = ? AND idFrom = ?";
     // private static final String SQL_UPDATE = "UPDATE dommapi.customerWhatsapp SET
     // questionId = ?, date = ?, nameWAP =?, idCustomer =?, idProject =? "
     // + "pendingState = ?, pendingDescription = ? "
     // + "WHERE idWhatsapp = ?";
-    private static final String SQL_INSERT = "INSERT INTO dommapi.customerWhatsapp (idWhatsapp, idCustomer, nameWAP, questionId, idProject) "
-            + "VALUES (?, ?, ?, ?, ?)";
+    private static final String SQL_INSERT = "INSERT INTO dommapi.customerWhatsapp (idWhatsapp, idCustomer, nameWAP, questionId, idProject, idFrom) "
+            + "VALUES (?, ?, ?, ?, ?, ?)";
     /*
      * private static final String SQL_DELETE =
      * "DELETE FROM dommapi.customerWhatsapp WHERE idWhatsapp = ?";
@@ -55,6 +55,7 @@ public class customerWhatsappDAO implements interfaces<customerWhatsappDTO> {
             ps.setString(3, dto.getName());
             ps.setString(4, dto.getIdQuestions());
             ps.setInt(5, dto.getIdProject());
+            ps.setString(6, dto.getIdFrom());
             int i = 0;
             i = ps.executeUpdate();
 
@@ -86,6 +87,7 @@ public class customerWhatsappDAO implements interfaces<customerWhatsappDTO> {
             ps.setString(6, dto.getDevices());
             ps.setString(7, dto.getCommand());
             ps.setString(8, dto.getIdWhatsapp());
+            ps.setString(9, dto.getIdFrom());
             log.info("Script " + ps);
             int i = 0;
             i = ps.executeUpdate();
@@ -138,12 +140,13 @@ public class customerWhatsappDAO implements interfaces<customerWhatsappDTO> {
         try {
             ps = con.getCnn().prepareStatement(SQL_READONE);
             ps.setString(1, dto.getIdWhatsapp());
+            ps.setString(2, dto.getIdFrom());
             res = ps.executeQuery();
             int i = 0;
             while (res.next()) {
-                customer = new customerWhatsappDTO(res.getString(1), res.getString(2),
-                        res.getString(3), res.getString(4), res.getTimestamp(5), res.getInt(6), res.getString(7),
-                        res.getInt(8), res.getInt(9), res.getString(10), res.getString(11));
+                customer = new customerWhatsappDTO(res.getString(1), res.getString(3),
+                        res.getString(4), res.getString(5), res.getTimestamp(6), res.getInt(7), res.getString(8),
+                        res.getInt(9), res.getInt(10), res.getString(11), res.getString(12), res.getString(2));
                 i++;
             }
             if (i == 0) {

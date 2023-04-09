@@ -80,5 +80,9 @@ public class answerResp {
         this.command = command;
     }
 
+    public String toString() {
+        return "answerResp [error=" + error + ", whatsapp=" + whatsapp + ", raspi=" + raspi + ", flgCommand=" + flgCommand
+                + ", command=" + command + ", question=" + question + "+ " + question.toString() + "]";
+    }
     
 }

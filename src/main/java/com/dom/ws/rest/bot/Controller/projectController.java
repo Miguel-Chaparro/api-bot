@@ -85,4 +85,18 @@ public class projectController {
         log.info("***end projectController updateProject***");        
         return response;
     }
+
+    public int getProjectIdDefault(String idFrom){
+        log.info("***start projectController getProjectIdDefault***");
+        int idProject = 0;
+        projectDTO dto = new projectDTO();
+        projectsDAO dao = new projectsDAO();
+        dto.setIdFrom(idFrom);
+        dto.setProjectDesc("DEFAULT");
+        dto.setTokenId("1");
+        dto = dao.readOne(dto);
+        idProject = dto.getIdProject();
+        log.info("***end projectController getProjectIdDefault***");
+        return idProject;
+    }
 }

@@ -24,12 +24,12 @@ import java.util.logging.Logger;
 public class answerDAO implements interfaces<answerDTO> {
 
     private static final String SQL_UPDATE = "UPDATE dommapi.answer SET  answerdes = ?, command = ?, flg_end = ?, flg_command = ? "
-            + "WHERE idQuestion = ? AND answerCode = ? AND idProject =? ";
-    private static final String SQL_INSERT = "INSERT INTO dommapi.answer (idQuestion, answerCode, answerdes, idproject, command, flg_end, flg_command) "
-            + "VALUES (?, ?, ?, ?, ?, ?, ?)";
-    private static final String SQL_DELETE = "DELETE FROM dommapi.answer WHERE idQuestion = ? AND answerCode = ? AND idProject =?";
+            + "WHERE idQuestion = ? AND answerCode = ? AND idProject =? AND idfrom = ?";
+    private static final String SQL_INSERT = "INSERT INTO dommapi.answer (idQuestion, answerCode, answerdes, idproject, command, flg_end, flg_command, idFrom) "
+            + "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+    private static final String SQL_DELETE = "DELETE FROM dommapi.answer WHERE idQuestion = ? AND answerCode = ? AND idProject =? AND idfrom = ?";
     private static final String SQL_READALL = "SELECT * FROM dommapi.answer WHERE idproject = ?";
-    private static final String SQL_READMANY = "SELECT * FROM dommapi.answer WHERE idQuestion = ? AND idproject = ? ";
+    private static final String SQL_READMANY = "SELECT idQuestion, answerCode, answerdes, idfrom, idProject, command, flg_End, flg_Command FROM dommapi.answer WHERE idQuestion = ? AND idproject = ? AND idfrom = ? ";
     private static final String SQL_READMANYPROJECT = "SELECT * FROM dommapi.answer WHERE  idproject = ? ";
     msgError error = new msgError();
     private final conexionBD con = conexionBD.saberEstado();
@@ -49,6 +49,7 @@ public class answerDAO implements interfaces<answerDTO> {
             ps.setString(5, dto.getCommand());
             ps.setInt(6, dto.getFlgEnd());
             ps.setInt(7, dto.getFlgCommand());
+            ps.setString(8, dto.getIdFrom());
             int i = 0;
             i = ps.executeUpdate();
 
@@ -75,10 +76,11 @@ public class answerDAO implements interfaces<answerDTO> {
             ps.setString(1, dto.getAnswerDesc());
             ps.setString(2, dto.getCommand());
             ps.setInt(3, dto.getFlgEnd());
-            ps.setInt(4, dto.getFlgCommand());            
+            ps.setInt(4, dto.getFlgCommand());
             ps.setString(5, dto.getIdQuestion());
             ps.setInt(6, dto.getAnswerId());
             ps.setInt(7, dto.getIdProject());
+            ps.setString(8, dto.getIdFrom());
             int i = 0;
             i = ps.executeUpdate();
 
@@ -105,6 +107,7 @@ public class answerDAO implements interfaces<answerDTO> {
             ps.setString(1, dto.getIdQuestion());
             ps.setInt(3, dto.getIdProject());
             ps.setInt(2, dto.getAnswerId());
+            ps.setString(4, dto.getIdFrom());
             int i = 0;
             i = ps.executeUpdate();
 
@@ -141,16 +144,19 @@ public class answerDAO implements interfaces<answerDTO> {
                 ps = con.getCnn().prepareStatement(SQL_READMANYPROJECT);
                 ps.setInt(1, dto.getIdProject());
             } else {
+                log.info("**** readMany****** " + dto.getIdQuestion() + " " + dto.getIdProject() + " " + dto.getIdFrom());
                 ps = con.getCnn().prepareStatement(SQL_READMANY);
                 ps.setString(1, dto.getIdQuestion());
                 ps.setInt(2, dto.getIdProject());
+                ps.setString(3, dto.getIdFrom());
             }
 
             res = ps.executeQuery();
 
             while (res.next()) {
                 answerList.add(new answerDTO(res.getString(1), res.getInt(2),
-                        res.getString(3), res.getInt(4), res.getString(5), res.getInt(6), res.getInt(7)));
+                        res.getString(3), res.getInt(5), res.getString(6), res.getInt(7), res.getInt(8),
+                        res.getString(4)));
                 i++;
 
             }
@@ -196,7 +202,8 @@ public class answerDAO implements interfaces<answerDTO> {
             res = ps.executeQuery();
             int i = 0;
             while (res.next()) {
-                answerList.add(new answerDTO(res.getString(1), res.getInt(2), res.getString(3), res.getInt(4), res.getString(5), res.getInt(6), res.getInt(7)));
+                answerList.add(new answerDTO(res.getString(1), res.getInt(2), res.getString(3), res.getInt(5),
+                        res.getString(6), res.getInt(7), res.getInt(8), res.getString(4)));
                 i++;
 
             }

@@ -19,12 +19,14 @@ public class answerDTO {
     private String command;
     private int flgEnd;
     private int flgCommand;
+    private String idFrom;
     private msgError error;
 
     public answerDTO() {
     }
 
-    public answerDTO(String idQuestion, int answerId, String answerDesc, int idProject, String command, int flgEnd, int flgCommand, msgError error) {
+    public answerDTO(String idQuestion, int answerId, String answerDesc, int idProject, String command, int flgEnd,
+            int flgCommand, String idfrom, msgError error) {
         this.idQuestion = idQuestion;
         this.answerId = answerId;
         this.answerDesc = answerDesc;
@@ -32,10 +34,12 @@ public class answerDTO {
         this.command = command;
         this.flgEnd = flgEnd;
         this.flgCommand = flgCommand;
+        this.idFrom = idfrom;
         this.error = error;
     }
 
-    public answerDTO(String idQuestion, int answerId, String answerDesc, int idProject, String command, int flgEnd, int flgCommand) {
+    public answerDTO(String idQuestion, int answerId, String answerDesc, int idProject, String command, int flgEnd,
+            int flgCommand, String idfrom) {
         this.idQuestion = idQuestion;
         this.answerId = answerId;
         this.answerDesc = answerDesc;
@@ -43,8 +47,9 @@ public class answerDTO {
         this.command = command;
         this.flgEnd = flgEnd;
         this.flgCommand = flgCommand;
+        this.idFrom = idfrom;
     }
-    
+
     public msgError getError() {
         return error;
     }
@@ -85,8 +90,6 @@ public class answerDTO {
         this.flgCommand = flgCommand;
     }
 
-   
-
     public String getIdQuestion() {
         return idQuestion;
     }
@@ -111,6 +114,12 @@ public class answerDTO {
         this.answerDesc = answerDesc;
     }
 
+    public String getIdFrom() {
+        return idFrom;
+    }
 
-    
+    public void setIdFrom(String idFrom) {
+        this.idFrom = idFrom;
+    }
+
 }

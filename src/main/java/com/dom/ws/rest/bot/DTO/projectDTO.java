@@ -15,6 +15,7 @@ import java.sql.Timestamp;
 public class projectDTO {
     private int idProject;
     private String idUser;
+    private String idFrom;
     private String projectDesc;
     private Timestamp dateProject;
     private int openProject;
@@ -24,6 +25,12 @@ public class projectDTO {
     private msgError error;
     private String tokenId;
 
+    public String getIdFrom() {
+        return idFrom;
+    }
+    public void setIdFrom(String idFrom) {
+        this.idFrom = idFrom;
+    }
     public String getTokenId() {
         return tokenId;
     }
@@ -88,7 +95,7 @@ public class projectDTO {
         this.error = error;
     }
 
-    public projectDTO(int idProject, String idUser, String projectDesc, Timestamp dateProject, int openProject, Timestamp endProject, int statusProject, int flgEndProject, msgError error) {
+    public projectDTO(int idProject, String idUser, String projectDesc, Timestamp dateProject, int openProject, Timestamp endProject, int statusProject, int flgEndProject, String idFrom, msgError error) {
         this.idProject = idProject;
         this.idUser = idUser;
         this.projectDesc = projectDesc;
@@ -97,10 +104,11 @@ public class projectDTO {
         this.endProject = endProject;
         this.statusProject = statusProject;
         this.flgEndProject = flgEndProject;
+        this.idFrom = idFrom;
         this.error = error;
     }
 
-    public projectDTO(int idProject, String idUser, String projectDesc, Timestamp dateProject, int openProject, Timestamp endProject, int statusProject, int flgEndProject) {
+    public projectDTO(int idProject, String idUser, String projectDesc, Timestamp dateProject, int openProject, Timestamp endProject, int statusProject, int flgEndProject, String idFrom) {
         this.idProject = idProject;
         this.idUser = idUser;
         this.projectDesc = projectDesc;
@@ -109,6 +117,7 @@ public class projectDTO {
         this.endProject = endProject;
         this.statusProject = statusProject;
         this.flgEndProject = flgEndProject;
+        this.idFrom = idFrom;
     }
     
     

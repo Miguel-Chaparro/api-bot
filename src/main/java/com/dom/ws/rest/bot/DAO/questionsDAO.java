@@ -23,7 +23,7 @@ import java.util.logging.Logger;
  */
 public class questionsDAO implements interfaces<questionsDTO> {
  
-    private static final String SQL_READONE = "SELECT [id],[question],[idProject],[nextQuestion],[multiAnswer],[minQuestion],[openQuestion],[endQuestion] FROM dommapi.questions WHERE id = ? AND idProject = ? ";
+    private static final String SQL_READONE = "SELECT [id],[question],[idFrom],[idProject],[nextQuestion],[multiAnswer],[minQuestion],[openQuestion],[endQuestion] FROM dommapi.questions WHERE id = ? AND idProject = ? AND idFrom = ?";
     private static final String SQL_UPDATE = "UPDATE dommapi.questions SET question = ?, nextQuestion = ?, multiAnswer = ?, minQuestion =?, openQuestion =?, endQuestion =? "
             + "WHERE id = ? AND idProject = ?";
     private static final String SQL_INSERT = "INSERT INTO dommapi.questions (id, question, idProject, nextQuestion, multiAnswer, minQuestion, openQuestion, endQuestion ) "
@@ -58,7 +58,7 @@ public class questionsDAO implements interfaces<questionsDTO> {
                 valida = true;
             }
         } catch (SQLException ex) {
-            log.log(Level.SEVERE, "Error create customerWhatsappDTO {0}", ex);
+            log.log(Level.SEVERE, "Error Create questionsDAO {0}", ex);
 
         } finally {
             con.cerrarConexion();
@@ -89,7 +89,7 @@ public class questionsDAO implements interfaces<questionsDTO> {
                 valida = true;
             }
         } catch (SQLException ex) {
-            log.log(Level.SEVERE, "Error create customerWhatsappDTO {0}", ex);
+            log.log(Level.SEVERE, "Error create questionsDAO {0}", ex);
 
         } finally {
             con.cerrarConexion();
@@ -114,12 +114,13 @@ public class questionsDAO implements interfaces<questionsDTO> {
             ps = con.getCnn().prepareStatement(SQL_READONE);
             ps.setString(1, dto.getIdQuestions());
             ps.setInt(2, dto.getIdProject());
+            ps.setString(3, dto.getIdFrom());
             
             log.log(Level.SEVERE, "Consulta  {0}\n", ps);
             res = ps.executeQuery();
             int i = 0;
             while (res.next()) {
-                questions = new questionsDTO(res.getString(1), res.getString(2), res.getInt(3), res.getInt(4), res.getInt(5), res.getInt(6),res.getInt(7),res.getInt(8));
+                questions = new questionsDTO(res.getString(1), res.getString(2), res.getInt(4), res.getInt(5), res.getInt(6), res.getInt(7),res.getInt(8),res.getInt(9),res.getString(3));
                 i++;
             }
             
@@ -129,7 +130,7 @@ public class questionsDAO implements interfaces<questionsDTO> {
             }
 
         } catch (SQLException ex) {
-            log.log(Level.SEVERE, "Error create customerWhatsappDTO {0}", ex);
+            log.log(Level.SEVERE, "Error Read customerWhatsappDTO {0}", ex);
             errorRead.setCode(-1);
             errorRead.setMessage("Error: " + ex);
 
@@ -156,7 +157,7 @@ public class questionsDAO implements interfaces<questionsDTO> {
             res = ps.executeQuery();
 
             while (res.next()) {
-                resp.add(new questionsDTO(res.getString(1), res.getString(2), res.getInt(3), res.getInt(4), res.getInt(5), res.getInt(6),res.getInt(7),res.getInt(8)));
+                resp.add(new questionsDTO(res.getString(1), res.getString(2), res.getInt(4), res.getInt(5), res.getInt(6), res.getInt(7),res.getInt(8),res.getInt(9),res.getString(3)));
                 i++;
 
             }

@@ -13,6 +13,7 @@ public class questionsAnswersReq {
 
     private String whatsappId;
     private String answer;
+    private String idFrom;
     private String tokenId;
 
     public String getTokenId() {
@@ -26,9 +27,10 @@ public class questionsAnswersReq {
     public questionsAnswersReq() {
     }
 
-    public questionsAnswersReq(String whatsappId, String answer) {
+    public questionsAnswersReq(String whatsappId, String answer, String idFrom) {
         this.whatsappId = whatsappId;
         this.answer = answer;
+        this.idFrom = idFrom;
     }
 
     public String getWhatsappId() {
@@ -45,6 +47,14 @@ public class questionsAnswersReq {
 
     public void setAnswer(String answer) {
         this.answer = answer;
+    }
+
+    public String getIdFrom() {
+        return idFrom;
+    }
+    
+    public void setIdFrom(String idFrom) {
+        this.idFrom = idFrom;
     }
 
 }

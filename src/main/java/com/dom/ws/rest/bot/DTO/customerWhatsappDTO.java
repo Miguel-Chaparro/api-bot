@@ -14,6 +14,7 @@ import java.sql.Timestamp;
  */
 public class customerWhatsappDTO {
     private String idWhatsapp;
+    private String idFrom;
     private String name;
     private String idCustomer;
     private String idQuestions;
@@ -27,7 +28,7 @@ public class customerWhatsappDTO {
     private msgError error;
 
     public customerWhatsappDTO(String idWhatsapp, String name, String idCustomer, String idQuestions, Timestamp date,
-            int pendingState, String pendingDescription, int idProject, int flg_devices, String device, String command,
+            int pendingState, String pendingDescription, int idProject, int flg_devices, String device, String command, String idFrom,
             msgError error) {
         this.idWhatsapp = idWhatsapp;
         this.name = name;
@@ -40,6 +41,7 @@ public class customerWhatsappDTO {
         this.flg_devices = flg_devices;
         this.devices = device;
         this.command = command;
+        this.idFrom = idFrom;
         this.error = error;
     }
 
@@ -52,7 +54,7 @@ public class customerWhatsappDTO {
     }
 
     public customerWhatsappDTO(String idWhatsapp, String name, String idCustomer, String idQuestions, Timestamp date,
-            int pendingState, String pendingDescription, int idProject, int flg_devices, String device, String command) {
+            int pendingState, String pendingDescription, int idProject, int flg_devices, String device, String command, String idFrom) {
         this.idWhatsapp = idWhatsapp;
         this.name = name;
         this.idCustomer = idCustomer;
@@ -64,6 +66,7 @@ public class customerWhatsappDTO {
         this.flg_devices = flg_devices;
         this.devices = device;
         this.command = command;
+        this.idFrom = idFrom;
         
     }
 
@@ -71,7 +74,7 @@ public class customerWhatsappDTO {
     }
 
     public customerWhatsappDTO(String idWhatsapp, String name, String idCustomer, String idQuestions, Timestamp date,
-            int pendingState, String pendingDescription, msgError error) {
+            int pendingState, String pendingDescription, String IdFrom, msgError error) {
         this.idWhatsapp = idWhatsapp;
         this.name = name;
         this.idCustomer = idCustomer;
@@ -79,6 +82,7 @@ public class customerWhatsappDTO {
         this.date = date;
         this.pendingState = pendingState;
         this.pendingDescription = pendingDescription;
+        this.idFrom = IdFrom;
         this.error = error;
     }
 
@@ -170,10 +174,18 @@ public class customerWhatsappDTO {
         this.command = command;
     }
 
+    public String getIdFrom() {
+        return idFrom;
+    }
+
+    public void setIdFrom(String idFrom) {
+        this.idFrom = idFrom;
+    }
+
     public String toString() {
         return "customerWhatsappDTO{" + "idWhatsapp=" + idWhatsapp + ", name=" + name + ", idCustomer=" + idCustomer
                 + ", idQuestions=" + idQuestions + ", date=" + date + ", pendingState=" + pendingState
                 + ", pendingDescription=" + pendingDescription + ", idProject=" + idProject + ", flg_devices="
-                + flg_devices + ", devices=" + devices + ", command=" + command + ", error=" + error + '}';
+                + flg_devices + ", devices=" + devices + ", command=" + command + ", error=" + error + ", idFrom=" + idFrom + '}';
     }
 }

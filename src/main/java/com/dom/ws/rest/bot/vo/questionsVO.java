@@ -49,4 +49,9 @@ public class questionsVO {
 
     public questionsVO() {
     }
+
+    public String toString() {
+        return "idQuestion: " + idQuestion + " questionDesc: " + questionDesc + " options: " + options + " Options size: "
+                + options.size() + "first option: " + options.get(0).getAnswerDesc() ;
+    }
 }

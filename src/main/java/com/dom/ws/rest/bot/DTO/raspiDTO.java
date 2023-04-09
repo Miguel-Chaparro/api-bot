@@ -145,4 +145,10 @@ public class raspiDTO {
         this.descDevices = descDevices;
     }
 
+    public String toString() {
+        return "raspiDTO{" + "raspi=" + raspi + ", ip=" + ip + ", nodeIp=" + nodeIp + ", groupId=" + groupId + ", topic="
+                + topic + ", idChannel=" + idChannel + ", idChat=" + idChat + ", flgMain=" + flgMain + ", idDevices="
+                + idDevices + ", descDevices=" + descDevices + ", errorCode=" + error.getCode() + ", errorDesc=" + error.getMessage() +'}';
+    }
+
 }

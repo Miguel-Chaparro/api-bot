@@ -14,7 +14,8 @@ import com.dom.ws.rest.bot.vo.msgError;
 public class questionsDTO {
     private String idQuestions;
     private String questions;
-    private int idProject;    
+    private int idProject; 
+    private String idFrom;   
     private int nextQuestion;
     private int multiAnswer;
     private int minQuestions;
@@ -25,7 +26,7 @@ public class questionsDTO {
     public questionsDTO() {
         
     }
-
+    
     public int getOpenQuestion() {
         return openQuestion;
     }
@@ -82,7 +83,15 @@ public class questionsDTO {
         this.error = error;
     }
 
-    public questionsDTO(String idQuestions, int idProject, String questions, int nextQuestion, int multiAnswer, int minQuestions, int endQuestions, msgError error) {
+    public String getIdFrom() {
+        return idFrom;
+    }
+
+    public void setIdFrom(String idFrom) {
+        this.idFrom = idFrom;
+    }
+
+    public questionsDTO(String idQuestions, int idProject, String questions, int nextQuestion, int multiAnswer, int minQuestions, int endQuestions, String idFrom, msgError error) {
         this.idQuestions = idQuestions;
         this.idProject = idProject;
         this.questions = questions;
@@ -90,12 +99,13 @@ public class questionsDTO {
         this.multiAnswer = multiAnswer;
         this.minQuestions = minQuestions;
         this.endQuestions = endQuestions;
+        this.idFrom = idFrom;
         this.error = error;
     }
 
  
 
-    public questionsDTO(String idQuestions, String questions, int idProject, int nextQuestion, int multiAnswer, int minQuestions,int openQuestion, int endQuestions) {
+    public questionsDTO(String idQuestions, String questions, int idProject, int nextQuestion, int multiAnswer, int minQuestions,int openQuestion, int endQuestions, String idFrom) {
         this.idQuestions = idQuestions;
         this.idProject = idProject;
         this.questions = questions;
@@ -104,6 +114,7 @@ public class questionsDTO {
         this.minQuestions = minQuestions;
         this.openQuestion = openQuestion;
         this.endQuestions = endQuestions;
+        this.idFrom = idFrom;
     }
 
     public String getIdQuestions() {

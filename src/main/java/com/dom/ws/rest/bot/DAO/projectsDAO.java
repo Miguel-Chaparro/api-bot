@@ -24,12 +24,12 @@ import java.util.logging.Logger;
 public class projectsDAO implements interfaces<projectDTO> {
 
     private static final String SQL_READMANY = "SELECT * FROM dommapi.project WHERE [idUser] = ? ";
-    private static final String SQL_READ_VALIDATE = "SELECT * FROM dommapi.project WHERE [idUser] = ? AND [projectDesc] = ?";
-    //private static final String SQL_READ = "SELECT * FROM dommapi.project WHERE [idUser] = ? AND [idProject] = ? ";
-    private static final String SQL_CREATE = "INSERT INTO [dommapi].[project] ([idUser] ,[projectDesc] ,[dateProject] ,[openProject] ,[endProject] ,[statusProject] ,[flgEndProject]) "
-            + "VALUES (?, ?, ?, ?, ?, ?, ?)";
+    private static final String SQL_READ_VALIDATE = "SELECT * FROM dommapi.project WHERE [idUser] = ? AND [projectDesc] = ? AND [idFrom] = ?";
+    private static final String SQL_READ = "SELECT * FROM dommapi.project WHERE [idFrom] = ? AND [projectDesc] = ? ";
+    private static final String SQL_CREATE = "INSERT INTO [dommapi].[project] ([idUser] ,[projectDesc] ,[dateProject] ,[openProject] ,[endProject] ,[statusProject] ,[flgEndProject], [idFrom]) "
+            + "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
     private static final String SQL_UPDATE = "UPDATE dommapi.project SET [idUser] = ?,[projectDesc]  = ?,[dateProject]  = ?,[openProject]  = ?,[endProject]  = ?,[statusProject]  = ?,[flgEndProject] = ? "
-            + "WHERE idproject = ?";
+            + "WHERE idproject = ? AND idFrom = ?";
     private final conexionBD con = conexionBD.saberEstado();
     static final Logger log = Logger.getLogger(projectsDAO.class.getName());
 
@@ -47,6 +47,7 @@ public class projectsDAO implements interfaces<projectDTO> {
             ps.setTimestamp(5, dto.getEndProject());
             ps.setInt(6, dto.getStatusProject());
             ps.setInt(7, dto.getFlgEndProject());
+            ps.setString(8, dto.getIdFrom());
             int i = 0;
             i = ps.executeUpdate();
 
@@ -77,6 +78,7 @@ public class projectsDAO implements interfaces<projectDTO> {
             ps.setInt(6, dto.getStatusProject());
             ps.setInt(7, dto.getFlgEndProject());
             ps.setInt(8, dto.getIdProject());
+            ps.setString(9, dto.getIdFrom());
             int i = 0;
             i = ps.executeUpdate();
 
@@ -106,21 +108,29 @@ public class projectsDAO implements interfaces<projectDTO> {
         msgError error = new msgError();
 
         try {
-
-            ps = con.getCnn().prepareStatement(SQL_READ_VALIDATE);
-            ps.setString(1, dto.getIdUser());
-            ps.setString(2, dto.getProjectDesc());
+            if (dto.getTokenId() == "1") {
+                ps = con.getCnn().prepareStatement(SQL_READ);                
+                ps.setString(1, dto.getIdFrom());
+                ps.setString(2, dto.getProjectDesc());
+            } else {
+                ps = con.getCnn().prepareStatement(SQL_READ_VALIDATE);
+                ps.setString(1, dto.getIdUser());
+                ps.setString(2, dto.getProjectDesc());
+                ps.setString(3, dto.getIdFrom());
+            }
 
             res = ps.executeQuery();
             int i = 0;
             while (res.next()) {
-                resp = new projectDTO(res.getInt(1), res.getString(2), res.getString(3), res.getTimestamp(4), res.getInt(5), res.getTimestamp(6), res.getInt(7), res.getInt(8));
+                resp = new projectDTO(res.getInt(2), res.getString(3), res.getString(4), res.getTimestamp(5),
+                        res.getInt(6), res.getTimestamp(7), res.getInt(8), res.getInt(9), res.getString(1));
                 i++;
             }
             if (i == 0) {
                 log.info("-----Concidencias 0");
                 error.setCode(1);
                 error.setMessage("No hay coincidencias");
+                resp.setIdProject(1);
             } else {
                 log.info("-----Concidencias 1");
                 error.setCode(0);
@@ -153,7 +163,8 @@ public class projectsDAO implements interfaces<projectDTO> {
             res = ps.executeQuery();
 
             while (res.next()) {
-                resp.add(new projectDTO(res.getInt(1), res.getString(2), res.getString(3), res.getTimestamp(4), res.getInt(5), res.getTimestamp(6), res.getInt(7), res.getInt(8)));
+                resp.add(new projectDTO(res.getInt(2), res.getString(3), res.getString(4), res.getTimestamp(5),
+                        res.getInt(6), res.getTimestamp(7), res.getInt(8), res.getInt(9), res.getString(1)));
                 i++;
 
             }

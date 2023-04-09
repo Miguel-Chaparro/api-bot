@@ -15,6 +15,7 @@ public class recordSurveyDTO {
     private String idWhastapp;
     private int idProject;
     private int idRecordSurvey;
+    private String idFrom;
     private String idQuestion;
     private String answer;
     private msgError error;
@@ -22,20 +23,22 @@ public class recordSurveyDTO {
     public recordSurveyDTO() {
     }
 
-    public recordSurveyDTO(String idWhastapp, int idProject, int idRecordSurvey, String idQuestion, String answer) {
+    public recordSurveyDTO(String idWhastapp, int idProject, int idRecordSurvey, String idQuestion, String answer, String idFrom) {
         this.idWhastapp = idWhastapp;
         this.idProject = idProject;
         this.idRecordSurvey = idRecordSurvey;
         this.idQuestion = idQuestion;
         this.answer = answer;
+        this.idFrom = idFrom;
     }
 
-    public recordSurveyDTO(String idWhastapp, int idProject, int idRecordSurvey, String idQuestion, String answer, msgError error) {
+    public recordSurveyDTO(String idWhastapp, int idProject, int idRecordSurvey, String idQuestion, String answer, String idFrom, msgError error) {
         this.idWhastapp = idWhastapp;
         this.idProject = idProject;
         this.idRecordSurvey = idRecordSurvey;
         this.idQuestion = idQuestion;
         this.answer = answer;
+        this.idFrom = idFrom;
         this.error = error;
     }
 
@@ -85,5 +88,11 @@ public class recordSurveyDTO {
 
     public void setError(msgError error) {
         this.error = error;
+    }
+    public String getIdFrom() {
+        return idFrom;
+    }
+    public void setIdFrom(String idFrom) {
+        this.idFrom = idFrom;
     }
 }
