@@ -13,6 +13,7 @@ import com.dom.ws.rest.bot.DTO.answerDTO;
 import com.dom.ws.rest.bot.DTO.customerWhatsappDTO;
 import com.dom.ws.rest.bot.DTO.questionsDTO;
 import com.dom.ws.rest.bot.DTO.raspiDTO;
+import com.dom.ws.rest.bot.DTO.recordSurveyDTO;
 import com.dom.ws.rest.bot.Request.questionsAnswersReq;
 import com.dom.ws.rest.bot.Response.answerResp;
 import com.dom.ws.rest.bot.vo.msgError;
@@ -66,6 +67,7 @@ public class questionsController {
                         "🤖Ups! Lo lamento, en estos momentos no puedo procesar la solicitud. \n Estoy aprendiendo día a día para no volver a repetir estos errores, favor intenta mas tarde");
                 break;
         }
+        
         statesResp.setError(error);
         statesResp.setWhatsapp(req.getWhatsappId());
         logg.log(Level.INFO, "{0}*** End questionsController whatsappData ***", statesResp.getError().getMessage());
@@ -215,6 +217,8 @@ public class questionsController {
             }
 
         }
+        
+        recordSurvey(req, option);
 
         resp.setQuestion(question);
         resp.setError(val.getError());
@@ -223,6 +227,23 @@ public class questionsController {
         logg.info("Respuesta: " + resp.toString());
         logg.info("*** End questionsController Response ***");
         return resp;
+    }
+
+    private void recordSurvey(customerWhatsappDTO customer, String dialog){
+        logg.info("*** Start questionsController recordSurvey ***");
+        // tratar de convertir el dialogo en un int, si no es posible, se envia -1 en una variable int
+        int option = -1;
+        try {
+            option = Integer.parseInt(dialog);
+            dialog = "";
+        } catch (NumberFormatException e) {
+            logg.info("Error al convertir el dialogo en un int");
+        }
+        recordSurveyController record = new recordSurveyController();
+        recordSurveyDTO recordDto = new recordSurveyDTO();
+        recordDto = record.convertQuestionDTOToRecordSurveyDTO(customer, option ,dialog);
+        record.createRecordSurvey(recordDto);
+        logg.info("*** End questionsController recordSurvey ***");
     }
 
     private questionsVO buildNextQuestion(customerWhatsappDTO req, int option, boolean newRegister, boolean flagBack,
@@ -249,6 +270,8 @@ public class questionsController {
         dto.setIdFrom(req.getIdFrom());
         dto.setIdProject(req.getIdProject());
         questionDto = dao.readOne(dto);
+        //Guardar aca
+      
         logg.log(Level.INFO, "{0}***  buildNextQuestion ***\n", "Opción: " + req.getIdQuestions());
         if (option == 0) {
             questionId = req.getIdQuestions().substring(0, req.getIdQuestions().length() - 2);
@@ -383,8 +406,8 @@ public class questionsController {
             indicator = Integer.parseInt(option);
             rta.setCode(-1);
             rta.setMessage(
-                    "🤖 Ups! *" + dto.getName()
-                            + "!* Lo sentimos esta opción ingresada no es valida, Estoy aprendiendo día a día con el fin de garantizar un mejor servicio");
+                    "🤖! *" + dto.getName()
+                            + "!* La opción ingresada no es valida, Estoy aprendiendo día a día con el fin de garantizar un mejor servicio");
             if (indicator == 0) {
                 logg.info("*** INDICADOR 0 ***");
 
@@ -447,7 +470,7 @@ public class questionsController {
             } else {
                 rta.setCode(-1);
                 rta.setMessage(
-                        "🤖Ups! *" + dto.getName() + "!* Estoy aprendiendo a leer... por favor ingresa solo digitos");
+                        "🤖! *" + dto.getName() + "!* Estoy aprendiendo a leer... por favor ingresa solo digitos");
             }
 
         }

@@ -5,6 +5,8 @@
  */
 package com.dom.ws.rest.bot.DTO;
 
+import java.sql.Timestamp;
+
 import com.dom.ws.rest.bot.vo.msgError;
 
 /**
@@ -17,28 +19,37 @@ public class recordSurveyDTO {
     private int idRecordSurvey;
     private String idFrom;
     private String idQuestion;
-    private String answer;
+    private String openAnswer;
+    private int answer;
+    private String multiAnswer;
+    private Timestamp fecha;
     private msgError error;
 
     public recordSurveyDTO() {
     }
 
-    public recordSurveyDTO(String idWhastapp, int idProject, int idRecordSurvey, String idQuestion, String answer, String idFrom) {
+    public recordSurveyDTO(String idWhastapp, String idFrom, int idProject, int idRecordSurvey, String idQuestion, String openAnswer, int answer, String multiAnswer, Timestamp fecha) {
         this.idWhastapp = idWhastapp;
         this.idProject = idProject;
         this.idRecordSurvey = idRecordSurvey;
         this.idQuestion = idQuestion;
         this.answer = answer;
+        this.openAnswer = openAnswer;
         this.idFrom = idFrom;
+        this.multiAnswer = multiAnswer;
+        this.fecha = fecha;
     }
 
-    public recordSurveyDTO(String idWhastapp, int idProject, int idRecordSurvey, String idQuestion, String answer, String idFrom, msgError error) {
+    public recordSurveyDTO(String idWhastapp, String idFrom, int idProject, int idRecordSurvey, String idQuestion, String openAnswer, int answer,String multiAnswer, Timestamp fecha, msgError error) {
         this.idWhastapp = idWhastapp;
         this.idProject = idProject;
         this.idRecordSurvey = idRecordSurvey;
         this.idQuestion = idQuestion;
+        this.openAnswer = openAnswer;
         this.answer = answer;
         this.idFrom = idFrom;
+        this.multiAnswer = multiAnswer;
+        this.fecha = fecha;
         this.error = error;
     }
 
@@ -74,11 +85,11 @@ public class recordSurveyDTO {
         this.idQuestion = idQuestion;
     }
 
-    public String getAnswer() {
+    public int getAnswer() {
         return answer;
     }
 
-    public void setAnswer(String answer) {
+    public void setAnswer(int answer) {
         this.answer = answer;
     }
 
@@ -94,5 +105,29 @@ public class recordSurveyDTO {
     }
     public void setIdFrom(String idFrom) {
         this.idFrom = idFrom;
+    }
+
+    public String getOpenAnswer() {
+        return openAnswer;
+    }
+
+    public void setOpenAnswer(String openAnswer) {
+        this.openAnswer = openAnswer;
+    }
+
+    public String getMultiAnswer() {
+        return multiAnswer;
+    }
+
+    public void setMultiAnswer(String multiAnswer) {
+        this.multiAnswer = multiAnswer;
+    }
+
+    public Timestamp getFecha() {
+        return fecha;
+    }
+
+    public void setFecha(Timestamp fecha) {
+        this.fecha = fecha;
     }
 }
