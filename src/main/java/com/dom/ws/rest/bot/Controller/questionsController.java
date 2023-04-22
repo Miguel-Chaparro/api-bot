@@ -67,7 +67,7 @@ public class questionsController {
                         "🤖Ups! Lo lamento, en estos momentos no puedo procesar la solicitud. \n Estoy aprendiendo día a día para no volver a repetir estos errores, favor intenta mas tarde");
                 break;
         }
-        
+
         statesResp.setError(error);
         statesResp.setWhatsapp(req.getWhatsappId());
         logg.log(Level.INFO, "{0}*** End questionsController whatsappData ***", statesResp.getError().getMessage());
@@ -99,7 +99,7 @@ public class questionsController {
         raspiDTO dto = new raspiDTO();
         boolean flg = false;
         // sumale 3 horas a la fecha actual
-        date.setTime(date.getTime() - (1000 * 60 * 60 * 3));
+        date.setTime(date.getTime() - (1000 * 60 * 60 * 1));
         Timestamp ts = new Timestamp(date.getTime());
         logg.info("Fecha actual: " + ts.getTime() + " Fecha de la ultima pregunta: " + ts);
         logg.info("Fecha req: " + req.getDate().getTime() + " Fecha de la ultima pregunta: " + req.getDate());
@@ -109,6 +109,10 @@ public class questionsController {
             if (req.getFlg_devices() > 0 && req.getPendingState() == 3) {
                 req.setIdQuestions("0");
                 req.setPendingState(2);
+
+            } else if (req.getPendingState() == 4) {
+                req.setIdQuestions("1");
+                req.setPendingState(0);
             } else if (req.getPendingState() != 2) {
                 req.setIdQuestions("1");
                 option = "0";
@@ -148,6 +152,20 @@ public class questionsController {
                 question.setQuestionDesc(dto.getError().getMessage());
                 question.setOptions(answerList);
             }
+        } else if (req.getPendingState() == 4) {
+            logg.info("Asistencia de un asesor humano");
+            List<answerDTO> listOption = new ArrayList<answerDTO>();
+            answerDTO dtoOption = new answerDTO();
+            dtoOption.setAnswerDesc("Si");
+            dtoOption.setAnswerId(1);
+            dtoOption.setError(new msgError(4, "Asistencia"));
+            listOption.add(dtoOption);
+            question = new questionsVO();
+            question.setQuestionDesc("🤖 ¿Desea que un asesor humano le ayude?");
+            question.setIdQuestion("4");
+            question.setOptions(listOption);
+            val.setError(new msgError(4, "Asesor Dommatos"));
+            logg.info("Fin Asistencia de un asesor humano");
         } else {
             answerList = validateOptions(req, option);
             question.setOptions(answerList);
@@ -179,11 +197,19 @@ public class questionsController {
                         resp.setRaspi(req.getDevices());
                         resp.setCommand(val.getError().getMessage());
                         resp.setFlgCommand("1");
+                        int separador = req.getDevices().indexOf("-");
+                        String device = "";
+                        if (separador > 0) {
+                            device = req.getDevices().split("-")[1];
+                        }else{
+                            device = req.getDevices();
+                        }
                         question.setQuestionDesc(
                                 "🤖 *" + req.getName()
-                                        + "!* Nos estamos Comunicando con el Dispositivo *" + req.getDevices()
+                                        + "!* Nos estamos Comunicando con el Dispositivo *"
+                                        + device
                                         + "*, favor espera un momento mientras *"
-                                        + question.getOptions().get(0).getAnswerDesc() + "* ...");
+                                        + question.getOptions().get(0).getAnswerDesc() + "* --- Si no responde en 30 segundos, Revise su conexión a Internet y vuelva a intentarlo ...");
                         List<answerDTO> listOption = new ArrayList<answerDTO>();
                         listOption.add(question.getOptions().get(0));
                         question.setOptions(listOption);
@@ -205,9 +231,24 @@ public class questionsController {
                                 "🤖 *" + req.getName()
                                         + "!* Gracias por utilizar nuestro servicio, En estos momentos un asesor estará atendiendo a tu solicitud ... Pronto te contactaremos");
                         break;
+                    case 7:
+                        logg.info("Asistencia de un asesor humano");
+                        question = buildNextQuestion(req, val.getAnswerId(), false, flg, false, val.getError());
+                        resp.setError(new msgError(7, val.getError().getMessage()));
+                        
 
+                        question.setQuestionDesc(
+                                "🤖 *" + req.getName()
+                                        + "!* Gracias por utilizar nuestro servicio, En estos momentos un asesor estará atendiendo a tu solicitud ... Pronto te contactaremos --- Recuerda los horarios de atención son de 8:00 a.m. a 5:00 p.m., después de este horario, el servicio de asistencia remota no estará disponible ...");
+                        question.setIdQuestion("4");
+                        /*List<answerDTO> listOption2 = new ArrayList<answerDTO>();
+                        listOption2.add(question.getOptions().get(0));
+                        question.setOptions(listOption2);*/
+                        resp.setCommand(val.getError().getMessage());
+
+                        break;
                     default:
-                        resp.setError(new msgError(7, "Error"));
+                        resp.setError(new msgError(8, "Error"));
                         question.setQuestionDesc(
                                 "🤖 *" + req.getName()
                                         + "!* Lamentamos informarte que no hemos podido procesar tu solicitud, favor intenta de nuevo ...");
@@ -217,8 +258,8 @@ public class questionsController {
             }
 
         }
-        
-        recordSurvey(req, option);
+
+        //recordSurvey(req, option);
 
         resp.setQuestion(question);
         resp.setError(val.getError());
@@ -229,9 +270,10 @@ public class questionsController {
         return resp;
     }
 
-    private void recordSurvey(customerWhatsappDTO customer, String dialog){
+    private void recordSurvey(customerWhatsappDTO customer, String dialog) {
         logg.info("*** Start questionsController recordSurvey ***");
-        // tratar de convertir el dialogo en un int, si no es posible, se envia -1 en una variable int
+        // tratar de convertir el dialogo en un int, si no es posible, se envia -1 en
+        // una variable int
         int option = -1;
         try {
             option = Integer.parseInt(dialog);
@@ -241,7 +283,7 @@ public class questionsController {
         }
         recordSurveyController record = new recordSurveyController();
         recordSurveyDTO recordDto = new recordSurveyDTO();
-        recordDto = record.convertQuestionDTOToRecordSurveyDTO(customer, option ,dialog);
+        recordDto = record.convertQuestionDTOToRecordSurveyDTO(customer, option, dialog);
         record.createRecordSurvey(recordDto);
         logg.info("*** End questionsController recordSurvey ***");
     }
@@ -270,8 +312,8 @@ public class questionsController {
         dto.setIdFrom(req.getIdFrom());
         dto.setIdProject(req.getIdProject());
         questionDto = dao.readOne(dto);
-        //Guardar aca
-      
+        // Guardar aca
+
         logg.log(Level.INFO, "{0}***  buildNextQuestion ***\n", "Opción: " + req.getIdQuestions());
         if (option == 0) {
             questionId = req.getIdQuestions().substring(0, req.getIdQuestions().length() - 2);
@@ -328,7 +370,7 @@ public class questionsController {
         String data;
         question = preview.getQuestions();
 
-        logg.log(Level.INFO, "{0}***  Message ***\n", "name: -" + name + "-");
+        logg.log(Level.INFO, "{0}***  Message *** \n", "name: -" + name + "-");
         if (name == null || "".equals(name)) {
             logg.log(Level.INFO, "{0}***  Message If true***\n", "name: " + name);
             data = "";
@@ -450,7 +492,14 @@ public class questionsController {
                             dto.setIdQuestions("1");
                             dto.setPendingState(0);
                             updateQuestionCustomer(dto, false);
-                        } else {
+                        } else if (q.getFlgEnd() == 4) {
+                            rta.setCode(7);
+                            rta.setMessage(q.getCommand());
+                            dto.setPendingDescription("Asesoría en linea");
+                            dto.setIdQuestions("1");
+                            dto.setPendingState(4);
+                            updateQuestionCustomer(dto, false);
+                        }else {
                             rta.setCode(0);
                             rta.setMessage("");
                         }

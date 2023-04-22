@@ -4,7 +4,6 @@ import java.util.logging.Logger;
 
 import com.dom.ws.rest.bot.DAO.recordSurveyDAO;
 import com.dom.ws.rest.bot.DTO.customerWhatsappDTO;
-import com.dom.ws.rest.bot.DTO.questionsDTO;
 import com.dom.ws.rest.bot.DTO.recordSurveyDTO;
 import com.dom.ws.rest.bot.vo.msgError;
 
