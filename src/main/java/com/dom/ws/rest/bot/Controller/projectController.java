@@ -99,4 +99,16 @@ public class projectController {
         log.info("***end projectController getProjectIdDefault***");
         return idProject;
     }
+
+    public projectDTO getProjectById(int id) {
+        log.info("***start projectController getProjectById***");
+        projectDTO dto = new projectDTO();
+        projectDTO req = new projectDTO();
+        req.setIdProject(id);
+        req.setTokenId("2");
+        projectsDAO dao = new projectsDAO();
+        dto = dao.readOne(req);
+        log.info("***end projectController getProjectById***");
+        return dto;
+    }
 }

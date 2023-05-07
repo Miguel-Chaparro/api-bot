@@ -11,6 +11,7 @@ import com.dom.ws.rest.bot.DAO.questionsDAO;
 import com.dom.ws.rest.bot.DAO.raspiDAO;
 import com.dom.ws.rest.bot.DTO.answerDTO;
 import com.dom.ws.rest.bot.DTO.customerWhatsappDTO;
+import com.dom.ws.rest.bot.DTO.projectDTO;
 import com.dom.ws.rest.bot.DTO.questionsDTO;
 import com.dom.ws.rest.bot.DTO.raspiDTO;
 import com.dom.ws.rest.bot.DTO.recordSurveyDTO;
@@ -258,8 +259,13 @@ public class questionsController {
             }
 
         }
-
-        //recordSurvey(req, option);
+        projectDTO project = new projectDTO();
+        project.setIdProject(req.getIdProject());
+        projectController projectCtrl = new projectController();
+        project = projectCtrl.getProjectById(req.getIdProject());
+        if (project.getStatusProject() == 2) {
+            recordSurvey(req, option);
+        }
 
         resp.setQuestion(question);
         resp.setError(val.getError());
