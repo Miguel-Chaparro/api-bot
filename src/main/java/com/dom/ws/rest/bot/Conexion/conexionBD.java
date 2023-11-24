@@ -54,7 +54,8 @@ public class conexionBD {
         usuarioBD = atributosBD.getProperty("usuarioBD");
         contrasenaBD = atributosBD.getProperty("contrasena");*/
         //servidor = "jdbc:mysql://localhost:3306/DommApi?autoReconnect=true";
-        servidor = "jdbc:sqlserver://apibot-database.database.windows.net:1433;database=apibot-database;user=apibot-database@apibot-database;password=Kelimporta0;encrypt=true;trustServerCertificate=false;hostNameInCertificate=*.database.windows.net;loginTimeout=30;";
+        //servidor = "jdbc:sqlserver://apibot-database.database.windows.net:1433;database=apibot-database;user=apibot-database@apibot-database;password=Kelimporta0;encrypt=true;trustServerCertificate=false;hostNameInCertificate=*.database.windows.net;loginTimeout=30;";
+        servidor = "jdbc:sqlserver://dommatos.database.windows.net:1433;database=botdb;user=botdb@dommatos;password=Kelimporta0;encrypt=true;trustServerCertificate=false;hostNameInCertificate=*.database.windows.net;loginTimeout=30;";
         /* usuarioBD = "dommatos";
         contrasenaBD = "D0mm4t0s"; */
         logg.log(Level.INFO, System.getenv("RDS_HOSTNAME"));
