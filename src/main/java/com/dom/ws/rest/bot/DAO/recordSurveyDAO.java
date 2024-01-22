@@ -15,13 +15,13 @@ import com.dom.ws.rest.bot.vo.msgError;
 
 public class recordSurveyDAO implements interfaces<recordSurveyDTO> {
 
-    private static final String SQL_INSERT = "INSERT INTO [dommapi].[recordsurvey] ([idWhatsapp] ,[idFrom] ,[idProject] ,[idQuestion] ,[openAnswer] ,[answer] ,[multiAnswer], [fecha]) VALUES (?,?,?,?,?,?,?,GETDATE())";
-    private static final String SQL_UPDATE = "UPDATE [dommapi].[recordsurvey] SET [idWhatsapp] = ? ,[idFrom] = ? ,[idProject] = ? ,[idQuestion] = ? ,[openAnswer] = ? ,[answer] = ? ,[multiAnswer] = ? WHERE [idRecordSurvey] = ?";
-    private static final String SQL_DELETE = "DELETE FROM [dommapi].[recordsurvey] WHERE [idRecordSurvey] = ?";
-    private static final String SQL_READALL = "SELECT * FROM [dommapi].[recordsurvey]";
-    private static final String SQL_READWHATSAPP = "SELECT [idRecordSurvey] ,[idWhatsapp] ,[idFrom] ,[idProject] ,[idQuestion] ,[openAnswer] ,[answer] ,[multiAnswer], [fecha]FROM [dommapi].[recordsurvey] WHERE [idWhatsapp] = ?";
-    private static final String SQL_READFROM = "SELECT [idRecordSurvey] ,[idWhatsapp] ,[idFrom] ,[idProject] ,[idQuestion] ,[openAnswer] ,[answer] ,[multiAnswer], [fecha] FROM [dommapi].[recordsurvey] WHERE [idFrom] = ?";
-    private static final String SQL_READ = "SELECT [idRecordSurvey] ,[idWhatsapp] ,[idFrom] ,[idProject] ,[idQuestion] ,[openAnswer] ,[answer] ,[multiAnswer], [fecha] FROM [dommapi].[recordsurvey] WHERE  idrecordsurvey = ?  ";
+    private static final String SQL_INSERT = "INSERT INTO dommapi.recordsurvey (idWhatsapp ,idFrom ,idProject ,idQuestion ,openAnswer ,answer ,multiAnswer, fecha) VALUES (?,?,?,?,?,?,?,GETDATE())";
+    private static final String SQL_UPDATE = "UPDATE dommapi.recordsurvey SET idWhatsapp = ? ,idFrom = ? ,idProject = ? ,idQuestion = ? ,openAnswer = ? ,answer = ? ,multiAnswer = ? WHERE idRecordSurvey = ?";
+    private static final String SQL_DELETE = "DELETE FROM dommapi.recordsurvey WHERE idRecordSurvey = ?";
+    private static final String SQL_READALL = "SELECT * FROM dommapi.recordsurvey";
+    private static final String SQL_READWHATSAPP = "SELECT idRecordSurvey ,idWhatsapp ,idFrom ,idProject ,idQuestion ,openAnswer ,answer ,multiAnswer, fechaFROM dommapi.recordsurvey WHERE idWhatsapp = ?";
+    private static final String SQL_READFROM = "SELECT idRecordSurvey ,idWhatsapp ,idFrom ,idProject ,idQuestion ,openAnswer ,answer ,multiAnswer, fecha FROM dommapi.recordsurvey WHERE idFrom = ?";
+    private static final String SQL_READ = "SELECT idRecordSurvey ,idWhatsapp ,idFrom ,idProject ,idQuestion ,openAnswer ,answer ,multiAnswer, fecha FROM dommapi.recordsurvey WHERE  idrecordsurvey = ?  ";
     
     msgError error = new msgError();
     private final conexionBD con = conexionBD.saberEstado();

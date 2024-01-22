@@ -23,13 +23,13 @@ import java.util.logging.Logger;
  */
 public class projectsDAO implements interfaces<projectDTO> {
 
-    private static final String SQL_READMANY = "SELECT * FROM dommapi.project WHERE [idUser] = ? ";
-    private static final String SQL_READ_VALIDATE = "SELECT * FROM dommapi.project WHERE [idUser] = ? AND [projectDesc] = ? AND [idFrom] = ?";
-    private static final String SQL_READ = "SELECT * FROM dommapi.project WHERE [idFrom] = ? AND [projectDesc] = ? ";
-    private static final String SQL_READ_ID = "SELECT * FROM dommapi.project WHERE [idproject] = ?";
-    private static final String SQL_CREATE = "INSERT INTO [dommapi].[project] ([idUser] ,[projectDesc] ,[dateProject] ,[openProject] ,[endProject] ,[statusProject] ,[flgEndProject], [idFrom]) "
+    private static final String SQL_READMANY = "SELECT * FROM dommapi.project WHERE idUser = ? ";
+    private static final String SQL_READ_VALIDATE = "SELECT * FROM dommapi.project WHERE idUser = ? AND projectDesc = ? AND idFrom = ?";
+    private static final String SQL_READ = "SELECT * FROM dommapi.project WHERE idFrom = ? AND projectDesc = ? ";
+    private static final String SQL_READ_ID = "SELECT * FROM dommapi.project WHERE idproject = ?";
+    private static final String SQL_CREATE = "INSERT INTO dommapi.project (idUser ,projectDesc ,dateProject ,openProject ,endProject ,statusProject ,flgEndProject, idFrom) "
             + "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
-    private static final String SQL_UPDATE = "UPDATE dommapi.project SET [idUser] = ?,[projectDesc]  = ?,[dateProject]  = ?,[openProject]  = ?,[endProject]  = ?,[statusProject]  = ?,[flgEndProject] = ? "
+    private static final String SQL_UPDATE = "UPDATE dommapi.project SET idUser = ?,projectDesc  = ?,dateProject  = ?,openProject  = ?,endProject  = ?,statusProject  = ?,flgEndProject = ? "
             + "WHERE idproject = ? AND idFrom = ?";
     private final conexionBD con = conexionBD.saberEstado();
     static final Logger log = Logger.getLogger(projectsDAO.class.getName());

@@ -51,9 +51,12 @@ public class questionsController {
                 dto.setIdWhatsapp(req.getWhatsappId());
                 dto.setIdFrom(req.getIdFrom());
                 dto.setIdCustomer("");
-                dto.setName("");
+                dto.setName(req.getName());
                 dto.setIdProject(projectDefaultid);
                 dto.setPendingState(0);
+                dto.setCommand("");
+                dto.setPendingDescription("");
+                dto.setFlg_devices(0);
                 statesResp.setError(updateQuestionCustomer(dto, true));
                 question = buildNextQuestion(dto, 1, true, false, false, new msgError(0, ""));
                 statesResp.setQuestion(question);
@@ -107,10 +110,11 @@ public class questionsController {
         if (req.getDate() == null || req.getDate().getTime() < ts.getTime()) {
             logg.info("Valida si la fecha es mayor a la actual");
             val.setError(new msgError(2, ""));
-            if (req.getFlg_devices() > 0 && req.getPendingState() == 3) {
+            if (req.getFlg_devices() > 0 ) {
                 req.setIdQuestions("0");
                 req.setPendingState(2);
-
+                req.setCommand("");
+                req.setPendingDescription("");
             } else if (req.getPendingState() == 4) {
                 req.setIdQuestions("1");
                 req.setPendingState(0);
@@ -121,6 +125,7 @@ public class questionsController {
             }
             updateQuestionCustomer(req, false);
         }
+        
         if (req.getFlg_devices() > 0 && req.getPendingState() == 2 && req.getIdQuestions().equals("0")) {
             logg.info("Valida si el usuario tiene dispositivos");
             listRaspiDTO = readRaspi(req.getIdWhatsapp());
@@ -167,6 +172,15 @@ public class questionsController {
             question.setOptions(listOption);
             val.setError(new msgError(4, "Asesor Dommatos"));
             logg.info("Fin Asistencia de un asesor humano");
+        } else if (req.getPendingDescription().equals("CONFIRM")) {
+            logg.info("Confirma el texto ingresado por el usuario");
+            question.setQuestionDesc(
+                    "🤖 *" + req.getName() + "!* Solo quiero estar seguro ... -Estas seguro que valor digitado es: *"
+                            + option + "* y deseas continuar?");
+            req.setPendingDescription(option);
+            updateQuestionCustomer(req, false);
+            val.setError(new msgError(0, "Confirmación de texto"));
+            question.setOptions(checkAnswers(req.getIdQuestions(), req.getIdProject(), req.getIdFrom(), false));
         } else {
             answerList = validateOptions(req, option);
             question.setOptions(answerList);
@@ -180,6 +194,7 @@ public class questionsController {
                 answerList = convertListRaspiDTOtoListAnswerDTO(listRaspiDTO);
                 req.setPendingState(3);
                 req.setIdQuestions("0");
+                req.setCommand("");
                 updateQuestionCustomer(req, false);
                 resp.setError(new msgError(0, "OK"));
                 question.setQuestionDesc(
@@ -193,6 +208,7 @@ public class questionsController {
                         break;
                     case 1:
                         question = buildNextQuestion(req, val.getAnswerId(), false, flg, false, val.getError());
+                        val.setError(question.getOptions().get(0).getError());
                         break;
                     case 2:
                         resp.setRaspi(req.getDevices());
@@ -202,7 +218,7 @@ public class questionsController {
                         String device = "";
                         if (separador > 0) {
                             device = req.getDevices().split("-")[1];
-                        }else{
+                        } else {
                             device = req.getDevices();
                         }
                         question.setQuestionDesc(
@@ -210,7 +226,8 @@ public class questionsController {
                                         + "!* Nos estamos Comunicando con el Dispositivo *"
                                         + device
                                         + "*, favor espera un momento mientras *"
-                                        + question.getOptions().get(0).getAnswerDesc() + "* --- Si no responde en 30 segundos, Revise su conexión a Internet y vuelva a intentarlo ...");
+                                        + question.getOptions().get(0).getAnswerDesc()
+                                        + "* --- Si no responde en 30 segundos, Revisa el estado del dispositivo y vuelva a intentarlo ...");
                         List<answerDTO> listOption = new ArrayList<answerDTO>();
                         listOption.add(question.getOptions().get(0));
                         question.setOptions(listOption);
@@ -219,6 +236,7 @@ public class questionsController {
                     case 3:
                         resp.setRaspi(req.getDevices());
                         question = buildNextQuestion(req, val.getAnswerId(), false, flg, true, val.getError());
+                        val.setError(question.getOptions().get(0).getError());
                         break;
                     case 4:
                         question.setQuestionDesc(val.getError().getMessage());
@@ -236,17 +254,24 @@ public class questionsController {
                         logg.info("Asistencia de un asesor humano");
                         question = buildNextQuestion(req, val.getAnswerId(), false, flg, false, val.getError());
                         resp.setError(new msgError(7, val.getError().getMessage()));
-                        
 
                         question.setQuestionDesc(
                                 "🤖 *" + req.getName()
                                         + "!* Gracias por utilizar nuestro servicio, En estos momentos un asesor estará atendiendo a tu solicitud ... Pronto te contactaremos --- Recuerda los horarios de atención son de 8:00 a.m. a 5:00 p.m., después de este horario, el servicio de asistencia remota no estará disponible ...");
                         question.setIdQuestion("4");
-                        /*List<answerDTO> listOption2 = new ArrayList<answerDTO>();
-                        listOption2.add(question.getOptions().get(0));
-                        question.setOptions(listOption2);*/
+                        /*
+                         * List<answerDTO> listOption2 = new ArrayList<answerDTO>();
+                         * listOption2.add(question.getOptions().get(0));
+                         * question.setOptions(listOption2);
+                         */
                         resp.setCommand(val.getError().getMessage());
-
+                        logg.info("Fin Asistencia de un asesor humano");
+                    
+                    case 8: 
+                        logg.info("Volver a preguntar el tx abierto");
+                        val.setError(new msgError(2, "Texto abierto"));
+                        String txtQuestion = getQuestions(req.getIdQuestions(), req.getIdProject(), req.getIdFrom()).getQuestions();
+                        question.setQuestionDesc(txtQuestion);
                         break;
                     default:
                         resp.setError(new msgError(8, "Error"));
@@ -294,6 +319,8 @@ public class questionsController {
         logg.info("*** End questionsController recordSurvey ***");
     }
 
+ 
+
     private questionsVO buildNextQuestion(customerWhatsappDTO req, int option, boolean newRegister, boolean flagBack,
             boolean flagDevice,
             msgError error) {
@@ -326,7 +353,7 @@ public class questionsController {
         } else {
             if (newRegister) {
                 questionId = option + "";
-            } else if (questionDto.getNextQuestion() == 0 && option != 0 && !flagDevice) {
+            } else if (questionDto.getNextQuestion() == 0 && option > 0) {
                 questionId = req.getIdQuestions() + "." + option;
             } else if (questionDto.getNextQuestion() > 0) {
                 questionId = questionDto.getNextQuestion() + "";
@@ -362,6 +389,16 @@ public class questionsController {
             response.setQuestionDesc(message(req.getName(), questionDto));
             response.setIdQuestion(questionId);
             req.setIdQuestions(questionId);
+        }
+
+        if(questionDto.getOpenQuestion()==1){
+            req.setPendingDescription("CONFIRM");
+            answerList = new ArrayList<>();
+            optionDto = new answerDTO();
+            optionDto.setAnswerId(0);
+            optionDto.setAnswerDesc("Si");
+            optionDto.setError(new msgError(2, "Ingresa Texto abierto"));
+            answerList.add(optionDto);
         }
 
         response.setOptions(answerList);
@@ -430,17 +467,30 @@ public class questionsController {
 
     }
 
-    private List<answerDTO> validateOptions(customerWhatsappDTO dto, String option) {
-        logg.info("*** Start questionsController validateOptions ***");
+    private List<answerDTO> checkAnswers(String questions, int idProject, String idFrom, boolean flgAll) {
+        logg.info("*** Start questionsController checkAnswers ***");
         answerDAO dao = new answerDAO();
         answerDTO req = new answerDTO();
         List<answerDTO> answerList = new ArrayList<>();
-        req.setIdQuestion(dto.getIdQuestions());
-        req.setAnswerId(0);
-        req.setIdProject(dto.getIdProject());
-        req.setIdFrom(dto.getIdFrom());
-        msgError rta = new msgError();
+        req.setIdQuestion(questions);
+        if (flgAll) {
+            req.setAnswerId(100);
+        } else {
+            req.setAnswerId(0);
+        }
+        req.setIdProject(idProject);
+        req.setIdFrom(idFrom);
         answerList = dao.readMany(req);
+        logg.info("*** End questionsController checkAnswers ***");
+        return answerList;
+    }
+
+    private List<answerDTO> validateOptions(customerWhatsappDTO dto, String option) {
+        logg.info("*** Start questionsController validateOptions ***");
+        answerDTO req = new answerDTO();
+        List<answerDTO> answerList = new ArrayList<>();
+        msgError rta = new msgError();
+        answerList = checkAnswers(dto.getIdQuestions(), dto.getIdProject(), dto.getIdFrom(), false);
         int indicator = -1;
         String command = "", pending = "";
         logg.info("*** dto ***" + dto.getIdWhatsapp());
@@ -461,6 +511,14 @@ public class questionsController {
 
                 rta.setCode(1);
                 rta.setMessage("Back");
+                if(dto.getFlg_devices()>0){
+                    rta.setCode(1);
+                    rta.setMessage("Iniciar de nuevo");
+                    req.setError(rta);
+                    answerList.add(0, req);
+                    logg.info("*** End questionsController validaOptions ***");
+                    return answerList;
+                }
             } else {
                 for (answerDTO q : answerList) {
                     logg.log(Level.INFO, "{0}\n", "for: " + q.getAnswerId() + "\n" + indicator);
@@ -504,6 +562,22 @@ public class questionsController {
                             dto.setPendingDescription("Asesoría en linea");
                             dto.setIdQuestions("1");
                             dto.setPendingState(4);
+                            updateQuestionCustomer(dto, false);
+                        } else if (q.getFlgEnd() == 1 && q.getFlgCommand() == 5) {
+                            rta.setCode(2);
+                            rta.setMessage(command + dto.getPendingDescription());
+                            dto.setCommand("");
+                            dto.setIdQuestions("0");
+                            dto.setPendingState(2);
+                            updateQuestionCustomer(dto, false);
+                        } else if (q.getFlgEnd() == 0 && q.getFlgCommand() == 5) {
+                            rta.setCode(3);
+                            rta.setMessage(command + dto.getPendingDescription());
+                            updateQuestionCustomer(dto, false);
+                        } else if(q.getFlgCommand() == 6){
+                            rta.setCode(8);
+                            rta.setMessage("");
+                            dto.setPendingDescription("CONFIRM");
                             updateQuestionCustomer(dto, false);
                         }else {
                             rta.setCode(0);
@@ -598,11 +672,24 @@ public class questionsController {
         for (raspiDTO raspiDTO : listRaspiDTO) {
             answerDTO answerDTO = new answerDTO();
             answerDTO.setAnswerId(raspiDTO.getIdDevices());
-            answerDTO.setAnswerDesc(raspiDTO.getRaspi());
+            answerDTO.setAnswerDesc(raspiDTO.getDescDevices());
+            answerDTO.setCommand(raspiDTO.getRaspi());
             listAnswerDTO.add(answerDTO);
         }
         logg.info("" + listAnswerDTO.size());
         logg.info("*** End questionsController convertListRaspiDTOtoListAnswerDTO ***");
         return listAnswerDTO;
+    }
+
+    private questionsDTO getQuestions(String idQuestion, int idProject, String idFrom) {
+        logg.info("*** Start questionsController getQuestions ***");
+        questionsDTO dto = new questionsDTO();
+        questionsDAO dao = new questionsDAO();
+        dto.setIdQuestions(idQuestion);
+        dto.setIdProject(idProject);
+        dto.setIdFrom(idFrom);
+        dto = dao.readOne(dto);
+        logg.info("*** End questionsController getQuestions ***");
+        return dto;
     }
 }

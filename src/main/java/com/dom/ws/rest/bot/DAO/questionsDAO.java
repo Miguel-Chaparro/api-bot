@@ -23,13 +23,13 @@ import java.util.logging.Logger;
  */
 public class questionsDAO implements interfaces<questionsDTO> {
  
-    private static final String SQL_READONE = "SELECT [id],[question],[idFrom],[idProject],[nextQuestion],[multiAnswer],[minQuestion],[openQuestion],[endQuestion] FROM dommapi.questions WHERE id = ? AND idProject = ? AND idFrom = ?";
+    private static final String SQL_READONE = "SELECT id,question,idFrom,idProject,nextQuestion,multiAnswer,minQuestion,openQuestion,endQuestion FROM dommapi.questions WHERE id = ? AND idProject = ? AND idFrom = ?";
     private static final String SQL_UPDATE = "UPDATE dommapi.questions SET question = ?, nextQuestion = ?, multiAnswer = ?, minQuestion =?, openQuestion =?, endQuestion =? "
             + "WHERE id = ? AND idProject = ?";
     private static final String SQL_INSERT = "INSERT INTO dommapi.questions (id, question, idProject, nextQuestion, multiAnswer, minQuestion, openQuestion, endQuestion ) "
             + "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
    // private static final String SQL_DELETE = "DELETE FROM dommapi.questions WHERE idWhatsapp = ?";
-    private static final String SQL_READMANY = "SELECT [id],[question],[idProject],[nextQuestion],[multiAnswer],[minQuestion],[openQuestion],[endQuestion] FROM dommapi.questions  WHERE idProject = ? ";
+    private static final String SQL_READMANY = "SELECT id,question,idProject,nextQuestion,multiAnswer,minQuestion,openQuestion,endQuestion FROM dommapi.questions  WHERE idProject = ? ";
     /* private static final String SQL_READMANYUSER = "";
     private static final String SQL_READALL = "SELECT * FROM dommapi.questions "; */
     msgError error = new msgError();
