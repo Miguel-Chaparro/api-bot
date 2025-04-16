@@ -16,16 +16,26 @@ import java.util.logging.Logger;
 public class FirebaseAuthFilter implements ContainerRequestFilter {
     
     private static final Logger log = Logger.getLogger(FirebaseAuthFilter.class.getName());
+    private static final String API_KEY_HEADER = "x-api-key";
+    private static final String ENV_API_KEY = System.getenv("API_KEY");
 
     @Override
     public void filter(ContainerRequestContext requestContext) throws IOException {
+        // Primero verificar si hay una API Key
+        String apiKey = requestContext.getHeaderString(API_KEY_HEADER);
+        if (apiKey != null && ENV_API_KEY != null && ENV_API_KEY.equals(apiKey)) {
+            log.info("Autenticación exitosa usando API Key");
+            return;
+        }
+
+        // Si no hay API Key válida, verificar token de Firebase
         String authHeader = requestContext.getHeaderString("Authorization");
         
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            log.warning("No authorization header found");
+            log.warning("No se encontró autorización válida");
             requestContext.abortWith(Response
                 .status(Response.Status.UNAUTHORIZED)
-                .entity("No se proporcionó token de autenticación")
+                .entity("Se requiere autenticación (Firebase token o API Key)")
                 .build());
             return;
         }
