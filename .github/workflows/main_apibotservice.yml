@@ -21,6 +21,7 @@ jobs:
         with:
           java-version: '8'
           distribution: 'temurin' 
+          cache: 'maven'
 
       - name: Create Firebase Credentials
         run: |
@@ -28,13 +29,17 @@ jobs:
             echo "${{ secrets.FIREBASE_CREDENTIALS_BASE64 }}" | base64 -d > src/main/resources/firebase-credentials.json
   
       - name: Build with Maven
-        run: mvn clean install
+        run: mvn -B clean install
+
+      - name: List build artifacts
+        run: ls -la target/
 
       - name: Upload artifact for deployment job
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v3.1.2
         with:
           name: java-app
           path: '${{ github.workspace }}/target/*.war'
+          retention-days: 1
 
   deploy:
     runs-on: ubuntu-latest
@@ -45,9 +50,13 @@ jobs:
 
     steps:
       - name: Download artifact from build job
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v3.0.2
         with:
           name: java-app
+          path: .
+
+      - name: List downloaded artifacts
+        run: ls -la
 
       - name: Deploy to Azure Web App
         id: deploy-to-webapp
