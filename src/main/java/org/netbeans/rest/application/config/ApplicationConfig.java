@@ -7,6 +7,7 @@ package org.netbeans.rest.application.config;
 
 import java.util.Set;
 import javax.ws.rs.core.Application;
+import com.dom.ws.rest.bot.Conexion.FirebaseInitializer;
 
 /**
  *
@@ -14,6 +15,12 @@ import javax.ws.rs.core.Application;
  */
 @javax.ws.rs.ApplicationPath("webresources")
 public class ApplicationConfig extends Application {
+
+    public ApplicationConfig() {
+        // Inicializar Firebase al arrancar la aplicación
+        FirebaseInitializer.getInstance().initialize();
+    }
+
 
     @Override
     public Set<Class<?>> getClasses() {

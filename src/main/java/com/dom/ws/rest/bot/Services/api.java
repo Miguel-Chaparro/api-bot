@@ -28,6 +28,8 @@ import com.dom.ws.rest.bot.Response.getQuestionsResp;
 import com.dom.ws.rest.bot.Response.projectsResp;
 import com.dom.ws.rest.bot.Response.raspiResp;
 import com.dom.ws.rest.bot.vo.msgError;
+import com.google.firebase.auth.FirebaseToken;
+
 import java.util.concurrent.ExecutorService;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.CookieParam;
@@ -36,8 +38,11 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.container.AsyncResponse;
+import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.Suspended;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.Provider;
 
 /**
@@ -140,7 +145,7 @@ public class api {
         return response;
     }
 
-    /**
+   /**
      *
      * @param asyncResponse
      * @param request
@@ -150,15 +155,29 @@ public class api {
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN})
     @Consumes({MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN})
 
-    public void getProjects(@Suspended final AsyncResponse asyncResponse, final createProjectsReq request) {
-        executorService.submit(new Runnable() {
-            @Override
-            public void run() {
+    public void getProjects(@Suspended final AsyncResponse asyncResponse, final createProjectsReq request, @Context ContainerRequestContext requestContext) {
+         FirebaseToken user = (FirebaseToken) requestContext.getProperty("user");
+         
+        if (user == null) {
+            asyncResponse.resume(Response.status(Response.Status.UNAUTHORIZED)
+                .entity("No autorizado")
+                .build());
+            return;
+        }
+
+        executorService.submit(() -> {
+            try {
+                // Agregar el ID del usuario a la petición
+                request.setIdUser(user.getUid());
                 asyncResponse.resume(doGetProjects(request));
+            } catch (Exception e) {
+                asyncResponse.resume(Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity(new msgError(-1, e.getMessage()))
+                    .build());
             }
         });
-    }
 
+    }
     private projectsResp doGetProjects(createProjectsReq request) {
 
         projectsResp response = new projectsResp();
