@@ -54,6 +54,13 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.Provider;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.parameters.RequestBody;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
+
 /**
  *
  * @author MIGUEL
@@ -73,7 +80,18 @@ public class api {
     @Path(value = "/domBot")
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN})
     @Consumes({MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN})
-
+    @Operation(
+        summary = "Bot de preguntas",
+        description = "Procesa preguntas y respuestas del bot.",
+        requestBody = @RequestBody(
+            required = true,
+            content = @Content(schema = @Schema(implementation = questionsAnswersReq.class))
+        ),
+        responses = {
+            @ApiResponse(responseCode = "200", description = "Respuesta del bot", content = @Content(schema = @Schema(implementation = answerResp.class))),
+            @ApiResponse(responseCode = "500", description = "Error interno del servidor")
+        }
+    )
     public void questions(@Suspended final AsyncResponse asyncResponse, final questionsAnswersReq request,@CookieParam("session") String session) {
         executorService.submit(new Runnable() {
             @Override
@@ -109,7 +127,18 @@ public class api {
     @Path(value = "/surveyBot")
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN})
     @Consumes({MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN})
-
+    @Operation(
+        summary = "Bot de encuestas",
+        description = "Procesa encuestas del bot.",
+        requestBody = @RequestBody(
+            required = true,
+            content = @Content(schema = @Schema(implementation = questionsAnswersReq.class))
+        ),
+        responses = {
+            @ApiResponse(responseCode = "200", description = "Respuesta de la encuesta", content = @Content(schema = @Schema(implementation = answerResp.class))),
+            @ApiResponse(responseCode = "500", description = "Error interno del servidor")
+        }
+    )
     public void survey(@Suspended final AsyncResponse asyncResponse, final questionsAnswersReq request) {
         executorService.submit(new Runnable() {
             @Override
@@ -136,7 +165,18 @@ public class api {
     @Path(value = "/raspi")
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN})
     @Consumes({MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN})
-
+    @Operation(
+        summary = "Bot de preguntas para Raspberry Pi",
+        description = "Procesa preguntas y respuestas del bot para dispositivos Raspberry Pi.",
+        requestBody = @RequestBody(
+            required = true,
+            content = @Content(schema = @Schema(implementation = questionsAnswersReq.class))
+        ),
+        responses = {
+            @ApiResponse(responseCode = "200", description = "Respuesta del bot", content = @Content(schema = @Schema(implementation = answerResp.class))),
+            @ApiResponse(responseCode = "500", description = "Error interno del servidor")
+        }
+    )
     public void raspi(@Suspended final AsyncResponse asyncResponse, final questionsAnswersReq request) {
         executorService.submit(new Runnable() {
             @Override
@@ -163,7 +203,29 @@ public class api {
     @Path(value = "/getProjects")
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN})
     @Consumes({MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN})
-
+    @Operation(
+        summary = "Obtener proyectos del usuario",
+        description = "Devuelve los proyectos asociados al usuario autenticado.",
+        requestBody = @RequestBody(
+            required = true,
+            content = @Content(schema = @Schema(implementation = createProjectsReq.class))
+        ),
+        responses = {
+            @ApiResponse(
+                responseCode = "200",
+                description = "Lista de proyectos",
+                content = @Content(schema = @Schema(implementation = projectsResp.class))
+            ),
+            @ApiResponse(
+                responseCode = "401",
+                description = "No autorizado"
+            ),
+            @ApiResponse(
+                responseCode = "500",
+                description = "Error interno del servidor"
+            )
+        }
+    )
     public void getProjects(@Suspended final AsyncResponse asyncResponse, final createProjectsReq request, @Context ContainerRequestContext requestContext) {
          FirebaseToken user = (FirebaseToken) requestContext.getProperty("user");
          
@@ -204,7 +266,18 @@ public class api {
     @Path(value = "/getQuestionsAnswers")
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN})
     @Consumes({MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN})
-
+    @Operation(
+        summary = "Obtener preguntas y respuestas",
+        description = "Devuelve las preguntas y respuestas para un proyecto.",
+        requestBody = @RequestBody(
+            required = true,
+            content = @Content(schema = @Schema(implementation = createProjectsReq.class))
+        ),
+        responses = {
+            @ApiResponse(responseCode = "200", description = "Preguntas y respuestas", content = @Content(schema = @Schema(implementation = getQuestionsAnswerResp.class))),
+            @ApiResponse(responseCode = "500", description = "Error interno del servidor")
+        }
+    )
     public void getQuestionsAnswer(@Suspended final AsyncResponse asyncResponse, final createProjectsReq request) {
         executorService.submit(new Runnable() {
             @Override
@@ -231,7 +304,18 @@ public class api {
     @Path(value = "/getQuestions")
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN})
     @Consumes({MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN})
-
+    @Operation(
+        summary = "Obtener preguntas",
+        description = "Devuelve las preguntas para un proyecto.",
+        requestBody = @RequestBody(
+            required = true,
+            content = @Content(schema = @Schema(implementation = createProjectsReq.class))
+        ),
+        responses = {
+            @ApiResponse(responseCode = "200", description = "Preguntas", content = @Content(schema = @Schema(implementation = getQuestionsResp.class))),
+            @ApiResponse(responseCode = "500", description = "Error interno del servidor")
+        }
+    )
     public void getQuestions(@Suspended final AsyncResponse asyncResponse, final createProjectsReq request) {
         executorService.submit(new Runnable() {
             @Override
@@ -258,7 +342,18 @@ public class api {
     @Path(value = "/getAnswers")
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN})
     @Consumes({MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN})
-
+    @Operation(
+        summary = "Obtener respuestas",
+        description = "Devuelve las respuestas para una pregunta de un proyecto.",
+        requestBody = @RequestBody(
+            required = true,
+            content = @Content(schema = @Schema(implementation = answerReq.class))
+        ),
+        responses = {
+            @ApiResponse(responseCode = "200", description = "Respuestas", content = @Content(schema = @Schema(implementation = getAnswerResp.class))),
+            @ApiResponse(responseCode = "500", description = "Error interno del servidor")
+        }
+    )
     public void getAnswers(@Suspended final AsyncResponse asyncResponse, final answerReq request) {
         executorService.submit(new Runnable() {
             @Override
@@ -285,7 +380,18 @@ public class api {
     @Path(value = "/createProject")
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN})
     @Consumes({MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN})
-
+    @Operation(
+        summary = "Crear proyecto",
+        description = "Crea un nuevo proyecto.",
+        requestBody = @RequestBody(
+            required = true,
+            content = @Content(schema = @Schema(implementation = projectDTO.class))
+        ),
+        responses = {
+            @ApiResponse(responseCode = "200", description = "Proyecto creado", content = @Content(schema = @Schema(implementation = projectDTO.class))),
+            @ApiResponse(responseCode = "500", description = "Error interno del servidor")
+        }
+    )
     public void createProyect(@Suspended final AsyncResponse asyncResponse, final projectDTO request) {
         executorService.submit(new Runnable() {
             @Override
@@ -312,7 +418,18 @@ public class api {
     @Path(value = "/createUpdateManyQuestions")
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN})
     @Consumes({MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN})
-
+    @Operation(
+        summary = "Crear o actualizar muchas preguntas",
+        description = "Crea o actualiza varias preguntas para un proyecto.",
+        requestBody = @RequestBody(
+            required = true,
+            content = @Content(schema = @Schema(implementation = createQuestionsReq.class))
+        ),
+        responses = {
+            @ApiResponse(responseCode = "200", description = "Preguntas procesadas", content = @Content(schema = @Schema(implementation = createQuestionsResp.class))),
+            @ApiResponse(responseCode = "500", description = "Error interno del servidor")
+        }
+    )
     public void createManyQuestions(@Suspended final AsyncResponse asyncResponse, final createQuestionsReq request) {
         executorService.submit(new Runnable() {
             @Override
@@ -339,7 +456,18 @@ public class api {
     @Path(value = "/createUpdateOneQuestion")
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN})
     @Consumes({MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN})
-
+    @Operation(
+        summary = "Crear o actualizar una pregunta",
+        description = "Crea o actualiza una pregunta para un proyecto.",
+        requestBody = @RequestBody(
+            required = true,
+            content = @Content(schema = @Schema(implementation = questionsDTO.class))
+        ),
+        responses = {
+            @ApiResponse(responseCode = "200", description = "Pregunta procesada", content = @Content(schema = @Schema(implementation = msgError.class))),
+            @ApiResponse(responseCode = "500", description = "Error interno del servidor")
+        }
+    )
     public void createOneQuestion(@Suspended final AsyncResponse asyncResponse, final questionsDTO request) {
         executorService.submit(new Runnable() {
             @Override
@@ -366,7 +494,18 @@ public class api {
     @Path(value = "/createUpdateOneAnswer")
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN})
     @Consumes({MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN})
-
+    @Operation(
+        summary = "Crear o actualizar una respuesta",
+        description = "Crea o actualiza una respuesta para una pregunta.",
+        requestBody = @RequestBody(
+            required = true,
+            content = @Content(schema = @Schema(implementation = answerDTO.class))
+        ),
+        responses = {
+            @ApiResponse(responseCode = "200", description = "Respuesta procesada", content = @Content(schema = @Schema(implementation = msgError.class))),
+            @ApiResponse(responseCode = "500", description = "Error interno del servidor")
+        }
+    )
     public void createOneAnswer(@Suspended final AsyncResponse asyncResponse, final answerDTO request) {
         executorService.submit(new Runnable() {
             @Override
@@ -393,7 +532,18 @@ public class api {
     @Path(value = "/updateProject")
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN})
     @Consumes({MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN})
-
+    @Operation(
+        summary = "Actualizar proyecto",
+        description = "Actualiza un proyecto existente.",
+        requestBody = @RequestBody(
+            required = true,
+            content = @Content(schema = @Schema(implementation = projectDTO.class))
+        ),
+        responses = {
+            @ApiResponse(responseCode = "200", description = "Proyecto actualizado", content = @Content(schema = @Schema(implementation = msgError.class))),
+            @ApiResponse(responseCode = "500", description = "Error interno del servidor")
+        }
+    )
     public void updateProject (@Suspended final AsyncResponse asyncResponse, final projectDTO request) {
         executorService.submit(new Runnable() {
             @Override
@@ -421,7 +571,18 @@ public class api {
     @Path(value = "/configDevices")
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN})
     @Consumes({MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN})
-
+    @Operation(
+        summary = "Obtener configuración de dispositivos",
+        description = "Obtiene la configuración de dispositivos para un proyecto.",
+        requestBody = @RequestBody(
+            required = true,
+            content = @Content(schema = @Schema(implementation = raspiReq.class))
+        ),
+        responses = {
+            @ApiResponse(responseCode = "200", description = "Configuración de dispositivos", content = @Content(schema = @Schema(implementation = raspiResp.class))),
+            @ApiResponse(responseCode = "500", description = "Error interno del servidor")
+        }
+    )
     public void configDevices (@Suspended final AsyncResponse asyncResponse, final raspiReq request) {
         executorService.submit(new Runnable() {
             @Override
@@ -447,7 +608,18 @@ public class api {
     @Path(value = "/createConfigDevices")
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN})
     @Consumes({MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN})
-
+    @Operation(
+        summary = "Crear configuración de dispositivos",
+        description = "Crea la configuración de dispositivos para un proyecto.",
+        requestBody = @RequestBody(
+            required = true,
+            content = @Content(schema = @Schema(implementation = raspiDTO.class))
+        ),
+        responses = {
+            @ApiResponse(responseCode = "200", description = "Configuración creada", content = @Content(schema = @Schema(implementation = msgError.class))),
+            @ApiResponse(responseCode = "500", description = "Error interno del servidor")
+        }
+    )
     public void createConfigDevices (@Suspended final AsyncResponse asyncResponse, final raspiDTO request) {
         executorService.submit(new Runnable() {
             @Override
@@ -467,12 +639,39 @@ public class api {
 
     /**
      * Endpoint de login que utiliza la información del token de Firebase
-     * @param asyncResponse
-     * @param requestContext Contexto de la petición que contiene el token decodificado
      */
     @POST
     @Path(value = "/login")
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN})
+    @Operation(
+        summary = "Login de usuario con Firebase",
+        description = "Autentica un usuario usando el token de Firebase y retorna información y perfiles.",
+        requestBody = @RequestBody(
+            required = false,
+            description = "No se requiere body, solo el header Authorization: Bearer <firebase-token>"
+        ),
+        responses = {
+            @ApiResponse(
+                responseCode = "200",
+                description = "Login exitoso",
+                content = @Content(
+                    mediaType = "application/json",
+                    schema = @Schema(implementation = LoginResponse.class),
+                    examples = @ExampleObject(
+                        value = "{\n  \"isNewUser\": true,\n  \"created\": true,\n  \"profiles\": [{\n    \"id\": 3,\n    \"name\": \"Cliente Internet\",\n    \"description\": \"Cliente de servicios de internet\",\n    \"active\": true\n  }]\n}"
+                    )
+                )
+            ),
+            @ApiResponse(
+                responseCode = "401",
+                description = "No autorizado"
+            ),
+            @ApiResponse(
+                responseCode = "500",
+                description = "Error interno del servidor"
+            )
+        }
+    )
     public void login(@Suspended final AsyncResponse asyncResponse, @Context ContainerRequestContext requestContext) {
         FirebaseToken decodedToken = (FirebaseToken) requestContext.getProperty("user");
         
@@ -534,14 +733,51 @@ public class api {
 
     /**
      * Endpoint para asignar perfiles a usuarios (solo administradores)
-     * @param asyncResponse
-     * @param request
-     * @param requestContext
      */
     @POST
     @Path(value = "/assignProfile")
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN})
     @Consumes({MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN})
+    @Operation(
+        summary = "Asignar perfil a usuario",
+        description = "Permite a un administrador asignar un perfil a un usuario.",
+        requestBody = @RequestBody(
+            required = true,
+            content = @Content(
+                mediaType = "application/json",
+                schema = @Schema(implementation = AssignProfileRequest.class),
+                examples = @ExampleObject(
+                    value = "{\n  \"userId\": \"uid123\",\n  \"profileId\": 1\n}"
+                )
+            )
+        ),
+        responses = {
+            @ApiResponse(
+                responseCode = "200",
+                description = "Perfil asignado correctamente",
+                content = @Content(
+                    mediaType = "application/json",
+                    examples = @ExampleObject(value = "{\n  \"code\": 0,\n  \"message\": \"Perfil asignado correctamente\"\n}")
+                )
+            ),
+            @ApiResponse(
+                responseCode = "400",
+                description = "Solicitud inválida",
+                content = @Content(
+                    mediaType = "application/json",
+                    examples = @ExampleObject(value = "{\n  \"code\": -1,\n  \"message\": \"No se pudo asignar el perfil\"\n}")
+                )
+            ),
+            @ApiResponse(
+                responseCode = "401",
+                description = "No autorizado"
+            ),
+            @ApiResponse(
+                responseCode = "403",
+                description = "Acceso denegado"
+            )
+        }
+    )
     public void assignProfile(@Suspended final AsyncResponse asyncResponse, 
                             final AssignProfileRequest request,
                             @Context ContainerRequestContext requestContext) {
@@ -589,12 +825,35 @@ public class api {
 
     /**
      * Endpoint para consultar usuarios registrados (solo administradores)
-     * @param asyncResponse
-     * @param requestContext
      */
     @GET
     @Path(value = "/users")
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN})
+    @Operation(
+        summary = "Obtener usuarios registrados",
+        description = "Permite a un administrador consultar todos los usuarios registrados.",
+        responses = {
+            @ApiResponse(
+                responseCode = "200",
+                description = "Lista de usuarios",
+                content = @Content(
+                    mediaType = "application/json",
+                    schema = @Schema(implementation = UserDTO.class),
+                    examples = @ExampleObject(
+                        value = "[{\n  \"id\": \"uid123\",\n  \"email\": \"user@mail.com\",\n  \"displayName\": \"Juan Perez\",\n  \"photoUrl\": null,\n  \"emailVerified\": true,\n  \"disabled\": false\n}]"
+                    )
+                )
+            ),
+            @ApiResponse(
+                responseCode = "401",
+                description = "No autorizado"
+            ),
+            @ApiResponse(
+                responseCode = "403",
+                description = "Acceso denegado"
+            )
+        }
+    )
     public void getUsers(@Suspended final AsyncResponse asyncResponse,
                         @Context ContainerRequestContext requestContext) {
         FirebaseToken decodedToken = (FirebaseToken) requestContext.getProperty("user");
