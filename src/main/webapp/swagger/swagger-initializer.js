@@ -1,7 +1,17 @@
 window.onload = function() {
-  //<editor-fold desc="Changeable Configuration Block">
+  // Configuración para requerir API Key antes de cargar el spec
+  let apiKey = null;
 
-  // the following lines will be replaced by docker/configurator, when it runs in a docker-container
+  function promptForApiKey() {
+    apiKey = window.prompt("Por favor ingresa tu API Key para acceder a la documentación:");
+    if (!apiKey) {
+      alert("Debes ingresar una API Key válida para continuar.");
+      promptForApiKey();
+    }
+  }
+
+  promptForApiKey();
+
   window.ui = SwaggerUIBundle({
     url: "/apiBot/services/openapi.json",
     dom_id: '#swagger-ui',
@@ -15,11 +25,17 @@ window.onload = function() {
     ],
     layout: "StandaloneLayout",
     requestInterceptor: (req) => {
-      // Si el usuario ya puso el API Key en Authorize, Swagger lo agregará automáticamente.
-      // Si quieres forzar que siempre lo pida, puedes dejarlo así y definir el esquema de seguridad en tu OpenAPI.
+      if (apiKey) {
+        req.headers['x-api-key'] = apiKey;
+      }
       return req;
+    },
+    // Bloquear el input de URL para evitar explorar otras specs
+    onComplete: function() {
+      const input = document.querySelector('input[placeholder="URL"]');
+      if (input) {
+        input.disabled = true;
+      }
     }
   });
-
-  //</editor-fold>
 };
