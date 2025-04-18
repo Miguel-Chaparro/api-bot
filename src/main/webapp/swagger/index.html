@@ -3,17 +3,58 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8">
-    <title>Swagger UI</title>
-    <link rel="stylesheet" type="text/css" href="./swagger-ui.css" />
-    <link rel="stylesheet" type="text/css" href="index.css" />
-    <link rel="icon" type="image/png" href="./favicon-32x32.png" sizes="32x32" />
-    <link rel="icon" type="image/png" href="./favicon-16x16.png" sizes="16x16" />
+    <title>Documentación API - apiBot</title>
+    <link rel="icon" type="image/png" href="favicon-32x32.png" sizes="32x32" />
+    <link rel="icon" type="image/png" href="favicon-16x16.png" sizes="16x16" />
+    <link rel="stylesheet" type="text/css" href="swagger-ui.css" >
+    <link rel="stylesheet" type="text/css" href="index.css" >
+    <style>
+      /* Ocultar la barra de input de URL (explorer) */
+      .topbar .download-url-wrapper, .topbar .topbar-wrapper input[placeholder="URL"] {
+        display: none !important;
+      }
+      /* Ocultar el logo SVG original */
+      .topbar-wrapper .link svg {
+        display: none !important;
+      }
+      /* Mostrar el logo PNG personalizado */
+      .topbar-wrapper .link::before {
+        content: "";
+        display: inline-block;
+        vertical-align: middle;
+        width: 40px; /* Ajusta el tamaño según tu logo */
+        height: 40px;
+        background: url('logo.png') no-repeat center center;
+        background-size: contain;
+        margin-right: 10px;
+      }
+      /* Personalizar el texto */
+      .topbar-wrapper .link span {
+        font-size: 1.5em;
+        font-weight: bold;
+        color: #1976d2;
+      }
+      .topbar-wrapper .link img {
+        display: none;
+      }
+    </style>
   </head>
 
   <body>
     <div id="swagger-ui"></div>
-    <script src="./swagger-ui-bundle.js" charset="UTF-8"> </script>
-    <script src="./swagger-ui-standalone-preset.js" charset="UTF-8"> </script>
-    <script src="./swagger-initializer.js" charset="UTF-8"> </script>
+    <script src="swagger-ui-bundle.js" charset="UTF-8"> </script>
+    <script src="swagger-ui-standalone-preset.js" charset="UTF-8"> </script>
+    <script src="swagger-initializer.js" charset="UTF-8"> </script>
+    <script>
+      // Cambiar el texto del logo
+      window.onload = function() {
+        setTimeout(function() {
+          var logo = document.querySelector('.topbar-wrapper .link span');
+          if (logo) {
+            logo.textContent = 'Documentación API - DomyBot';
+          }
+        }, 500);
+      };
+    </script>
   </body>
 </html>
