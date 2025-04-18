@@ -1,4 +1,4 @@
-window.onload = function() {
+document.addEventListener('DOMContentLoaded', function() {
   // Configuración para requerir API Key antes de cargar el spec
   let apiKey = null;
 
@@ -38,4 +38,4 @@ window.onload = function() {
       }
     }
   });
-};
+});
