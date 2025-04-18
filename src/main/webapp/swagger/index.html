@@ -3,7 +3,7 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8">
-    <title>Documentación API - apiBot</title>
+    <title>Documentación API - DommyBot</title>
     <link rel="icon" type="image/png" href="favicon-32x32.png" sizes="32x32" />
     <link rel="icon" type="image/png" href="favicon-16x16.png" sizes="16x16" />
     <link rel="stylesheet" type="text/css" href="swagger-ui.css" >
@@ -59,6 +59,12 @@
           if (logo) {
             logo.textContent = 'Documentación API - DomyBot';
           }
+          // Personalizar el encabezado de los tags (paths)
+          document.querySelectorAll('.opblock-tag-section .opblock-tag > div').forEach(function(tagDiv) {
+            if (tagDiv.textContent.trim() === 'default') {
+              tagDiv.textContent = 'DommyBot API'; // Cambia aquí el texto a mostrar
+            }
+          });
         }, 500);
       };
     </script>
