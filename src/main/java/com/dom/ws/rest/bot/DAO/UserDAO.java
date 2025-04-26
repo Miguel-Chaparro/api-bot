@@ -131,4 +131,36 @@ public class UserDAO implements interfaces<UserDTO> {
         log.info("*** End UserDAO readAll ***");
         return users;
     }
+    
+    public UserDTO readOneById(String id) {
+        log.info("*** Start UserDAO readOneById ***");
+        UserDTO user = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+        try {
+            ps = con.getCnn().prepareStatement("SELECT * FROM dommapi.users WHERE id = ?");
+            ps.setString(1, id);
+            rs = ps.executeQuery();
+            if (rs.next()) {
+                user = new UserDTO();
+                user.setId(rs.getString("id"));
+                user.setEmail(rs.getString("email"));
+                user.setDisplayName(rs.getString("display_name"));
+                user.setPhotoUrl(rs.getString("photo_url"));
+                user.setPhoneNumber(rs.getString("phone_number"));
+                user.setProviderId(rs.getString("provider_id"));
+                user.setCreationTime(rs.getTimestamp("creation_time"));
+                user.setLastSignInTime(rs.getTimestamp("last_sign_in_time"));
+                user.setEmailVerified(rs.getBoolean("email_verified"));
+                user.setCustomClaims(rs.getString("custom_claims"));
+                user.setDisabled(rs.getBoolean("disabled"));
+            }
+        } catch (SQLException ex) {
+            log.log(Level.SEVERE, "Error reading user by id", ex);
+        } finally {
+            con.cerrarConexion();
+        }
+        log.info("*** End UserDAO readOneById ***");
+        return user;
+    }
 }
