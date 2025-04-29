@@ -1,0 +1,8 @@
+POST http://localhost:8080/apiBot/AccessApi/login
+Authorization: Bearer <TU_FIREBASE_TOKEN>
+Content-Type: application/json
+
+{
+  "tipoIdentificacion": "CC",
+  "numeroIdentificacion": "123456789"
+}
