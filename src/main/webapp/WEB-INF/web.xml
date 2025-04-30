@@ -19,7 +19,7 @@
         <async-supported>true</async-supported>
         <load-on-startup>1</load-on-startup>
     </servlet>
-    
+    <!--
      <filter>
          <filter-name>CorsFilter</filter-name>
          <filter-class>org.apache.catalina.filters.CorsFilter</filter-class>
@@ -28,7 +28,7 @@
          <filter-name>CorsFilter</filter-name>
          <url-pattern>/*</url-pattern>
      </filter-mapping>
-    
+    -->
    
     <servlet-mapping>
         <servlet-name>apiBot</servlet-name>
