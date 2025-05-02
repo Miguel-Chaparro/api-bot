@@ -13,12 +13,14 @@ import com.dom.ws.rest.bot.Controller.projectController;
 import com.dom.ws.rest.bot.Controller.questionsController;
 import com.dom.ws.rest.bot.DAO.ProfileDAO;
 import com.dom.ws.rest.bot.DAO.UserDAO;
+import com.dom.ws.rest.bot.DAO.EmpresaDAO;
 import com.dom.ws.rest.bot.DTO.ProfileDTO;
 import com.dom.ws.rest.bot.DTO.UserDTO;
 import com.dom.ws.rest.bot.DTO.answerDTO;
 import com.dom.ws.rest.bot.DTO.projectDTO;
 import com.dom.ws.rest.bot.DTO.questionsDTO;
 import com.dom.ws.rest.bot.DTO.raspiDTO;
+import com.dom.ws.rest.bot.DTO.EmpresaDTO;
 import com.dom.ws.rest.bot.Request.AssignProfileRequest;
 import com.dom.ws.rest.bot.Request.answerReq;
 import com.dom.ws.rest.bot.Request.questionsAnswersReq;
@@ -891,5 +893,116 @@ public class api {
         List<UserDTO> users = userDAO.readAll();
         
         return Response.ok(users).build();
+    }
+
+    /**
+     * Crear una empresa
+     */
+    @POST
+    @Path(value = "/createEmpresa")
+    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN})
+    @Consumes({MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN})
+    @Operation(
+        summary = "Crear empresa",
+        description = "Crea una nueva empresa.",
+        requestBody = @RequestBody(
+            required = true,
+            content = @Content(schema = @Schema(implementation = EmpresaDTO.class))
+        ),
+        responses = {
+            @ApiResponse(responseCode = "200", description = "Empresa creada", content = @Content(schema = @Schema(implementation = Boolean.class))),
+            @ApiResponse(responseCode = "500", description = "Error interno del servidor")
+        }
+    )
+    public void createEmpresa(@Suspended final AsyncResponse asyncResponse, final EmpresaDTO request) {
+        executorService.submit(() -> {
+            EmpresaDAO dao = new EmpresaDAO();
+            boolean created = dao.create(request);
+            asyncResponse.resume(created);
+        });
+    }
+
+    /**
+     * Actualizar una empresa
+     */
+    @POST
+    @Path(value = "/updateEmpresa")
+    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN})
+    @Consumes({MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN})
+    @Operation(
+        summary = "Actualizar empresa",
+        description = "Actualiza una empresa existente.",
+        requestBody = @RequestBody(
+            required = true,
+            content = @Content(schema = @Schema(implementation = EmpresaDTO.class))
+        ),
+        responses = {
+            @ApiResponse(responseCode = "200", description = "Empresa actualizada", content = @Content(schema = @Schema(implementation = Boolean.class))),
+            @ApiResponse(responseCode = "500", description = "Error interno del servidor")
+        }
+    )
+    public void updateEmpresa(@Suspended final AsyncResponse asyncResponse, final EmpresaDTO request) {
+        executorService.submit(() -> {
+            EmpresaDAO dao = new EmpresaDAO();
+            boolean updated = dao.update(request);
+            asyncResponse.resume(updated);
+        });
+    }
+
+    /**
+     * Eliminar una empresa
+     */
+    @POST
+    @Path(value = "/deleteEmpresa")
+    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN})
+    @Consumes({MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN})
+    @Operation(
+        summary = "Eliminar empresa",
+        description = "Elimina una empresa existente.",
+        requestBody = @RequestBody(
+            required = true,
+            content = @Content(schema = @Schema(implementation = EmpresaDTO.class))
+        ),
+        responses = {
+            @ApiResponse(responseCode = "200", description = "Empresa eliminada", content = @Content(schema = @Schema(implementation = Boolean.class))),
+            @ApiResponse(responseCode = "500", description = "Error interno del servidor")
+        }
+    )
+    public void deleteEmpresa(@Suspended final AsyncResponse asyncResponse, final EmpresaDTO request) {
+        executorService.submit(() -> {
+            EmpresaDAO dao = new EmpresaDAO();
+            boolean deleted = dao.delete(request);
+            asyncResponse.resume(deleted);
+        });
+    }
+
+    /**
+     * Obtener usuarios por empresa
+     */
+    @GET
+    @Path("/usersByEmpresa/{empresaId}")
+    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN})
+    @Operation(
+        summary = "Obtener usuarios por empresa",
+        description = "Devuelve los usuarios asociados a una empresa específica.",
+        responses = {
+            @ApiResponse(
+                responseCode = "200",
+                description = "Lista de usuarios",
+                content = @Content(
+                    mediaType = "application/json",
+                    schema = @Schema(implementation = UserDTO.class)
+                )
+            ),
+            @ApiResponse(responseCode = "404", description = "Empresa no encontrada"),
+            @ApiResponse(responseCode = "500", description = "Error interno del servidor")
+        }
+    )
+    public void getUsersByEmpresa(@Suspended final AsyncResponse asyncResponse, @javax.ws.rs.PathParam("empresaId") Integer empresaId) {
+        executorService.submit(() -> {
+            UserDAO userDAO = new UserDAO();
+            List<UserDTO> users = userDAO.readAllByEmpresaId(empresaId);
+            asyncResponse.resume(users);
+        });
     }
 }

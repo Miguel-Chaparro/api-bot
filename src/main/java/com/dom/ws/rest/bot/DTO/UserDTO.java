@@ -17,6 +17,7 @@ public class UserDTO {
     private boolean disabled;       
     private msgError error;
     private String lastLoginIp; // Nueva propiedad
+    private Integer empresaId; // Relación con empresa
 
     public UserDTO() {
     }
@@ -24,7 +25,7 @@ public class UserDTO {
     public UserDTO(String id, String email, String displayName, String photoUrl, 
                   String phoneNumber, String providerId, Timestamp creationTime, 
                   Timestamp lastSignInTime, boolean emailVerified, 
-                  String customClaims, boolean disabled, String lastLoginIp) {
+                  String customClaims, boolean disabled, String lastLoginIp, Integer empresaId) {
         this.id = id;
         this.email = email;
         this.displayName = displayName;
@@ -37,6 +38,7 @@ public class UserDTO {
         this.customClaims = customClaims;
         this.disabled = disabled;
         this.lastLoginIp = lastLoginIp;
+        this.empresaId = empresaId;
     }
 
     // Getters y Setters
@@ -78,4 +80,7 @@ public class UserDTO {
 
     public String getLastLoginIp() { return lastLoginIp; }
     public void setLastLoginIp(String lastLoginIp) { this.lastLoginIp = lastLoginIp; }
+
+    public Integer getEmpresaId() { return empresaId; }
+    public void setEmpresaId(Integer empresaId) { this.empresaId = empresaId; }
 }

@@ -12,7 +12,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class UserDAO implements interfaces<UserDTO> {
-    private static final String SQL_INSERT = "INSERT INTO dommapi.users (id, email, display_name, photo_url, phone_number, provider_id, creation_time, last_sign_in_time, email_verified, custom_claims, disabled) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+    private static final String SQL_INSERT = "INSERT INTO dommapi.users (id, email, display_name, photo_url, phone_number, provider_id, creation_time, last_sign_in_time, email_verified, custom_claims, disabled, empresa_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
     private static final String SQL_EXISTS = "SELECT COUNT(*) FROM dommapi.users WHERE id = ?";
     private static final String SQL_GET_ALL = "SELECT * FROM dommapi.users";
     
@@ -62,6 +62,7 @@ public class UserDAO implements interfaces<UserDTO> {
             ps.setBoolean(9, dto.isEmailVerified());
             ps.setString(10, dto.getCustomClaims());
             ps.setBoolean(11, dto.isDisabled());
+            ps.setObject(12, dto.getEmpresaId());
             
             int result = ps.executeUpdate();
             success = result > 0;
@@ -120,6 +121,7 @@ public class UserDAO implements interfaces<UserDTO> {
                 user.setEmailVerified(rs.getBoolean("email_verified"));
                 user.setCustomClaims(rs.getString("custom_claims"));
                 user.setDisabled(rs.getBoolean("disabled"));
+                user.setEmpresaId((Integer)rs.getObject("empresa_id"));
                 users.add(user);
             }
         } catch (SQLException ex) {
@@ -154,6 +156,7 @@ public class UserDAO implements interfaces<UserDTO> {
                 user.setEmailVerified(rs.getBoolean("email_verified"));
                 user.setCustomClaims(rs.getString("custom_claims"));
                 user.setDisabled(rs.getBoolean("disabled"));
+                user.setEmpresaId((Integer)rs.getObject("empresa_id"));
             }
         } catch (SQLException ex) {
             log.log(Level.SEVERE, "Error reading user by id", ex);
@@ -162,5 +165,39 @@ public class UserDAO implements interfaces<UserDTO> {
         }
         log.info("*** End UserDAO readOneById ***");
         return user;
+    }
+
+    public List<UserDTO> readAllByEmpresaId(Integer empresaId) {
+        log.info("*** Start UserDAO readAllByEmpresaId ***");
+        List<UserDTO> users = new ArrayList<>();
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+        try {
+            ps = con.getCnn().prepareStatement("SELECT * FROM dommapi.users WHERE empresa_id = ?");
+            ps.setObject(1, empresaId);
+            rs = ps.executeQuery();
+            while (rs.next()) {
+                UserDTO user = new UserDTO();
+                user.setId(rs.getString("id"));
+                user.setEmail(rs.getString("email"));
+                user.setDisplayName(rs.getString("display_name"));
+                user.setPhotoUrl(rs.getString("photo_url"));
+                user.setPhoneNumber(rs.getString("phone_number"));
+                user.setProviderId(rs.getString("provider_id"));
+                user.setCreationTime(rs.getTimestamp("creation_time"));
+                user.setLastSignInTime(rs.getTimestamp("last_sign_in_time"));
+                user.setEmailVerified(rs.getBoolean("email_verified"));
+                user.setCustomClaims(rs.getString("custom_claims"));
+                user.setDisabled(rs.getBoolean("disabled"));
+                user.setEmpresaId((Integer)rs.getObject("empresa_id"));
+                users.add(user);
+            }
+        } catch (SQLException ex) {
+            log.log(Level.SEVERE, "Error getting users by empresa_id", ex);
+        } finally {
+            con.cerrarConexion();
+        }
+        log.info("*** End UserDAO readAllByEmpresaId ***");
+        return users;
     }
 }
