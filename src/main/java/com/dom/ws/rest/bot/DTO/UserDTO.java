@@ -26,6 +26,8 @@ public class UserDTO {
     private String ciudad;
     private String departamento;
     private String direccion;
+    private String tipoIdentificacion;
+    private String numeroIdentificacion;
 
     public UserDTO() {
     }
@@ -115,4 +117,10 @@ public class UserDTO {
 
     public String getDireccion() { return direccion; }
     public void setDireccion(String direccion) { this.direccion = direccion; }
+
+    public String getTipoIdentificacion() { return tipoIdentificacion; }
+    public void setTipoIdentificacion(String tipoIdentificacion) { this.tipoIdentificacion = tipoIdentificacion; }
+
+    public String getNumeroIdentificacion() { return numeroIdentificacion; }
+    public void setNumeroIdentificacion(String numeroIdentificacion) { this.numeroIdentificacion = numeroIdentificacion; }
 }

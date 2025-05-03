@@ -12,8 +12,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class UserDAO implements interfaces<UserDTO> {
-    private static final String SQL_INSERT = "INSERT INTO dommapi.users (id, email, display_name, photo_url, phone_number, provider_id, creation_time, last_sign_in_time, email_verified, custom_claims, disabled, empresa_id, id_raspi, created_by, plan_internet, plan_paneles, ppoe, ciudad, departamento, direccion) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-    private static final String SQL_UPDATE = "UPDATE dommapi.users SET email=?, display_name=?, photo_url=?, phone_number=?, provider_id=?, creation_time=?, last_sign_in_time=?, email_verified=?, custom_claims=?, disabled=?, empresa_id=?, id_raspi=?, created_by=?, plan_internet=?, plan_paneles=?, ppoe=?, ciudad=?, departamento=?, direccion=? WHERE id=?";
+    private static final String SQL_INSERT = "INSERT INTO dommapi.users (id, email, display_name, photo_url, phone_number, provider_id, creation_time, last_sign_in_time, email_verified, custom_claims, disabled, empresa_id, id_raspi, created_by, plan_internet, plan_paneles, ppoe, ciudad, departamento, direccion, tipo_identificacion, numero_identificacion) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+    private static final String SQL_UPDATE = "UPDATE dommapi.users SET email=?, display_name=?, photo_url=?, phone_number=?, provider_id=?, creation_time=?, last_sign_in_time=?, email_verified=?, custom_claims=?, disabled=?, empresa_id=?, id_raspi=?, created_by=?, plan_internet=?, plan_paneles=?, ppoe=?, ciudad=?, departamento=?, direccion=?, tipo_identificacion=?, numero_identificacion=? WHERE id=?";
     private static final String SQL_EXISTS = "SELECT COUNT(*) FROM dommapi.users WHERE id = ?";
     private static final String SQL_GET_ALL = "SELECT * FROM dommapi.users";
     
@@ -72,6 +72,8 @@ public class UserDAO implements interfaces<UserDTO> {
             ps.setString(18, dto.getCiudad());
             ps.setString(19, dto.getDepartamento());
             ps.setString(20, dto.getDireccion());
+            ps.setString(21, dto.getTipoIdentificacion());
+            ps.setString(22, dto.getNumeroIdentificacion());
             
             int result = ps.executeUpdate();
             success = result > 0;
@@ -113,7 +115,9 @@ public class UserDAO implements interfaces<UserDTO> {
             ps.setString(17, dto.getCiudad());
             ps.setString(18, dto.getDepartamento());
             ps.setString(19, dto.getDireccion());
-            ps.setString(20, dto.getId());
+            ps.setString(20, dto.getTipoIdentificacion());
+            ps.setString(21, dto.getNumeroIdentificacion());
+            ps.setString(22, dto.getId());
             
             int result = ps.executeUpdate();
             success = result > 0;
@@ -176,6 +180,8 @@ public class UserDAO implements interfaces<UserDTO> {
                 user.setCiudad(rs.getString("ciudad"));
                 user.setDepartamento(rs.getString("departamento"));
                 user.setDireccion(rs.getString("direccion"));
+                user.setTipoIdentificacion(rs.getString("tipo_identificacion"));
+                user.setNumeroIdentificacion(rs.getString("numero_identificacion"));
                 users.add(user);
             }
         } catch (SQLException ex) {
@@ -219,6 +225,8 @@ public class UserDAO implements interfaces<UserDTO> {
                 user.setCiudad(rs.getString("ciudad"));
                 user.setDepartamento(rs.getString("departamento"));
                 user.setDireccion(rs.getString("direccion"));
+                user.setTipoIdentificacion(rs.getString("tipo_identificacion"));
+                user.setNumeroIdentificacion(rs.getString("numero_identificacion"));
             }
         } catch (SQLException ex) {
             log.log(Level.SEVERE, "Error reading user by id", ex);
@@ -260,6 +268,8 @@ public class UserDAO implements interfaces<UserDTO> {
                 user.setCiudad(rs.getString("ciudad"));
                 user.setDepartamento(rs.getString("departamento"));
                 user.setDireccion(rs.getString("direccion"));
+                user.setTipoIdentificacion(rs.getString("tipo_identificacion"));
+                user.setNumeroIdentificacion(rs.getString("numero_identificacion"));
                 users.add(user);
             }
         } catch (SQLException ex) {

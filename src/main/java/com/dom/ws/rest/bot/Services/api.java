@@ -1068,6 +1068,14 @@ public class api {
                 .build());
             return;
         }
+        // Validar tipo y número de identificación
+        if (request.getTipoIdentificacion() == null || request.getTipoIdentificacion().trim().isEmpty() ||
+            request.getNumeroIdentificacion() == null || request.getNumeroIdentificacion().trim().isEmpty()) {
+            asyncResponse.resume(Response.status(Response.Status.BAD_REQUEST)
+                .entity(new msgError(-1, "El tipo y número de identificación son obligatorios"))
+                .build());
+            return;
+        }
         executorService.submit(() -> {
             // Asignar el usuario que crea
             request.setCreatedBy(decodedToken.getUid());
