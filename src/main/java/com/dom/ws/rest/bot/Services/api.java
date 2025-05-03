@@ -37,6 +37,9 @@ import com.dom.ws.rest.bot.Response.projectsResp;
 import com.dom.ws.rest.bot.Response.raspiResp;
 import com.dom.ws.rest.bot.vo.msgError;
 import com.google.firebase.auth.FirebaseToken;
+import com.google.firebase.auth.UserRecord;
+import com.google.firebase.auth.UserRecord.CreateRequest;
+import com.google.firebase.auth.FirebaseAuth;
 
 import java.sql.Timestamp;
 import java.util.List;
@@ -1137,6 +1140,26 @@ public class api {
             }
         }
         newUser.setEmpresaId(empresaId);
+
+        // Crear usuario en Firebase primero
+        try {
+            CreateRequest fbRequest = new CreateRequest()
+                .setEmail(newUser.getEmail())
+                .setPassword(newUser.getNumeroIdentificacion())
+                .setDisplayName(newUser.getDisplayName());
+            if (newUser.getPhoneNumber() != null && !newUser.getPhoneNumber().isEmpty()) {
+                fbRequest.setPhoneNumber(newUser.getPhoneNumber());
+            }
+            UserRecord userRecord = FirebaseAuth.getInstance().createUser(fbRequest);
+            // Guardar el UID generado por Firebase en el DTO
+            newUser.setId(userRecord.getUid());
+        } catch (Exception e) {
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                .entity(new msgError(-1, "Error creando usuario en Firebase: " + e.getMessage()))
+                .build();
+        }
+
+        // Ahora guardar en la base de datos
         boolean created = userDAO.create(newUser);
         return Response.ok(created).build();
     }
