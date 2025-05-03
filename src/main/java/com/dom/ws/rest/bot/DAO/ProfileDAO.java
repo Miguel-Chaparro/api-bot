@@ -85,4 +85,51 @@ public class ProfileDAO {
         
         return isAdmin;
     }
+
+    public List<ProfileDTO> getAllActiveProfiles() {
+        List<ProfileDTO> profiles = new ArrayList<>();
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+        try {
+            ps = con.getCnn().prepareStatement("SELECT * FROM dommapi.profiles WHERE active = true");
+            rs = ps.executeQuery();
+            while (rs.next()) {
+                ProfileDTO profile = new ProfileDTO();
+                profile.setId(rs.getInt("id"));
+                profile.setName(rs.getString("name"));
+                profile.setDescription(rs.getString("description"));
+                profile.setActive(rs.getBoolean("active"));
+                profiles.add(profile);
+            }
+        } catch (SQLException ex) {
+            log.log(Level.SEVERE, "Error getting all active profiles", ex);
+        } finally {
+            con.cerrarConexion();
+        }
+        return profiles;
+    }
+
+    public List<ProfileDTO> getActiveProfilesByDescription(String description) {
+        List<ProfileDTO> profiles = new ArrayList<>();
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+        try {
+            ps = con.getCnn().prepareStatement("SELECT * FROM dommapi.profiles WHERE active = true AND description = ?");
+            ps.setString(1, description);
+            rs = ps.executeQuery();
+            while (rs.next()) {
+                ProfileDTO profile = new ProfileDTO();
+                profile.setId(rs.getInt("id"));
+                profile.setName(rs.getString("name"));
+                profile.setDescription(rs.getString("description"));
+                profile.setActive(rs.getBoolean("active"));
+                profiles.add(profile);
+            }
+        } catch (SQLException ex) {
+            log.log(Level.SEVERE, "Error getting active profiles by description", ex);
+        } finally {
+            con.cerrarConexion();
+        }
+        return profiles;
+    }
 }

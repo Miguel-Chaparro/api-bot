@@ -1079,6 +1079,16 @@ public class api {
                 .build());
             return;
         }
+        // Validar formato E.164 para phoneNumber si viene presente
+        if (request.getPhoneNumber() != null && !request.getPhoneNumber().isEmpty()) {
+            String phone = request.getPhoneNumber();
+            if (!phone.matches("^\\+[1-9]\\d{1,14}$")) {
+                asyncResponse.resume(Response.status(Response.Status.BAD_REQUEST)
+                    .entity(new msgError(-1, "El número de teléfono debe estar en formato internacional E.164, por ejemplo: +573001234567"))
+                    .build());
+                return;
+            }
+        }
         executorService.submit(() -> {
             // Asignar el usuario que crea
             request.setCreatedBy(decodedToken.getUid());
@@ -1261,5 +1271,75 @@ public class api {
         userToUpdate.setEmpresaId(empresaId);
         boolean updated = userDAO.update(userToUpdate);
         return Response.ok(updated).build();
+    }
+
+    /**
+     * Endpoint para consultar perfiles activos (solo administradores)
+     */
+    @GET
+    @Path("/activeProfiles")
+    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN})
+    @Operation(
+        summary = "Obtener perfiles activos",
+        description = "Permite a un usuario con perfil Administrador consultar los perfiles activos. Si el perfil es Administrador y la descripción es 'Administrador', retorna todos los perfiles activos. Si la descripción es diferente, retorna solo los perfiles activos con la misma descripción.",
+        responses = {
+            @ApiResponse(
+                responseCode = "200",
+                description = "Lista de perfiles activos",
+                content = @Content(
+                    mediaType = "application/json",
+                    schema = @Schema(implementation = ProfileDTO.class),
+                    examples = @ExampleObject(
+                        value = "[{\n  \"id\": 1,\n  \"name\": \"Administrador\",\n  \"description\": \"Administrador\",\n  \"active\": true\n}]"
+                    )
+                )
+            ),
+            @ApiResponse(
+                responseCode = "401",
+                description = "No autorizado"
+            ),
+            @ApiResponse(
+                responseCode = "403",
+                description = "Acceso denegado"
+            )
+        }
+    )
+    public void getActiveProfiles(@Suspended final AsyncResponse asyncResponse, @Context ContainerRequestContext requestContext) {
+        FirebaseToken decodedToken = (FirebaseToken) requestContext.getProperty("user");
+        if (decodedToken == null) {
+            asyncResponse.resume(Response.status(Response.Status.UNAUTHORIZED)
+                .entity("No autorizado")
+                .build());
+            return;
+        }
+        executorService.submit(() -> {
+            asyncResponse.resume(doGetActiveProfiles(decodedToken.getUid()));
+        });
+    }
+
+    private Response doGetActiveProfiles(String userId) {
+        ProfileDAO profileDAO = new ProfileDAO();
+        List<ProfileDTO> userProfiles = profileDAO.getUserProfiles(userId);
+        boolean isAdmin = false;
+        String adminDesc = null;
+        for (ProfileDTO profile : userProfiles) {
+            if ("Administrador".equalsIgnoreCase(profile.getName())) {
+                isAdmin = true;
+                adminDesc = profile.getDescription();
+                break;
+            }
+        }
+        if (!isAdmin) {
+            return Response.status(Response.Status.FORBIDDEN)
+                .entity(new msgError(-1, "Solo los administradores pueden consultar perfiles"))
+                .build();
+        }
+        List<ProfileDTO> result;
+        if ("Administrador".equalsIgnoreCase(adminDesc)) {
+            result = profileDAO.getAllActiveProfiles();
+        } else {
+            result = profileDAO.getActiveProfilesByDescription(adminDesc);
+        }
+        return Response.ok(result).build();
     }
 }
