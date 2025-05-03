@@ -12,7 +12,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class UserDAO implements interfaces<UserDTO> {
-    private static final String SQL_INSERT = "INSERT INTO dommapi.users (id, email, display_name, photo_url, phone_number, provider_id, creation_time, last_sign_in_time, email_verified, custom_claims, disabled, empresa_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+    private static final String SQL_INSERT = "INSERT INTO dommapi.users (id, email, display_name, photo_url, phone_number, provider_id, creation_time, last_sign_in_time, email_verified, custom_claims, disabled, empresa_id, id_raspi, created_by, plan_internet, plan_paneles, ppoe, ciudad, departamento, direccion) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+    private static final String SQL_UPDATE = "UPDATE dommapi.users SET email=?, display_name=?, photo_url=?, phone_number=?, provider_id=?, creation_time=?, last_sign_in_time=?, email_verified=?, custom_claims=?, disabled=?, empresa_id=?, id_raspi=?, created_by=?, plan_internet=?, plan_paneles=?, ppoe=?, ciudad=?, departamento=?, direccion=? WHERE id=?";
     private static final String SQL_EXISTS = "SELECT COUNT(*) FROM dommapi.users WHERE id = ?";
     private static final String SQL_GET_ALL = "SELECT * FROM dommapi.users";
     
@@ -63,6 +64,14 @@ public class UserDAO implements interfaces<UserDTO> {
             ps.setString(10, dto.getCustomClaims());
             ps.setBoolean(11, dto.isDisabled());
             ps.setObject(12, dto.getEmpresaId());
+            ps.setString(13, dto.getIdRaspi());
+            ps.setString(14, dto.getCreatedBy());
+            ps.setString(15, dto.getPlanInternet());
+            ps.setString(16, dto.getPlanPaneles());
+            ps.setString(17, dto.getPpoe());
+            ps.setString(18, dto.getCiudad());
+            ps.setString(19, dto.getDepartamento());
+            ps.setString(20, dto.getDireccion());
             
             int result = ps.executeUpdate();
             success = result > 0;
@@ -79,7 +88,44 @@ public class UserDAO implements interfaces<UserDTO> {
 
     @Override
     public boolean update(UserDTO dto) {
-        return false; // Implementar si se necesita
+        log.info("*** Start UserDAO update ***");
+        PreparedStatement ps;
+        boolean success = false;
+        
+        try {
+            ps = con.getCnn().prepareStatement(SQL_UPDATE);
+            ps.setString(1, dto.getEmail());
+            ps.setString(2, dto.getDisplayName());
+            ps.setString(3, dto.getPhotoUrl());
+            ps.setString(4, dto.getPhoneNumber());
+            ps.setString(5, dto.getProviderId());
+            ps.setTimestamp(6, dto.getCreationTime());
+            ps.setTimestamp(7, dto.getLastSignInTime());
+            ps.setBoolean(8, dto.isEmailVerified());
+            ps.setString(9, dto.getCustomClaims());
+            ps.setBoolean(10, dto.isDisabled());
+            ps.setObject(11, dto.getEmpresaId());
+            ps.setString(12, dto.getIdRaspi());
+            ps.setString(13, dto.getCreatedBy());
+            ps.setString(14, dto.getPlanInternet());
+            ps.setString(15, dto.getPlanPaneles());
+            ps.setString(16, dto.getPpoe());
+            ps.setString(17, dto.getCiudad());
+            ps.setString(18, dto.getDepartamento());
+            ps.setString(19, dto.getDireccion());
+            ps.setString(20, dto.getId());
+            
+            int result = ps.executeUpdate();
+            success = result > 0;
+            
+        } catch (SQLException ex) {
+            log.log(Level.SEVERE, "Error updating user {0}", ex);
+        } finally {
+            con.cerrarConexion();
+        }
+        
+        log.info("*** End UserDAO update ***");
+        return success;
     }
 
     @Override
@@ -122,6 +168,14 @@ public class UserDAO implements interfaces<UserDTO> {
                 user.setCustomClaims(rs.getString("custom_claims"));
                 user.setDisabled(rs.getBoolean("disabled"));
                 user.setEmpresaId((Integer)rs.getObject("empresa_id"));
+                user.setIdRaspi(rs.getString("id_raspi"));
+                user.setCreatedBy(rs.getString("created_by"));
+                user.setPlanInternet(rs.getString("plan_internet"));
+                user.setPlanPaneles(rs.getString("plan_paneles"));
+                user.setPpoe(rs.getString("ppoe"));
+                user.setCiudad(rs.getString("ciudad"));
+                user.setDepartamento(rs.getString("departamento"));
+                user.setDireccion(rs.getString("direccion"));
                 users.add(user);
             }
         } catch (SQLException ex) {
@@ -157,6 +211,14 @@ public class UserDAO implements interfaces<UserDTO> {
                 user.setCustomClaims(rs.getString("custom_claims"));
                 user.setDisabled(rs.getBoolean("disabled"));
                 user.setEmpresaId((Integer)rs.getObject("empresa_id"));
+                user.setIdRaspi(rs.getString("id_raspi"));
+                user.setCreatedBy(rs.getString("created_by"));
+                user.setPlanInternet(rs.getString("plan_internet"));
+                user.setPlanPaneles(rs.getString("plan_paneles"));
+                user.setPpoe(rs.getString("ppoe"));
+                user.setCiudad(rs.getString("ciudad"));
+                user.setDepartamento(rs.getString("departamento"));
+                user.setDireccion(rs.getString("direccion"));
             }
         } catch (SQLException ex) {
             log.log(Level.SEVERE, "Error reading user by id", ex);
@@ -190,6 +252,14 @@ public class UserDAO implements interfaces<UserDTO> {
                 user.setCustomClaims(rs.getString("custom_claims"));
                 user.setDisabled(rs.getBoolean("disabled"));
                 user.setEmpresaId((Integer)rs.getObject("empresa_id"));
+                user.setIdRaspi(rs.getString("id_raspi"));
+                user.setCreatedBy(rs.getString("created_by"));
+                user.setPlanInternet(rs.getString("plan_internet"));
+                user.setPlanPaneles(rs.getString("plan_paneles"));
+                user.setPpoe(rs.getString("ppoe"));
+                user.setCiudad(rs.getString("ciudad"));
+                user.setDepartamento(rs.getString("departamento"));
+                user.setDireccion(rs.getString("direccion"));
                 users.add(user);
             }
         } catch (SQLException ex) {

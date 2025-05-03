@@ -18,6 +18,14 @@ public class UserDTO {
     private msgError error;
     private String lastLoginIp; // Nueva propiedad
     private Integer empresaId; // Relación con empresa
+    private String idRaspi;
+    private String createdBy;
+    private String planInternet;
+    private String planPaneles;
+    private String ppoe;
+    private String ciudad;
+    private String departamento;
+    private String direccion;
 
     public UserDTO() {
     }
@@ -83,4 +91,28 @@ public class UserDTO {
 
     public Integer getEmpresaId() { return empresaId; }
     public void setEmpresaId(Integer empresaId) { this.empresaId = empresaId; }
+
+    public String getIdRaspi() { return idRaspi; }
+    public void setIdRaspi(String idRaspi) { this.idRaspi = idRaspi; }
+
+    public String getCreatedBy() { return createdBy; }
+    public void setCreatedBy(String createdBy) { this.createdBy = createdBy; }
+
+    public String getPlanInternet() { return planInternet; }
+    public void setPlanInternet(String planInternet) { this.planInternet = planInternet; }
+
+    public String getPlanPaneles() { return planPaneles; }
+    public void setPlanPaneles(String planPaneles) { this.planPaneles = planPaneles; }
+
+    public String getPpoe() { return ppoe; }
+    public void setPpoe(String ppoe) { this.ppoe = ppoe; }
+
+    public String getCiudad() { return ciudad; }
+    public void setCiudad(String ciudad) { this.ciudad = ciudad; }
+
+    public String getDepartamento() { return departamento; }
+    public void setDepartamento(String departamento) { this.departamento = departamento; }
+
+    public String getDireccion() { return direccion; }
+    public void setDireccion(String direccion) { this.direccion = direccion; }
 }

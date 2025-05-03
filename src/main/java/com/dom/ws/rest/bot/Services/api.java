@@ -878,21 +878,55 @@ public class api {
         });
     }
 
-    private Response doGetUsers(String adminUserId) {
+    private Response doGetUsers(String userId) {
         ProfileDAO profileDAO = new ProfileDAO();
-        
-        // Verificar si el usuario que hace la petición es administrador
-        if (!profileDAO.isUserAdmin(adminUserId)) {
+        UserDAO userDAO = new UserDAO();
+        List<ProfileDTO> profiles = profileDAO.getUserProfiles(userId);
+        boolean isAdmin = false;
+        String empresaDesc = null;
+        for (ProfileDTO profile : profiles) {
+            if ("Administrador".equalsIgnoreCase(profile.getName())) {
+                if ("Administrador".equalsIgnoreCase(profile.getDescription())) {
+                    // Admin global: puede ver todos los usuarios
+                    isAdmin = true;
+                    break;
+                } else {
+                    // Admin de empresa: solo usuarios de su empresa
+                    empresaDesc = profile.getDescription();
+                    isAdmin = true;
+                    break;
+                }
+            }
+        }
+        if (!isAdmin) {
             return Response.status(Response.Status.FORBIDDEN)
                 .entity(new msgError(-1, "Solo los administradores pueden consultar usuarios"))
                 .build();
         }
-        
-        // Obtener la lista de usuarios
-        UserDAO userDAO = new UserDAO();
-        List<UserDTO> users = userDAO.readAll();
-        
-        return Response.ok(users).build();
+        if (empresaDesc != null && !"Administrador".equalsIgnoreCase(empresaDesc)) {
+            // Buscar la empresa por nombre (descripción) y obtener su id
+            // Suponiendo que el nombre de la empresa es único y está en la tabla empresa
+            EmpresaDAO empresaDAO = new EmpresaDAO();
+            List<EmpresaDTO> empresas = empresaDAO.readAll();
+            Integer empresaId = null;
+            for (EmpresaDTO empresa : empresas) {
+                if (empresaDesc.equalsIgnoreCase(empresa.getNombre())) {
+                    empresaId = empresa.getId();
+                    break;
+                }
+            }
+            if (empresaId == null) {
+                return Response.status(Response.Status.NOT_FOUND)
+                    .entity(new msgError(-1, "No se encontró la empresa asociada al perfil"))
+                    .build();
+            }
+            List<UserDTO> users = userDAO.readAllByEmpresaId(empresaId);
+            return Response.ok(users).build();
+        } else {
+            // Admin global
+            List<UserDTO> users = userDAO.readAll();
+            return Response.ok(users).build();
+        }
     }
 
     /**
@@ -1004,5 +1038,197 @@ public class api {
             List<UserDTO> users = userDAO.readAllByEmpresaId(empresaId);
             asyncResponse.resume(users);
         });
+    }
+
+    /**
+     * Crear un usuario (solo administradores y técnicos)
+     */
+    @POST
+    @Path(value = "/createUser")
+    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN})
+    @Consumes({MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN})
+    @Operation(
+        summary = "Crear usuario",
+        description = "Permite crear un usuario según reglas de perfil y empresa.",
+        requestBody = @RequestBody(
+            required = true,
+            content = @Content(schema = @Schema(implementation = UserDTO.class))
+        ),
+        responses = {
+            @ApiResponse(responseCode = "200", description = "Usuario creado", content = @Content(schema = @Schema(implementation = Boolean.class))),
+            @ApiResponse(responseCode = "403", description = "No tiene permisos para crear usuarios"),
+            @ApiResponse(responseCode = "400", description = "Datos inválidos o empresa no encontrada")
+        }
+    )
+    public void createUser(@Suspended final AsyncResponse asyncResponse, final UserDTO request, @Context ContainerRequestContext requestContext) {
+        FirebaseToken decodedToken = (FirebaseToken) requestContext.getProperty("user");
+        if (decodedToken == null) {
+            asyncResponse.resume(Response.status(Response.Status.UNAUTHORIZED)
+                .entity("No autorizado")
+                .build());
+            return;
+        }
+        executorService.submit(() -> {
+            // Asignar el usuario que crea
+            request.setCreatedBy(decodedToken.getUid());
+            asyncResponse.resume(doCreateUser(decodedToken.getUid(), request));
+        });
+    }
+
+    private Response doCreateUser(String userId, UserDTO newUser) {
+        ProfileDAO profileDAO = new ProfileDAO();
+        EmpresaDAO empresaDAO = new EmpresaDAO();
+        UserDAO userDAO = new UserDAO();
+        List<ProfileDTO> profiles = profileDAO.getUserProfiles(userId);
+        boolean isAdmin = false;
+        boolean isTecnico = false;
+        String empresaDesc = null;
+        boolean adminGlobal = false;
+        for (ProfileDTO profile : profiles) {
+            if ("Administrador".equalsIgnoreCase(profile.getName())) {
+                isAdmin = true;
+                if ("Administrador".equalsIgnoreCase(profile.getDescription())) {
+                    adminGlobal = true;
+                } else {
+                    empresaDesc = profile.getDescription();
+                }
+                break;
+            } else if ("Tecnico".equalsIgnoreCase(profile.getName())) {
+                isTecnico = true;
+                empresaDesc = profile.getDescription();
+                break;
+            }
+        }
+        if (!isAdmin && !isTecnico) {
+            return Response.status(Response.Status.FORBIDDEN)
+                .entity(new msgError(-1, "No tiene permisos para crear usuarios"))
+                .build();
+        }
+        Integer empresaId = null;
+        if (adminGlobal) {
+            // Debe venir la empresa en el request
+            empresaId = newUser.getEmpresaId();
+            if (empresaId == null) {
+                return Response.status(Response.Status.BAD_REQUEST)
+                    .entity(new msgError(-1, "Debe especificar la empresa para el usuario"))
+                    .build();
+            }
+        } else {
+            // Buscar la empresa por nombre (de la descripción del perfil)
+            List<EmpresaDTO> empresas = empresaDAO.readAll();
+            for (EmpresaDTO empresa : empresas) {
+                if (empresaDesc != null && empresaDesc.equalsIgnoreCase(empresa.getNombre())) {
+                    empresaId = empresa.getId();
+                    break;
+                }
+            }
+            if (empresaId == null) {
+                return Response.status(Response.Status.BAD_REQUEST)
+                    .entity(new msgError(-1, "No se encontró la empresa asociada al perfil"))
+                    .build();
+            }
+        }
+        newUser.setEmpresaId(empresaId);
+        boolean created = userDAO.create(newUser);
+        return Response.ok(created).build();
+    }
+
+    /**
+     * Actualizar un usuario (solo administradores y técnicos)
+     */
+    @POST
+    @Path(value = "/updateUser")
+    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN})
+    @Consumes({MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN})
+    @Operation(
+        summary = "Actualizar usuario",
+        description = "Permite actualizar un usuario según reglas de perfil y empresa.",
+        requestBody = @RequestBody(
+            required = true,
+            content = @Content(schema = @Schema(implementation = UserDTO.class))
+        ),
+        responses = {
+            @ApiResponse(responseCode = "200", description = "Usuario actualizado", content = @Content(schema = @Schema(implementation = Boolean.class))),
+            @ApiResponse(responseCode = "403", description = "No tiene permisos para actualizar usuarios"),
+            @ApiResponse(responseCode = "400", description = "Datos inválidos o empresa no encontrada")
+        }
+    )
+    public void updateUser(@Suspended final AsyncResponse asyncResponse, final UserDTO request, @Context ContainerRequestContext requestContext) {
+        FirebaseToken decodedToken = (FirebaseToken) requestContext.getProperty("user");
+        if (decodedToken == null) {
+            asyncResponse.resume(Response.status(Response.Status.UNAUTHORIZED)
+                .entity("No autorizado")
+                .build());
+            return;
+        }
+        executorService.submit(() -> {
+            // Asignar el usuario que actualiza (opcional, si quieres registrar auditoría)
+            request.setCreatedBy(decodedToken.getUid());
+            asyncResponse.resume(doUpdateUser(decodedToken.getUid(), request));
+        });
+    }
+
+    private Response doUpdateUser(String userId, UserDTO userToUpdate) {
+        ProfileDAO profileDAO = new ProfileDAO();
+        EmpresaDAO empresaDAO = new EmpresaDAO();
+        UserDAO userDAO = new UserDAO();
+        List<ProfileDTO> profiles = profileDAO.getUserProfiles(userId);
+        boolean isAdmin = false;
+        boolean isTecnico = false;
+        String empresaDesc = null;
+        boolean adminGlobal = false;
+        for (ProfileDTO profile : profiles) {
+            if ("Administrador".equalsIgnoreCase(profile.getName())) {
+                isAdmin = true;
+                if ("Administrador".equalsIgnoreCase(profile.getDescription())) {
+                    adminGlobal = true;
+                } else {
+                    empresaDesc = profile.getDescription();
+                }
+                break;
+            } else if ("Tecnico".equalsIgnoreCase(profile.getName())) {
+                isTecnico = true;
+                empresaDesc = profile.getDescription();
+                break;
+            }
+        }
+        if (!isAdmin && !isTecnico) {
+            return Response.status(Response.Status.FORBIDDEN)
+                .entity(new msgError(-1, "No tiene permisos para actualizar usuarios"))
+                .build();
+        }
+        Integer empresaId = null;
+        if (adminGlobal) {
+            // Puede actualizar cualquier usuario, la empresa puede venir en el request
+            empresaId = userToUpdate.getEmpresaId();
+            if (empresaId == null) {
+                return Response.status(Response.Status.BAD_REQUEST)
+                    .entity(new msgError(-1, "Debe especificar la empresa para el usuario"))
+                    .build();
+            }
+        } else {
+            // Buscar la empresa por nombre (de la descripción del perfil)
+            List<EmpresaDTO> empresas = empresaDAO.readAll();
+            for (EmpresaDTO empresa : empresas) {
+                if (empresaDesc != null && empresaDesc.equalsIgnoreCase(empresa.getNombre())) {
+                    empresaId = empresa.getId();
+                    break;
+                }
+            }
+            if (empresaId == null) {
+                return Response.status(Response.Status.BAD_REQUEST)
+                    .entity(new msgError(-1, "No se encontró la empresa asociada al perfil"))
+                    .build();
+            }
+            // Solo puede actualizar usuarios de su empresa
+            if (!empresaId.equals(userToUpdate.getEmpresaId())) {
+                return Response.status(Response.Status.FORBIDDEN)
+                    .entity(new msgError(-1, "No puede actualizar usuarios de otra empresa"))
+                    .build();
+            }
+        }
+        userToUpdate.setEmpresaId(empresaId);
+        boolean updated = userDAO.update(userToUpdate);
+        return Response.ok(updated).build();
     }
 }
