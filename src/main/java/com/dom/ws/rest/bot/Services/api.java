@@ -14,6 +14,7 @@ import com.dom.ws.rest.bot.Controller.questionsController;
 import com.dom.ws.rest.bot.DAO.ProfileDAO;
 import com.dom.ws.rest.bot.DAO.UserDAO;
 import com.dom.ws.rest.bot.DAO.EmpresaDAO;
+import com.dom.ws.rest.bot.DAO.RaspberryNewDAO;
 import com.dom.ws.rest.bot.DTO.ProfileDTO;
 import com.dom.ws.rest.bot.DTO.UserDTO;
 import com.dom.ws.rest.bot.DTO.answerDTO;
@@ -21,6 +22,7 @@ import com.dom.ws.rest.bot.DTO.projectDTO;
 import com.dom.ws.rest.bot.DTO.questionsDTO;
 import com.dom.ws.rest.bot.DTO.raspiDTO;
 import com.dom.ws.rest.bot.DTO.EmpresaDTO;
+import com.dom.ws.rest.bot.DTO.RaspberryNewDTO;
 import com.dom.ws.rest.bot.Request.AssignProfileRequest;
 import com.dom.ws.rest.bot.Request.answerReq;
 import com.dom.ws.rest.bot.Request.questionsAnswersReq;
@@ -42,6 +44,8 @@ import com.google.firebase.auth.UserRecord.CreateRequest;
 import com.google.firebase.auth.FirebaseAuth;
 
 import java.sql.Timestamp;
+import java.sql.Connection;
+import java.sql.DriverManager;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import javax.ws.rs.Consumes;
@@ -1341,5 +1345,135 @@ public class api {
             result = profileDAO.getActiveProfilesByDescription(adminDesc);
         }
         return Response.ok(result).build();
+    }
+
+    /**
+     * Endpoint para consultar los dispositivos asociados a un usuario registrado
+     */
+    @GET
+    @Path("/user/devices")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(
+        summary = "Consultar dispositivos de usuario",
+        description = "Devuelve la estructura de dispositivos Raspberry asociados al usuario autenticado.",
+        responses = {
+            @ApiResponse(
+                responseCode = "200",
+                description = "Estructura de dispositivos",
+                content = @Content(
+                    mediaType = "application/json",
+                    schema = @Schema(implementation = RaspberryNewDTO.class)
+                )
+            ),
+            @ApiResponse(responseCode = "401", description = "No autorizado"),
+            @ApiResponse(responseCode = "404", description = "No se encontraron dispositivos asociados")
+        }
+    )
+    public void getUserDevices(@Suspended final AsyncResponse asyncResponse, @Context ContainerRequestContext requestContext) {
+        FirebaseToken decodedToken = (FirebaseToken) requestContext.getProperty("user");
+        if (decodedToken == null) {
+            asyncResponse.resume(Response.status(Response.Status.UNAUTHORIZED)
+                .entity("No autorizado")
+                .build());
+            return;
+        }
+        executorService.submit(() -> {
+            try (Connection conn = DriverManager.getConnection("jdbc:tu_url_bd", "usuario", "password")) {
+                RaspberryNewDAO dao = new RaspberryNewDAO(conn);
+                RaspberryNewDTO dto = dao.getRaspberryByUserId(decodedToken.getUid());
+                if (dto == null) {
+                    asyncResponse.resume(Response.status(Response.Status.NOT_FOUND)
+                        .entity("No se encontraron dispositivos asociados")
+                        .build());
+                } else {
+                    asyncResponse.resume(Response.ok(dto).build());
+                }
+            } catch (Exception e) {
+                asyncResponse.resume(Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity(e.getMessage())
+                    .build());
+            }
+        });
+    }
+
+    /**
+     * Endpoint para consultar dispositivos por número de celular
+     */
+    @GET
+    @Path("/user/devices/by-number/{number}")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(
+        summary = "Consultar dispositivos por número de celular",
+        description = "Devuelve la estructura de dispositivos Raspberry asociados al número de celular.",
+        responses = {
+            @ApiResponse(
+                responseCode = "200",
+                description = "Estructura de dispositivos",
+                content = @Content(
+                    mediaType = "application/json",
+                    schema = @Schema(implementation = RaspberryNewDTO.class)
+                )
+            ),
+            @ApiResponse(responseCode = "404", description = "No se encontraron dispositivos asociados")
+        }
+    )
+    public void getUserDevicesByNumber(@Suspended final AsyncResponse asyncResponse, @javax.ws.rs.PathParam("number") String number) {
+        executorService.submit(() -> {
+            try (Connection conn = DriverManager.getConnection("jdbc:tu_url_bd", "usuario", "password")) {
+                RaspberryNewDAO dao = new RaspberryNewDAO(conn);
+                RaspberryNewDTO dto = dao.getRaspberryByUserNumber(number);
+                if (dto == null) {
+                    asyncResponse.resume(Response.status(Response.Status.NOT_FOUND)
+                        .entity("No se encontraron dispositivos asociados")
+                        .build());
+                } else {
+                    asyncResponse.resume(Response.ok(dto).build());
+                }
+            } catch (Exception e) {
+                asyncResponse.resume(Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity(e.getMessage())
+                    .build());
+            }
+        });
+    }
+
+    /**
+     * Endpoint para crear o actualizar dispositivos y asociaciones
+     */
+    @POST
+    @Path("/user/devices")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(
+        summary = "Crear o actualizar dispositivos y asociaciones",
+        description = "Crea o actualiza la configuración de una Raspberry y asocia usuarios por userId y/o número de celular.",
+        requestBody = @RequestBody(
+            required = true,
+            content = @Content(schema = @Schema(implementation = RaspberryNewDTO.class))
+        ),
+        responses = {
+            @ApiResponse(responseCode = "200", description = "Configuración guardada correctamente"),
+            @ApiResponse(responseCode = "400", description = "Datos inválidos"),
+            @ApiResponse(responseCode = "500", description = "Error interno del servidor")
+        }
+    )
+    public void createOrUpdateUserDevices(@Suspended final AsyncResponse asyncResponse, final RaspberryNewDTO request) {
+        executorService.submit(() -> {
+            try (Connection conn = DriverManager.getConnection("jdbc:tu_url_bd", "usuario", "password")) {
+                RaspberryNewDAO dao = new RaspberryNewDAO(conn);
+                boolean ok = dao.createOrUpdateRaspberryWithUsers(request);
+                if (ok) {
+                    asyncResponse.resume(Response.ok("Configuración guardada correctamente").build());
+                } else {
+                    asyncResponse.resume(Response.status(Response.Status.BAD_REQUEST)
+                        .entity("No se pudo guardar la configuración")
+                        .build());
+                }
+            } catch (Exception e) {
+                asyncResponse.resume(Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity(e.getMessage())
+                    .build());
+            }
+        });
     }
 }
