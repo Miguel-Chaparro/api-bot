@@ -704,39 +704,39 @@ public class api {
 
     private LoginResponse doLogin(FirebaseToken decodedToken) {
         LoginResponse response = new LoginResponse();
-        UserDTO userDTO = new UserDTO();
-        
-        // Llenar el DTO con la información del token
-        userDTO.setId(decodedToken.getUid());
-        userDTO.setEmail(decodedToken.getEmail());
-        userDTO.setDisplayName(decodedToken.getName());
-        userDTO.setPhotoUrl(decodedToken.getPicture());
-        userDTO.setEmailVerified(decodedToken.isEmailVerified());
-        userDTO.setProviderId(decodedToken.getIssuer());
-        userDTO.setCreationTime(new Timestamp(System.currentTimeMillis()));
-        userDTO.setLastSignInTime(new Timestamp(System.currentTimeMillis()));
-        
         UserDAO userDAO = new UserDAO();
         ProfileDAO profileDAO = new ProfileDAO();
-        boolean exists = userDAO.exists(userDTO.getId());
-        
-        if (!exists) {
-            boolean created = userDAO.create(userDTO);
-            response.setNewUser(true);
-            response.setCreated(created);
-            
-            // Si es un nuevo usuario, asignar perfil por defecto (por ejemplo, cliente)
-            if (created) {
-                profileDAO.assignProfileToUser(userDTO.getId(), 3); // ID 3 = Cliente por defecto
-            }
-        } else {
+        UserDTO userDTO = userDAO.readOneById(decodedToken.getUid());
+        boolean exists = userDTO != null && userDTO.getId() != null;
+        if (exists && userDTO != null) {
+            // Refrescar datos del usuario con la información más reciente del token
+            userDTO.setDisplayName(decodedToken.getName());
+            userDTO.setPhotoUrl(decodedToken.getPicture());
+            userDTO.setEmail(decodedToken.getEmail());
+            userDTO.setEmailVerified(decodedToken.isEmailVerified());
+            userDTO.setLastSignInTime(new java.sql.Timestamp(System.currentTimeMillis()));
+            userDAO.update(userDTO);
             response.setNewUser(false);
+        } else {
+            // Si no existe, crear usuario nuevo
+            userDTO = new UserDTO();
+            userDTO.setId(decodedToken.getUid());
+            userDTO.setEmail(decodedToken.getEmail());
+            userDTO.setDisplayName(decodedToken.getName());
+            userDTO.setPhotoUrl(decodedToken.getPicture());
+            userDTO.setEmailVerified(decodedToken.isEmailVerified());
+            userDTO.setProviderId(decodedToken.getIssuer());
+            userDTO.setCreationTime(new java.sql.Timestamp(System.currentTimeMillis()));
+            userDTO.setLastSignInTime(new java.sql.Timestamp(System.currentTimeMillis()));
+            userDAO.create(userDTO);
+            response.setNewUser(true);
+            response.setCreated(true);
+            // Asignar perfil por defecto
+            profileDAO.assignProfileToUser(userDTO.getId(), 3);
         }
-        
         // Obtener los perfiles del usuario
         List<ProfileDTO> userProfiles = profileDAO.getUserProfiles(userDTO.getId());
         response.setProfiles(userProfiles);
-        
         return response;
     }
 
