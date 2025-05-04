@@ -917,7 +917,7 @@ public class api {
             List<EmpresaDTO> empresas = empresaDAO.readAll();
             Integer empresaId = null;
             for (EmpresaDTO empresa : empresas) {
-                if (empresaDesc.equalsIgnoreCase(empresa.getNombre())) {
+                if (Integer.valueOf(empresaDesc).equals(empresa.getId())) {
                     empresaId = empresa.getId();
                     break;
                 }
