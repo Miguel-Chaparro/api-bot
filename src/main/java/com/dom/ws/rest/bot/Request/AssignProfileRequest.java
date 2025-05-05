@@ -1,15 +1,17 @@
 package com.dom.ws.rest.bot.Request;
 
+import java.util.List;
+
 public class AssignProfileRequest {
     private String userId;
-    private int profileId;
+    private List<Integer> profileIds;
 
     public AssignProfileRequest() {
     }
 
-    public AssignProfileRequest(String userId, int profileId) {
+    public AssignProfileRequest(String userId, List<Integer> profileIds) {
         this.userId = userId;
-        this.profileId = profileId;
+        this.profileIds = profileIds;
     }
 
     public String getUserId() {
@@ -20,11 +22,11 @@ public class AssignProfileRequest {
         this.userId = userId;
     }
 
-    public int getProfileId() {
-        return profileId;
+    public List<Integer> getProfileIds() {
+        return profileIds;
     }
 
-    public void setProfileId(int profileId) {
-        this.profileId = profileId;
+    public void setProfileIds(List<Integer> profileIds) {
+        this.profileIds = profileIds;
     }
 }

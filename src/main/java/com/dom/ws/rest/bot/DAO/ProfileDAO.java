@@ -132,4 +132,19 @@ public class ProfileDAO {
         }
         return profiles;
     }
+
+    public boolean deleteAllProfilesForUser(String userId) {
+        PreparedStatement ps = null;
+        boolean success = false;
+        try {
+            ps = con.getCnn().prepareStatement("DELETE FROM dommapi.user_profiles WHERE user_id = ?");
+            ps.setString(1, userId);
+            success = ps.executeUpdate() >= 0;
+        } catch (SQLException ex) {
+            log.log(Level.SEVERE, "Error deleting user profiles", ex);
+        } finally {
+            con.cerrarConexion();
+        }
+        return success;
+    }
 }

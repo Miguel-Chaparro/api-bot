@@ -731,8 +731,6 @@ public class api {
             userDAO.create(userDTO);
             response.setNewUser(true);
             response.setCreated(true);
-            // Asignar perfil por defecto
-            profileDAO.assignProfileToUser(userDTO.getId(), 3);
         }
         // Obtener los perfiles del usuario
         List<ProfileDTO> userProfiles = profileDAO.getUserProfiles(userDTO.getId());
@@ -748,25 +746,25 @@ public class api {
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN})
     @Consumes({MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN})
     @Operation(
-        summary = "Asignar perfil a usuario",
-        description = "Permite a un administrador asignar un perfil a un usuario.",
+        summary = "Asignar perfiles a usuario",
+        description = "Permite a un administrador asignar una lista de perfiles a un usuario. Elimina las relaciones previas y asigna los nuevos perfiles.",
         requestBody = @RequestBody(
             required = true,
             content = @Content(
                 mediaType = "application/json",
                 schema = @Schema(implementation = AssignProfileRequest.class),
                 examples = @ExampleObject(
-                    value = "{\n  \"userId\": \"uid123\",\n  \"profileId\": 1\n}"
+                    value = "{\n  \"userId\": \"uid123\",\n  \"profileIds\": [1,2,3]\n}"
                 )
             )
         ),
         responses = {
             @ApiResponse(
                 responseCode = "200",
-                description = "Perfil asignado correctamente",
+                description = "Perfiles asignados correctamente",
                 content = @Content(
                     mediaType = "application/json",
-                    examples = @ExampleObject(value = "{\n  \"code\": 0,\n  \"message\": \"Perfil asignado correctamente\"\n}")
+                    examples = @ExampleObject(value = "{\n  \"code\": 0,\n  \"message\": \"Perfiles asignados correctamente\"\n}")
                 )
             ),
             @ApiResponse(
@@ -774,7 +772,7 @@ public class api {
                 description = "Solicitud inválida",
                 content = @Content(
                     mediaType = "application/json",
-                    examples = @ExampleObject(value = "{\n  \"code\": -1,\n  \"message\": \"No se pudo asignar el perfil\"\n}")
+                    examples = @ExampleObject(value = "{\n  \"code\": -1,\n  \"message\": \"No se pudieron asignar los perfiles\"\n}")
                 )
             ),
             @ApiResponse(
@@ -791,17 +789,15 @@ public class api {
                             final AssignProfileRequest request,
                             @Context ContainerRequestContext requestContext) {
         FirebaseToken decodedToken = (FirebaseToken) requestContext.getProperty("user");
-        
         if (decodedToken == null) {
             asyncResponse.resume(Response.status(Response.Status.UNAUTHORIZED)
                 .entity("No autorizado")
                 .build());
             return;
         }
-
         executorService.submit(() -> {
             try {
-                asyncResponse.resume(doAssignProfile(request, decodedToken.getUid()));
+                asyncResponse.resume(doAssignProfiles(request, decodedToken.getUid()));
             } catch (Exception e) {
                 asyncResponse.resume(Response.status(Response.Status.INTERNAL_SERVER_ERROR)
                     .entity(new msgError(-1, e.getMessage()))
@@ -810,24 +806,32 @@ public class api {
         });
     }
 
-    private Response doAssignProfile(AssignProfileRequest request, String adminUserId) {
+    private Response doAssignProfiles(AssignProfileRequest request, String adminUserId) {
         ProfileDAO profileDAO = new ProfileDAO();
-        
         // Verificar si el usuario que hace la petición es administrador
         if (!profileDAO.isUserAdmin(adminUserId)) {
             return Response.status(Response.Status.FORBIDDEN)
                 .entity(new msgError(-1, "Solo los administradores pueden asignar perfiles"))
                 .build();
         }
-        
-        // Intentar asignar el perfil
-        boolean success = profileDAO.assignProfileToUser(request.getUserId(), request.getProfileId());
-        
-        if (success) {
-            return Response.ok(new msgError(0, "Perfil asignado correctamente")).build();
+        // Validar entrada
+        if (request.getUserId() == null || request.getProfileIds() == null || request.getProfileIds().isEmpty()) {
+            return Response.status(Response.Status.BAD_REQUEST)
+                .entity(new msgError(-1, "Debe especificar el usuario y al menos un perfil"))
+                .build();
+        }
+        // Eliminar relaciones previas
+        boolean deleted = profileDAO.deleteAllProfilesForUser(request.getUserId());
+        boolean allAssigned = true;
+        for (Integer profileId : request.getProfileIds()) {
+            boolean assigned = profileDAO.assignProfileToUser(request.getUserId(), profileId);
+            if (!assigned) allAssigned = false;
+        }
+        if (allAssigned && deleted) {
+            return Response.ok(new msgError(0, "Perfiles asignados correctamente")).build();
         } else {
             return Response.status(Response.Status.BAD_REQUEST)
-                .entity(new msgError(-1, "No se pudo asignar el perfil"))
+                .entity(new msgError(-1, "No se pudieron asignar los perfiles"))
                 .build();
         }
     }
@@ -1474,6 +1478,49 @@ public class api {
                     .entity(e.getMessage())
                     .build());
             }
+        });
+    }
+
+    /**
+     * Endpoint para consultar los perfiles asignados a un usuario (solo administradores)
+     */
+    @GET
+    @Path("/user/{userId}/profiles")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(
+        summary = "Obtener perfiles de un usuario",
+        description = "Permite a un administrador consultar los perfiles asignados a un usuario.",
+        responses = {
+            @ApiResponse(
+                responseCode = "200",
+                description = "Lista de perfiles",
+                content = @Content(
+                    mediaType = "application/json",
+                    schema = @Schema(implementation = ProfileDTO.class)
+                )
+            ),
+            @ApiResponse(responseCode = "401", description = "No autorizado"),
+            @ApiResponse(responseCode = "403", description = "Acceso denegado")
+        }
+    )
+    public void getUserProfiles(@Suspended final AsyncResponse asyncResponse, @javax.ws.rs.PathParam("userId") String userId, @Context ContainerRequestContext requestContext) {
+        FirebaseToken decodedToken = (FirebaseToken) requestContext.getProperty("user");
+        if (decodedToken == null) {
+            asyncResponse.resume(Response.status(Response.Status.UNAUTHORIZED)
+                .entity("No autorizado")
+                .build());
+            return;
+        }
+        executorService.submit(() -> {
+            ProfileDAO profileDAO = new ProfileDAO();
+            if (!profileDAO.isUserAdmin(decodedToken.getUid())) {
+                asyncResponse.resume(Response.status(Response.Status.FORBIDDEN)
+                    .entity("Solo los administradores pueden consultar perfiles de otros usuarios")
+                    .build());
+                return;
+            }
+            List<ProfileDTO> profiles = profileDAO.getUserProfiles(userId);
+            asyncResponse.resume(Response.ok(profiles).build());
         });
     }
 }
