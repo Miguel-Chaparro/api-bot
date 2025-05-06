@@ -1523,4 +1523,56 @@ public class api {
             asyncResponse.resume(Response.ok(profiles).build());
         });
     }
+
+    /**
+     * Endpoint para consultar todas las empresas (solo administradores globales)
+     */
+    @GET
+    @Path("/empresas")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(
+        summary = "Obtener todas las empresas",
+        description = "Permite a un administrador global (name=Administrador y description=Administrador) consultar todas las empresas registradas.",
+        responses = {
+            @ApiResponse(
+                responseCode = "200",
+                description = "Lista de empresas",
+                content = @Content(
+                    mediaType = "application/json",
+                    schema = @Schema(implementation = EmpresaDTO.class)
+                )
+            ),
+            @ApiResponse(responseCode = "401", description = "No autorizado"),
+            @ApiResponse(responseCode = "403", description = "Acceso denegado")
+        }
+    )
+    public void getAllEmpresas(@Suspended final AsyncResponse asyncResponse, @Context ContainerRequestContext requestContext) {
+        FirebaseToken decodedToken = (FirebaseToken) requestContext.getProperty("user");
+        if (decodedToken == null) {
+            asyncResponse.resume(Response.status(Response.Status.UNAUTHORIZED)
+                .entity("No autorizado")
+                .build());
+            return;
+        }
+        executorService.submit(() -> {
+            ProfileDAO profileDAO = new ProfileDAO();
+            List<ProfileDTO> profiles = profileDAO.getUserProfiles(decodedToken.getUid());
+            boolean isAdminGlobal = false;
+            for (ProfileDTO profile : profiles) {
+                if ("Administrador".equalsIgnoreCase(profile.getName()) && "Administrador".equalsIgnoreCase(profile.getDescription())) {
+                    isAdminGlobal = true;
+                    break;
+                }
+            }
+            if (!isAdminGlobal) {
+                asyncResponse.resume(Response.status(Response.Status.FORBIDDEN)
+                    .entity("Solo administradores globales pueden consultar todas las empresas")
+                    .build());
+                return;
+            }
+            EmpresaDAO empresaDAO = new EmpresaDAO();
+            List<EmpresaDTO> empresas = empresaDAO.readAll();
+            asyncResponse.resume(Response.ok(empresas).build());
+        });
+    }
 }
