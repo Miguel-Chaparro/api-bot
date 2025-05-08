@@ -111,4 +111,15 @@ public class projectController {
         log.info("***end projectController getProjectById***");
         return dto;
     }
+
+    public projectsResp getAllProjects() {
+        log.info("***start projectController getAllProjects***");
+        projectsResp resp = new projectsResp();
+        projectsDAO dao = new projectsDAO();
+        List<projectDTO> array = dao.readAll();
+        resp.setProjects(array);
+        resp.setError(array.get(0).getError());
+        log.info("***end projectController getAllProjects***");
+        return resp;
+    }
 }

@@ -202,7 +202,44 @@ public class projectsDAO implements interfaces<projectDTO> {
 
     @Override
     public List<projectDTO> readAll() {
-        List<projectDTO> resp = new ArrayList<>();
+        log.info("***start projectsDAO readAll***");
+        PreparedStatement ps;
+        ResultSet res;
+        ArrayList<projectDTO> resp = new ArrayList<>();
+        msgError error = new msgError();
+        int i = 0;
+        try {
+            ps = con.getCnn().prepareStatement("SELECT * FROM dommapi.project");
+            res = ps.executeQuery();
+            while (res.next()) {
+                resp.add(new projectDTO(res.getInt(2), res.getString(3), res.getString(4), res.getTimestamp(5),
+                        res.getInt(6), res.getTimestamp(7), res.getInt(8), res.getInt(9), res.getString(1)));
+                i++;
+            }
+            if (i > 0) {
+                error.setCode(0);
+                error.setMessage("");
+            } else {
+                error.setCode(11);
+                error.setMessage("Error no data found");
+            }
+        } catch (SQLException ex) {
+            log.log(Level.SEVERE, "Error projectsDAO readAll {0}", ex);
+            error.setCode(ex.getErrorCode());
+            error.setMessage("Error ORA: " + ex);
+        } finally {
+            con.cerrarConexion();
+        }
+        if (i == 0) {
+            projectDTO objDto = new projectDTO();
+            objDto.setError(error);
+            resp.add(objDto);
+        } else {
+            projectDTO objDto = resp.get(0);
+            objDto.setError(error);
+            resp.set(0, objDto);
+        }
+        log.info("***End projectsDAO readAll***");
         return resp;
     }
 }

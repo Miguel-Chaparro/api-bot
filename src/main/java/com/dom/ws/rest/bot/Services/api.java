@@ -206,19 +206,14 @@ public class api {
    /**
      *
      * @param asyncResponse
-     * @param request
+     * @param requestContext
      */
-    @POST
+    @GET
     @Path(value = "/getProjects")
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN})
-    @Consumes({MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN})
     @Operation(
         summary = "Obtener proyectos del usuario",
         description = "Devuelve los proyectos asociados al usuario autenticado.",
-        requestBody = @RequestBody(
-            required = true,
-            content = @Content(schema = @Schema(implementation = createProjectsReq.class))
-        ),
         responses = {
             @ApiResponse(
                 responseCode = "200",
@@ -235,35 +230,50 @@ public class api {
             )
         }
     )
-    public void getProjects(@Suspended final AsyncResponse asyncResponse, final createProjectsReq request, @Context ContainerRequestContext requestContext) {
-         FirebaseToken user = (FirebaseToken) requestContext.getProperty("user");
-         
+    public void getProjects(@Suspended final AsyncResponse asyncResponse, @Context ContainerRequestContext requestContext) {
+        FirebaseToken user = (FirebaseToken) requestContext.getProperty("user");
         if (user == null) {
             asyncResponse.resume(Response.status(Response.Status.UNAUTHORIZED)
                 .entity("No autorizado")
                 .build());
             return;
         }
-
         executorService.submit(() -> {
             try {
-                // Agregar el ID del usuario a la petición
-                request.setIdUser(user.getUid());
-                asyncResponse.resume(doGetProjects(request));
+                ProfileDAO profileDAO = new ProfileDAO();
+                List<ProfileDTO> profiles = profileDAO.getUserProfiles(user.getUid());
+                boolean isAdmin = false;
+                boolean isAdminGlobal = false;
+                for (ProfileDTO profile : profiles) {
+                    if ("Administrador".equalsIgnoreCase(profile.getName())) {
+                        isAdmin = true;
+                        if ("Administrador".equalsIgnoreCase(profile.getDescription())) {
+                            isAdminGlobal = true;
+                            break;
+                        }
+                    }
+                }
+                projectsResp resp;
+                projectController ctrl = new projectController();
+                if (isAdminGlobal) {
+                    resp = ctrl.getAllProjects();
+                } else if (isAdmin) {
+                    // Solo proyectos creados por el usuario
+                    createProjectsReq req = new createProjectsReq();
+                    req.setIdUser(user.getUid());
+                    resp = ctrl.getProjectUser(req);
+                } else {
+                    createProjectsReq req = new createProjectsReq();
+                    req.setIdUser(user.getUid());
+                    resp = ctrl.getProjectUser(req);
+                }
+                asyncResponse.resume(resp);
             } catch (Exception e) {
                 asyncResponse.resume(Response.status(Response.Status.INTERNAL_SERVER_ERROR)
                     .entity(new msgError(-1, e.getMessage()))
                     .build());
             }
         });
-
-    }
-    private projectsResp doGetProjects(createProjectsReq request) {
-
-        projectsResp response = new projectsResp();
-        projectController ctrl = new projectController();
-        response = ctrl.getProjectUser(request);
-        return response;
     }
 
     /**
