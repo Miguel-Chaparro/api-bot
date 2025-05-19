@@ -1153,22 +1153,25 @@ public class api {
                     .build();
             }
         } else {
-            // Buscar la empresa por nombre (de la descripción del perfil)
-            List<EmpresaDTO> empresas = empresaDAO.readAll();
-            for (EmpresaDTO empresa : empresas) {
-                if (empresaDesc != null && empresaDesc.equalsIgnoreCase(empresa.getNombre())) {
-                    empresaId = empresa.getId();
-                    break;
+            // Si el request no trae empresaId o es null, buscar la empresa asociada al admin
+            if (newUser.getEmpresaId() == null) {
+                List<EmpresaDTO> empresas = empresaDAO.readAll();
+                for (EmpresaDTO empresa : empresas) {
+                    if (empresaDesc != null && empresaDesc.equalsIgnoreCase(empresa.getNombre())) {
+                        empresaId = empresa.getId();
+                        break;
+                    }
                 }
-            }
-            if (empresaId == null) {
-                return Response.status(Response.Status.BAD_REQUEST)
-                    .entity(new msgError(-1, "No se encontró la empresa asociada al perfil"))
-                    .build();
+                if (empresaId == null) {
+                    return Response.status(Response.Status.BAD_REQUEST)
+                        .entity(new msgError(-1, "No se encontró la empresa asociada al perfil del administrador"))
+                        .build();
+                }
+            } else {
+                empresaId = newUser.getEmpresaId();
             }
         }
         newUser.setEmpresaId(empresaId);
-
         // Crear usuario en Firebase primero
         try {
             CreateRequest fbRequest = new CreateRequest()
@@ -1179,15 +1182,12 @@ public class api {
                 fbRequest.setPhoneNumber(newUser.getPhoneNumber());
             }
             UserRecord userRecord = FirebaseAuth.getInstance().createUser(fbRequest);
-            // Guardar el UID generado por Firebase en el DTO
             newUser.setId(userRecord.getUid());
         } catch (Exception e) {
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
                 .entity(new msgError(-1, "Error creando usuario en Firebase: " + e.getMessage()))
                 .build();
         }
-
-        // Ahora guardar en la base de datos
         boolean created = userDAO.create(newUser);
         return Response.ok(created).build();
     }
