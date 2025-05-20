@@ -1267,22 +1267,16 @@ public class api {
             }
         } else {
             // Buscar la empresa por nombre (de la descripción del perfil)
-            List<EmpresaDTO> empresas = empresaDAO.readAll();
             int idBussiness = 0;
             try{
                 idBussiness = Integer.parseInt(empresaDesc);
                 empresaId = idBussiness;
+                
             } catch (NumberFormatException e) {
                 // Manejar el caso en que la descripción de la empresa no es un número
                 return Response.status(Response.Status.BAD_REQUEST)
                     .entity(new msgError(-1, "La descripción de la empresa no es válida"))
                     .build();
-            }
-            for (EmpresaDTO empresa : empresas) {
-                if (idBussiness == empresa.getId()) {
-                    empresaId = empresa.getId();
-                    break;
-                }
             }
             // Solo puede actualizar usuarios de su empresa
             if (!empresaId.equals(userToUpdate.getEmpresaId())) {
