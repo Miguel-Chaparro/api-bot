@@ -1271,6 +1271,7 @@ public class api {
             int idBussiness = 0;
             try{
                 idBussiness = Integer.parseInt(empresaDesc);
+                empresaId = idBussiness;
             } catch (NumberFormatException e) {
                 // Manejar el caso en que la descripción de la empresa no es un número
                 return Response.status(Response.Status.BAD_REQUEST)
@@ -1282,11 +1283,6 @@ public class api {
                     empresaId = empresa.getId();
                     break;
                 }
-            }
-            if (empresaId == null) {
-                return Response.status(Response.Status.BAD_REQUEST)
-                    .entity(new msgError(-1, "No se encontró la empresa asociada al perfil"))
-                    .build();
             }
             // Solo puede actualizar usuarios de su empresa
             if (!empresaId.equals(userToUpdate.getEmpresaId())) {
