@@ -29,7 +29,7 @@ public class questionsDAO implements interfaces<questionsDTO> {
     private static final String SQL_INSERT = "INSERT INTO dommapi.questions (id, question, idProject, nextQuestion, multiAnswer, minQuestion, openQuestion, endQuestion ) "
             + "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
    // private static final String SQL_DELETE = "DELETE FROM dommapi.questions WHERE idWhatsapp = ?";
-    private static final String SQL_READMANY = "SELECT id,question,idProject,nextQuestion,multiAnswer,minQuestion,openQuestion,endQuestion FROM dommapi.questions  WHERE idProject = ? ";
+    private static final String SQL_READMANY = "SELECT id,question,idFrom,idProject,nextQuestion,multiAnswer,minQuestion,openQuestion,endQuestion FROM dommapi.questions  WHERE idProject = ? ";
     /* private static final String SQL_READMANYUSER = "";
     private static final String SQL_READALL = "SELECT * FROM dommapi.questions "; */
     msgError error = new msgError();
