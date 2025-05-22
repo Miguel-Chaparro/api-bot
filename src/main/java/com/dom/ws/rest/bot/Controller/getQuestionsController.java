@@ -80,6 +80,7 @@ public class getQuestionsController {
         msgError errorQuery = new msgError();
         List<answerDTO> arrayAnswer = new ArrayList<>();
         ansDto.setIdProject(req.getIdProject());
+        ansDto.setIdFrom(req.getFrom());
         try{
             ansDto.setIdQuestion(req.getIdQuestion());
             if(ansDto.getIdQuestion().equals("")){

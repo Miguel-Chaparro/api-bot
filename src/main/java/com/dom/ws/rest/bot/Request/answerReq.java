@@ -13,13 +13,15 @@ public class answerReq {
 
     private int idProject;
     private String idQuestion;
+    private String  from;
 
     public answerReq() {
     }
 
-    public answerReq(int idProject, String idQuestion) {
+    public answerReq(int idProject, String idQuestion, String from) {
         this.idProject = idProject;
         this.idQuestion = idQuestion;
+        this.from = from;
     }
 
     public int getIdProject() {
@@ -36,6 +38,14 @@ public class answerReq {
 
     public void setIdQuestion(String idQuestion) {
         this.idQuestion = idQuestion;
+    }
+
+    public String getFrom() {
+        return from;
+    }
+
+    public void setFrom(String from) {
+        this.from = from;
     }
 
 }
