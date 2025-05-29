@@ -65,6 +65,7 @@ public class RaspberryNewDTO {
     private boolean mikrotik;
     private String nameDeviceAdmin;
     private String nameDeviceTec;
+    private int id;
 
     // getters y setters
     public List<RaspiUserDTO> getAdmin() { return admin; }
@@ -81,4 +82,6 @@ public class RaspberryNewDTO {
     public void setNameDeviceAdmin(String nameDeviceAdmin) { this.nameDeviceAdmin = nameDeviceAdmin; }
     public String getNameDeviceTec() { return nameDeviceTec; }
     public void setNameDeviceTec(String nameDeviceTec) { this.nameDeviceTec = nameDeviceTec; }
+    public int getId() { return id; }
+    public void setId(int id) { this.id = id; }
 }

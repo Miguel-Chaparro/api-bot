@@ -250,4 +250,19 @@ public class RaspberryNewDAO {
             conn.setAutoCommit(true);
         }
     }
+
+    // Method to fetch all Raspberry devices
+    public List<RaspberryNewDTO> getAllRaspberrys() throws SQLException {
+        List<RaspberryNewDTO> raspberryList = new ArrayList<>();
+        String sql = "SELECT id FROM dommapi.raspberry";
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                int raspberryId = rs.getInt("id");
+                RaspberryNewDTO dto = buildRaspberryResponse(raspberryId);
+                raspberryList.add(dto);
+            }
+        }
+        return raspberryList;
+    }
 }

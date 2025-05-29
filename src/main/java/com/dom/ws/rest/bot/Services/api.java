@@ -1591,4 +1591,99 @@ public class api {
             asyncResponse.resume(Response.ok(empresas).build());
         });
     }
+
+    /**
+     * Endpoint para crear un dispositivo
+     */
+    @POST
+    @Path("/devices")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(
+        summary = "Crear dispositivo",
+        description = "Crea un dispositivo. Solo permitido para Administrador global.",
+        requestBody = @RequestBody(
+            required = true,
+            content = @Content(schema = @Schema(implementation = RaspberryNewDTO.class))
+        ),
+        responses = {
+            @ApiResponse(responseCode = "200", description = "Dispositivo creado correctamente"),
+            @ApiResponse(responseCode = "403", description = "No autorizado"),
+            @ApiResponse(responseCode = "500", description = "Error interno del servidor")
+        }
+    )
+    public void createDevice(@Suspended final AsyncResponse asyncResponse, final RaspberryNewDTO request, @Context ContainerRequestContext requestContext) {
+        FirebaseToken user = (FirebaseToken) requestContext.getProperty("user");
+        if (user == null) {
+            asyncResponse.resume(Response.status(Response.Status.UNAUTHORIZED).entity("No autorizado").build());
+            return;
+        }
+        executorService.submit(() -> {
+            try {
+                ProfileDAO profileDAO = new ProfileDAO();
+                List<ProfileDTO> profiles = profileDAO.getUserProfiles(user.getUid());
+                boolean isAdminGlobal = profiles.stream().anyMatch(
+                    p -> "Administrador".equalsIgnoreCase(p.getName()) && "Administrador".equalsIgnoreCase(p.getDescription())
+                );
+                if (!isAdminGlobal) {
+                    asyncResponse.resume(Response.status(Response.Status.FORBIDDEN).entity("Solo permitido para Administrador global").build());
+                    return;
+                }
+                try (Connection conn = DriverManager.getConnection("jdbc:tu_url_bd", "usuario", "password")) {
+                    RaspberryNewDAO dao = new RaspberryNewDAO(conn);
+                    boolean ok = dao.createOrUpdateRaspberryWithUsers(request);
+                    if (ok) {
+                        asyncResponse.resume(Response.ok("Raspberry creada correctamente").build());
+                    } else {
+                        asyncResponse.resume(Response.status(Response.Status.BAD_REQUEST).entity("No se pudo crear la Raspberry").build());
+                    }
+                }
+            } catch (Exception e) {
+                asyncResponse.resume(Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build());
+            }
+        });
+    }
+
+    /**
+     * Endpoint para consultar todas las Raspberrys
+     */
+    @GET
+    @Path("/devices")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(
+        summary = "Consultar todas las Raspberrys",
+        description = "Devuelve todas las Raspberrys. Solo permitido para Administrador global.",
+        responses = {
+            @ApiResponse(responseCode = "200", description = "Lista de Raspberrys", content = @Content(schema = @Schema(implementation = RaspberryNewDTO.class))),
+            @ApiResponse(responseCode = "403", description = "No autorizado"),
+            @ApiResponse(responseCode = "500", description = "Error interno del servidor")
+        }
+    )
+    public void getAllRaspberrys(@Suspended final AsyncResponse asyncResponse, @Context ContainerRequestContext requestContext) {
+        FirebaseToken user = (FirebaseToken) requestContext.getProperty("user");
+        if (user == null) {
+            asyncResponse.resume(Response.status(Response.Status.UNAUTHORIZED).entity("No autorizado").build());
+            return;
+        }
+        executorService.submit(() -> {
+            try {
+                ProfileDAO profileDAO = new ProfileDAO();
+                List<ProfileDTO> profiles = profileDAO.getUserProfiles(user.getUid());
+                boolean isAdminGlobal = profiles.stream().anyMatch(
+                    p -> "Administrador".equalsIgnoreCase(p.getName()) && "Administrador".equalsIgnoreCase(p.getDescription())
+                );
+                if (!isAdminGlobal) {
+                    asyncResponse.resume(Response.status(Response.Status.FORBIDDEN).entity("Solo permitido para Administrador global").build());
+                    return;
+                }
+                try (Connection conn = DriverManager.getConnection("jdbc:tu_url_bd", "usuario", "password")) {
+                    RaspberryNewDAO dao = new RaspberryNewDAO(conn);
+                    List<RaspberryNewDTO> raspberrys = dao.getAllRaspberrys();
+                    asyncResponse.resume(Response.ok(raspberrys).build());
+                }
+            } catch (Exception e) {
+                asyncResponse.resume(Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build());
+            }
+        });
+    }
 }
