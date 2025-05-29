@@ -91,9 +91,6 @@ public class conexionBD {
                 // si la conexion fue exitosa mostramos un mensaje de conexion exitosa
                 if (cnn != null) {
                     logg.info("Conexion a base de datos " + servidor + " ... Ok");
-                } else {
-                    logg.info("Conexion a base de datos " + servidor + " ... Error");
-
                 }
 
             } catch (ClassNotFoundException | SQLException ex) {

@@ -20,7 +20,7 @@ public class OpenApiResource {
         try {
             SwaggerConfiguration oasConfig = new SwaggerConfiguration()
                     .resourcePackages(java.util.Collections.singleton("com.dom.ws.rest.bot.Services"));
-            OpenApiContext ctx = new JaxrsOpenApiContextBuilder()
+            OpenApiContext ctx = new JaxrsOpenApiContextBuilder<>()
                     .openApiConfiguration(oasConfig)
                     .buildContext(true);
             OpenAPI oas = ctx.read();

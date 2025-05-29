@@ -5,10 +5,8 @@ import com.dom.ws.rest.bot.service.impl.UserServiceImpl;
 import com.dom.ws.rest.bot.service.interfaces.UserService;
 import com.google.firebase.auth.FirebaseToken;
 import javax.ws.rs.container.ContainerRequestContext;
-import java.util.logging.Logger;
 
 public class AuthorizationService {
-    private static final Logger log = Logger.getLogger(AuthorizationService.class.getName());
     private final UserService userService;
 
     public AuthorizationService() {

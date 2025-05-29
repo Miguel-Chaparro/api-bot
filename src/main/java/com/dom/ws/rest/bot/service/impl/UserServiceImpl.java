@@ -6,10 +6,8 @@ import com.dom.ws.rest.bot.DTO.ProfileDTO;
 import com.dom.ws.rest.bot.DTO.UserDTO;
 import com.dom.ws.rest.bot.service.interfaces.UserService;
 import java.util.List;
-import java.util.logging.Logger;
 
 public class UserServiceImpl implements UserService {
-    private static final Logger log = Logger.getLogger(UserServiceImpl.class.getName());
     private final UserDAO userDAO;
     private final ProfileDAO profileDAO;
 

@@ -1,7 +1,9 @@
 package com.dom.ws.rest.bot.DAO;
 
 import com.dom.ws.rest.bot.Conexion.conexionBD;
+import com.dom.ws.rest.bot.DTO.RaspberryDTO;
 import com.dom.ws.rest.bot.DTO.RaspberryNewDTO;
+import com.dom.ws.rest.bot.DTO.RaspberryUserRelationDTO;
 import java.sql.*;
 import java.util.*;
 
@@ -287,6 +289,52 @@ public class RaspberryNewDAO {
             }
             ps.executeBatch();
             return true;
+        }
+    }
+
+    // Método para crear una Raspberry solo con los campos de la tabla dommapi.raspberry
+    public boolean createRaspberry(RaspberryDTO dto) throws SQLException {
+        String insertRaspberry = "INSERT INTO dommapi.raspberry (name_admin, name_tec, topic, mikrotik) VALUES (?, ?, ?, ?)";
+        try (PreparedStatement ps = conn.getCnn().prepareStatement(insertRaspberry)) {
+            ps.setString(1, dto.getNameDeviceAdmin());
+            ps.setString(2, dto.getNameDeviceTec());
+            ps.setString(3, dto.getTopic());
+            ps.setBoolean(4, dto.isMikrotik());
+            return ps.executeUpdate() > 0;
+        }
+    }
+
+    // Método para obtener todas las Raspberrys solo con los campos de la tabla dommapi.raspberry
+    public List<RaspberryDTO> getAllRaspberrysSimple() throws SQLException {
+        List<RaspberryDTO> raspberryList = new ArrayList<>();
+        String sql = "SELECT id, name_admin, name_tec, topic, mikrotik FROM dommapi.raspberry";
+        try (PreparedStatement ps = conn.getCnn().prepareStatement(sql)) {
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                RaspberryDTO dto = new RaspberryDTO();
+                dto.setId(rs.getInt("id"));
+                dto.setNameDeviceAdmin(rs.getString("name_admin"));
+                dto.setNameDeviceTec(rs.getString("name_tec"));
+                dto.setTopic(rs.getString("topic"));
+                dto.setMikrotik(rs.getBoolean("mikrotik"));
+                raspberryList.add(dto);
+            }
+        }
+        return raspberryList;
+    }
+
+    // Método para crear la relación usuario-raspberry solo con los campos de la tabla dommapi.raspberry_user
+    public boolean createRaspberryUserRelation(RaspberryUserRelationDTO dto) throws SQLException {
+        String sql = "INSERT INTO dommapi.raspberry_user (raspberry_id, user_number, user_id, role, name, topic, device) VALUES (?, ?, ?, ?, ?, ?, ?)";
+        try (PreparedStatement ps = conn.getCnn().prepareStatement(sql)) {
+            ps.setInt(1, dto.getRaspberryId());
+            ps.setString(2, dto.getUserNumber());
+            ps.setString(3, dto.getUserId());
+            ps.setString(4, dto.getRole());
+            ps.setString(5, dto.getName());
+            ps.setString(6, dto.getTopic());
+            ps.setString(7, dto.getDevice());
+            return ps.executeUpdate() > 0;
         }
     }
 }
