@@ -1,14 +1,13 @@
 package com.dom.ws.rest.bot.DAO;
 
+import com.dom.ws.rest.bot.Conexion.conexionBD;
 import com.dom.ws.rest.bot.DTO.RaspberryNewDTO;
 import java.sql.*;
 import java.util.*;
 
 public class RaspberryNewDAO {
-    private final Connection conn;
-    public RaspberryNewDAO(Connection conn) {
-        this.conn = conn;
-    }
+    private final conexionBD conn = conexionBD.saberEstado();
+    
 
     public RaspberryNewDTO getRaspberryByUserId(String userId) throws SQLException {
         Integer raspberryId = getRaspberryIdByUserId(userId);
@@ -24,7 +23,7 @@ public class RaspberryNewDAO {
 
     private Integer getRaspberryIdByUserId(String userId) throws SQLException {
         String sql = "SELECT raspberry_id FROM dommapi.raspberry_user WHERE user_id = ? LIMIT 1";
-        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+        try (PreparedStatement ps = conn.getCnn().prepareStatement(sql)) {
             ps.setString(1, userId);
             ResultSet rs = ps.executeQuery();
             if (rs.next()) return rs.getInt("raspberry_id");
@@ -34,7 +33,7 @@ public class RaspberryNewDAO {
 
     private Integer getRaspberryIdByUserNumber(String number) throws SQLException {
         String sql = "SELECT raspberry_id FROM dommapi.raspberry_user WHERE user_number = ? LIMIT 1";
-        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+        try (PreparedStatement ps = conn.getCnn().prepareStatement(sql)) {
             ps.setString(1, number);
             ResultSet rs = ps.executeQuery();
             if (rs.next()) return rs.getInt("raspberry_id");
@@ -57,7 +56,7 @@ public class RaspberryNewDAO {
     private List<RaspberryNewDTO.RaspiUserDTO> getUsersByRole(int raspberryId, String role) throws SQLException {
         String sql = "SELECT user_number, topic, name, device FROM dommapi.raspberry_user WHERE raspberry_id = ? AND role = ?";
         List<RaspberryNewDTO.RaspiUserDTO> list = new ArrayList<>();
-        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+        try (PreparedStatement ps = conn.getCnn().prepareStatement(sql)) {
             ps.setInt(1, raspberryId);
             ps.setString(2, role);
             ResultSet rs = ps.executeQuery();
@@ -76,7 +75,7 @@ public class RaspberryNewDAO {
     private List<RaspberryNewDTO.RaspiIpDTO> getIps(int raspberryId) throws SQLException {
         String sql = "SELECT id, ip, nodo, grupo FROM dommapi.raspberry_ip WHERE raspberry_id = ?";
         List<RaspberryNewDTO.RaspiIpDTO> list = new ArrayList<>();
-        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+        try (PreparedStatement ps = conn.getCnn().prepareStatement(sql)) {
             ps.setInt(1, raspberryId);
             ResultSet rs = ps.executeQuery();
             while (rs.next()) {
@@ -94,7 +93,7 @@ public class RaspberryNewDAO {
     private List<RaspberryNewDTO.RaspiDeviceDTO> getDevices(int raspberryId) throws SQLException {
         String sql = "SELECT device, ip, port, username, password, service, type_mikrotik FROM dommapi.raspberry_device WHERE raspberry_id = ?";
         List<RaspberryNewDTO.RaspiDeviceDTO> list = new ArrayList<>();
-        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+        try (PreparedStatement ps = conn.getCnn().prepareStatement(sql)) {
             ps.setInt(1, raspberryId);
             ResultSet rs = ps.executeQuery();
             while (rs.next()) {
@@ -114,7 +113,7 @@ public class RaspberryNewDAO {
 
     private boolean isMikrotik(int raspberryId) throws SQLException {
         String sql = "SELECT mikrotik FROM dommapi.raspberry WHERE id = ?";
-        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+        try (PreparedStatement ps = conn.getCnn().prepareStatement(sql)) {
             ps.setInt(1, raspberryId);
             ResultSet rs = ps.executeQuery();
             if (rs.next()) return rs.getBoolean("mikrotik");
@@ -124,7 +123,7 @@ public class RaspberryNewDAO {
 
     private String getNameDevice(int raspberryId, boolean admin) throws SQLException {
         String sql = admin ? "SELECT name_admin FROM dommapi.raspberry WHERE id = ?" : "SELECT name_tec FROM dommapi.raspberry WHERE id = ?";
-        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+        try (PreparedStatement ps = conn.getCnn().prepareStatement(sql)) {
             ps.setInt(1, raspberryId);
             ResultSet rs = ps.executeQuery();
             if (rs.next()) return admin ? rs.getString("name_admin") : rs.getString("name_tec");
@@ -133,12 +132,12 @@ public class RaspberryNewDAO {
     }
 
     public boolean createOrUpdateRaspberryWithUsers(RaspberryNewDTO dto) throws SQLException {
-        conn.setAutoCommit(false);
+        conn.getCnn().setAutoCommit(false);
         try {
             // 1. Insertar o actualizar raspberry principal (por nameDeviceAdmin como clave única)
             Integer raspberryId = null;
             String selectRaspberry = "SELECT id FROM dommapi.raspberry WHERE name_admin = ?";
-            try (PreparedStatement ps = conn.prepareStatement(selectRaspberry)) {
+            try (PreparedStatement ps = conn.getCnn().prepareStatement(selectRaspberry)) {
                 ps.setString(1, dto.getNameDeviceAdmin());
                 ResultSet rs = ps.executeQuery();
                 if (rs.next()) {
@@ -147,7 +146,7 @@ public class RaspberryNewDAO {
             }
             if (raspberryId == null) {
                 String insertRaspberry = "INSERT INTO dommapi.raspberry (name_admin, name_tec, topic, mikrotik) VALUES (?, ?, ?, ?) RETURNING id";
-                try (PreparedStatement ps = conn.prepareStatement(insertRaspberry)) {
+                try (PreparedStatement ps = conn.getCnn().prepareStatement(insertRaspberry)) {
                     ps.setString(1, dto.getNameDeviceAdmin());
                     ps.setString(2, dto.getNameDeviceTec());
                     String topic = (dto.getAdmin() != null && !dto.getAdmin().isEmpty()) ? dto.getAdmin().get(0).getTopic() : null;
@@ -160,7 +159,7 @@ public class RaspberryNewDAO {
                 }
             } else {
                 String updateRaspberry = "UPDATE dommapi.raspberry SET name_tec = ?, mikrotik = ? WHERE id = ?";
-                try (PreparedStatement ps = conn.prepareStatement(updateRaspberry)) {
+                try (PreparedStatement ps = conn.getCnn().prepareStatement(updateRaspberry)) {
                     ps.setString(1, dto.getNameDeviceTec());
                     ps.setBoolean(2, dto.isMikrotik());
                     ps.setInt(3, raspberryId);
@@ -170,14 +169,14 @@ public class RaspberryNewDAO {
             if (raspberryId == null) throw new SQLException("No se pudo obtener el id de la raspberry");
 
             // 2. Limpiar y volver a insertar usuarios asociados
-            try (PreparedStatement ps = conn.prepareStatement("DELETE FROM dommapi.raspberry_user WHERE raspberry_id = ?")) {
+            try (PreparedStatement ps = conn.getCnn().prepareStatement("DELETE FROM dommapi.raspberry_user WHERE raspberry_id = ?")) {
                 ps.setInt(1, raspberryId);
                 ps.executeUpdate();
             }
             if (dto.getAdmin() != null) {
                 for (RaspberryNewDTO.RaspiUserDTO user : dto.getAdmin()) {
                     String insertUser = "INSERT INTO dommapi.raspberry_user (raspberry_id, user_number, role, name, topic, device) VALUES (?, ?, 'admin', ?, ?, ?)";
-                    try (PreparedStatement ps = conn.prepareStatement(insertUser)) {
+                    try (PreparedStatement ps = conn.getCnn().prepareStatement(insertUser)) {
                         ps.setInt(1, raspberryId);
                         ps.setString(2, user.getNumber());
                         ps.setString(3, user.getName());
@@ -190,7 +189,7 @@ public class RaspberryNewDAO {
             if (dto.getOperator() != null) {
                 for (RaspberryNewDTO.RaspiUserDTO user : dto.getOperator()) {
                     String insertUser = "INSERT INTO dommapi.raspberry_user (raspberry_id, user_number, role, name, topic, device) VALUES (?, ?, 'operator', ?, ?, ?)";
-                    try (PreparedStatement ps = conn.prepareStatement(insertUser)) {
+                    try (PreparedStatement ps = conn.getCnn().prepareStatement(insertUser)) {
                         ps.setInt(1, raspberryId);
                         ps.setString(2, user.getNumber());
                         ps.setString(3, user.getName());
@@ -202,14 +201,14 @@ public class RaspberryNewDAO {
             }
 
             // 3. Limpiar y volver a insertar IPs
-            try (PreparedStatement ps = conn.prepareStatement("DELETE FROM dommapi.raspberry_ip WHERE raspberry_id = ?")) {
+            try (PreparedStatement ps = conn.getCnn().prepareStatement("DELETE FROM dommapi.raspberry_ip WHERE raspberry_id = ?")) {
                 ps.setInt(1, raspberryId);
                 ps.executeUpdate();
             }
             if (dto.getIps() != null) {
                 for (RaspberryNewDTO.RaspiIpDTO ip : dto.getIps()) {
                     String insertIp = "INSERT INTO dommapi.raspberry_ip (raspberry_id, ip, nodo, grupo) VALUES (?, ?, ?, ?)";
-                    try (PreparedStatement ps = conn.prepareStatement(insertIp)) {
+                    try (PreparedStatement ps = conn.getCnn().prepareStatement(insertIp)) {
                         ps.setInt(1, raspberryId);
                         ps.setString(2, ip.getIp());
                         ps.setString(3, ip.getNodo());
@@ -220,14 +219,14 @@ public class RaspberryNewDAO {
             }
 
             // 4. Limpiar y volver a insertar dispositivos
-            try (PreparedStatement ps = conn.prepareStatement("DELETE FROM dommapi.raspberry_device WHERE raspberry_id = ?")) {
+            try (PreparedStatement ps = conn.getCnn().prepareStatement("DELETE FROM dommapi.raspberry_device WHERE raspberry_id = ?")) {
                 ps.setInt(1, raspberryId);
                 ps.executeUpdate();
             }
             if (dto.getDevices() != null) {
                 for (RaspberryNewDTO.RaspiDeviceDTO dev : dto.getDevices()) {
                     String insertDev = "INSERT INTO dommapi.raspberry_device (raspberry_id, device, ip, port, username, password, service, type_mikrotik) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
-                    try (PreparedStatement ps = conn.prepareStatement(insertDev)) {
+                    try (PreparedStatement ps = conn.getCnn().prepareStatement(insertDev)) {
                         ps.setInt(1, raspberryId);
                         ps.setString(2, dev.getDevice());
                         ps.setString(3, dev.getIp());
@@ -241,13 +240,13 @@ public class RaspberryNewDAO {
                 }
             }
 
-            conn.commit();
+            conn.getCnn().commit();
             return true;
         } catch (Exception e) {
-            conn.rollback();
+            conn.getCnn().rollback();
             throw e;
         } finally {
-            conn.setAutoCommit(true);
+            conn.getCnn().setAutoCommit(true);
         }
     }
 
@@ -255,7 +254,7 @@ public class RaspberryNewDAO {
     public List<RaspberryNewDTO> getAllRaspberrys() throws SQLException {
         List<RaspberryNewDTO> raspberryList = new ArrayList<>();
         String sql = "SELECT id FROM dommapi.raspberry";
-        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+        try (PreparedStatement ps = conn.getCnn().prepareStatement(sql)) {
             ResultSet rs = ps.executeQuery();
             while (rs.next()) {
                 int raspberryId = rs.getInt("id");
@@ -264,5 +263,30 @@ public class RaspberryNewDAO {
             }
         }
         return raspberryList;
+    }
+
+    // Fixed unused variable issue by accessing fields of admin and operator
+    public boolean createUserRaspberryRelation(String userId, RaspberryNewDTO dto) throws SQLException {
+        String sql = "INSERT INTO dommapi.raspberry_user (user_id, raspberry_id, role, name, device) VALUES (?, ?, ?, ?, ?)";
+        try (PreparedStatement ps = conn.getCnn().prepareStatement(sql)) {
+            for (RaspberryNewDTO.RaspiUserDTO admin : dto.getAdmin()) {
+                ps.setString(1, userId);
+                ps.setInt(2, dto.getId());
+                ps.setString(3, "admin");
+                ps.setString(4, admin.getName());
+                ps.setString(5, admin.getDevice());
+                ps.addBatch();
+            }
+            for (RaspberryNewDTO.RaspiUserDTO operator : dto.getOperator()) {
+                ps.setString(1, userId);
+                ps.setInt(2, dto.getId());
+                ps.setString(3, "operator");
+                ps.setString(4, operator.getName());
+                ps.setString(5, operator.getDevice());
+                ps.addBatch();
+            }
+            ps.executeBatch();
+            return true;
+        }
     }
 }

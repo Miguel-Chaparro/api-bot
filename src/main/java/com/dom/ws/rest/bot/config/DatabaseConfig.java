@@ -2,10 +2,8 @@ package com.dom.ws.rest.bot.config;
 
 import com.dom.ws.rest.bot.Conexion.conexionBD;
 import java.sql.Connection;
-import java.util.logging.Logger;
 
 public class DatabaseConfig {
-    private static final Logger log = Logger.getLogger(DatabaseConfig.class.getName());
     private static DatabaseConfig instance;
     private final conexionBD connection;
 

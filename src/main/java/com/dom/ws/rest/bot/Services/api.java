@@ -37,13 +37,13 @@ import com.dom.ws.rest.bot.Response.getQuestionsAnswerResp;
 import com.dom.ws.rest.bot.Response.getQuestionsResp;
 import com.dom.ws.rest.bot.Response.projectsResp;
 import com.dom.ws.rest.bot.Response.raspiResp;
+import com.dom.ws.rest.bot.config.DatabaseConfig;
 import com.dom.ws.rest.bot.vo.msgError;
 import com.google.firebase.auth.FirebaseToken;
 import com.google.firebase.auth.UserRecord;
 import com.google.firebase.auth.UserRecord.CreateRequest;
 import com.google.firebase.auth.FirebaseAuth;
 
-import java.sql.Timestamp;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.util.List;
@@ -82,38 +82,34 @@ public class api {
 
     /**
      * agregar cookie para autenticacion
+     * 
      * @param asyncResponse
      * @param request
      */
     @POST
     @Path(value = "/domBot")
-    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN})
-    @Consumes({MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN})
-    @Operation(
-        summary = "Bot de preguntas",
-        description = "Procesa preguntas y respuestas del bot.",
-        requestBody = @RequestBody(
-            required = true,
-            content = @Content(schema = @Schema(implementation = questionsAnswersReq.class))
-        ),
-        responses = {
+    @Produces({ MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN })
+    @Consumes({ MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN })
+    @Operation(summary = "Bot de preguntas", description = "Procesa preguntas y respuestas del bot.", requestBody = @RequestBody(required = true, content = @Content(schema = @Schema(implementation = questionsAnswersReq.class))), responses = {
             @ApiResponse(responseCode = "200", description = "Respuesta del bot", content = @Content(schema = @Schema(implementation = answerResp.class))),
             @ApiResponse(responseCode = "500", description = "Error interno del servidor")
-        }
-    )
-    public void questions(@Suspended final AsyncResponse asyncResponse, final questionsAnswersReq request,@CookieParam("session") String session) {
+    })
+    public void questions(@Suspended final AsyncResponse asyncResponse, final questionsAnswersReq request,
+            @CookieParam("session") String session) {
         executorService.submit(new Runnable() {
             @Override
             public void run() {
-           /*      try {
-                    questionsController controller = new questionsController();
-                    getQuestionsAnswerResp response = controller.questions(request,session);
-                    asyncResponse.resume(response);
-                } catch (Exception e) {
-                    msgError error = new msgError();
-                    error.setError(e.getMessage());
-                    asyncResponse.resume(error);
-                } */
+                /*
+                 * try {
+                 * questionsController controller = new questionsController();
+                 * getQuestionsAnswerResp response = controller.questions(request,session);
+                 * asyncResponse.resume(response);
+                 * } catch (Exception e) {
+                 * msgError error = new msgError();
+                 * error.setError(e.getMessage());
+                 * asyncResponse.resume(error);
+                 * }
+                 */
                 asyncResponse.resume(doQuestions(request));
             }
         });
@@ -134,20 +130,12 @@ public class api {
      */
     @POST
     @Path(value = "/surveyBot")
-    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN})
-    @Consumes({MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN})
-    @Operation(
-        summary = "Bot de encuestas",
-        description = "Procesa encuestas del bot.",
-        requestBody = @RequestBody(
-            required = true,
-            content = @Content(schema = @Schema(implementation = questionsAnswersReq.class))
-        ),
-        responses = {
+    @Produces({ MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN })
+    @Consumes({ MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN })
+    @Operation(summary = "Bot de encuestas", description = "Procesa encuestas del bot.", requestBody = @RequestBody(required = true, content = @Content(schema = @Schema(implementation = questionsAnswersReq.class))), responses = {
             @ApiResponse(responseCode = "200", description = "Respuesta de la encuesta", content = @Content(schema = @Schema(implementation = answerResp.class))),
             @ApiResponse(responseCode = "500", description = "Error interno del servidor")
-        }
-    )
+    })
     public void survey(@Suspended final AsyncResponse asyncResponse, final questionsAnswersReq request) {
         executorService.submit(new Runnable() {
             @Override
@@ -172,20 +160,12 @@ public class api {
      */
     @POST
     @Path(value = "/raspi")
-    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN})
-    @Consumes({MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN})
-    @Operation(
-        summary = "Bot de preguntas para Raspberry Pi",
-        description = "Procesa preguntas y respuestas del bot para dispositivos Raspberry Pi.",
-        requestBody = @RequestBody(
-            required = true,
-            content = @Content(schema = @Schema(implementation = questionsAnswersReq.class))
-        ),
-        responses = {
+    @Produces({ MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN })
+    @Consumes({ MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN })
+    @Operation(summary = "Bot de preguntas para Raspberry Pi", description = "Procesa preguntas y respuestas del bot para dispositivos Raspberry Pi.", requestBody = @RequestBody(required = true, content = @Content(schema = @Schema(implementation = questionsAnswersReq.class))), responses = {
             @ApiResponse(responseCode = "200", description = "Respuesta del bot", content = @Content(schema = @Schema(implementation = answerResp.class))),
             @ApiResponse(responseCode = "500", description = "Error interno del servidor")
-        }
-    )
+    })
     public void raspi(@Suspended final AsyncResponse asyncResponse, final questionsAnswersReq request) {
         executorService.submit(new Runnable() {
             @Override
@@ -203,39 +183,26 @@ public class api {
         return response;
     }
 
-   /**
+    /**
      *
      * @param asyncResponse
      * @param requestContext
      */
     @GET
     @Path(value = "/getProjects")
-    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN})
-    @Operation(
-        summary = "Obtener proyectos del usuario",
-        description = "Devuelve los proyectos asociados al usuario autenticado.",
-        responses = {
-            @ApiResponse(
-                responseCode = "200",
-                description = "Lista de proyectos",
-                content = @Content(schema = @Schema(implementation = projectsResp.class))
-            ),
-            @ApiResponse(
-                responseCode = "401",
-                description = "No autorizado"
-            ),
-            @ApiResponse(
-                responseCode = "500",
-                description = "Error interno del servidor"
-            )
-        }
-    )
-    public void getProjects(@Suspended final AsyncResponse asyncResponse, @Context ContainerRequestContext requestContext) {
+    @Produces({ MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN })
+    @Operation(summary = "Obtener proyectos del usuario", description = "Devuelve los proyectos asociados al usuario autenticado.", responses = {
+            @ApiResponse(responseCode = "200", description = "Lista de proyectos", content = @Content(schema = @Schema(implementation = projectsResp.class))),
+            @ApiResponse(responseCode = "401", description = "No autorizado"),
+            @ApiResponse(responseCode = "500", description = "Error interno del servidor")
+    })
+    public void getProjects(@Suspended final AsyncResponse asyncResponse,
+            @Context ContainerRequestContext requestContext) {
         FirebaseToken user = (FirebaseToken) requestContext.getProperty("user");
         if (user == null) {
             asyncResponse.resume(Response.status(Response.Status.UNAUTHORIZED)
-                .entity("No autorizado")
-                .build());
+                    .entity("No autorizado")
+                    .build());
             return;
         }
         executorService.submit(() -> {
@@ -270,8 +237,8 @@ public class api {
                 asyncResponse.resume(resp);
             } catch (Exception e) {
                 asyncResponse.resume(Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                    .entity(new msgError(-1, e.getMessage()))
-                    .build());
+                        .entity(new msgError(-1, e.getMessage()))
+                        .build());
             }
         });
     }
@@ -283,20 +250,12 @@ public class api {
      */
     @POST
     @Path(value = "/getQuestionsAnswers")
-    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN})
-    @Consumes({MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN})
-    @Operation(
-        summary = "Obtener preguntas y respuestas",
-        description = "Devuelve las preguntas y respuestas para un proyecto.",
-        requestBody = @RequestBody(
-            required = true,
-            content = @Content(schema = @Schema(implementation = createProjectsReq.class))
-        ),
-        responses = {
+    @Produces({ MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN })
+    @Consumes({ MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN })
+    @Operation(summary = "Obtener preguntas y respuestas", description = "Devuelve las preguntas y respuestas para un proyecto.", requestBody = @RequestBody(required = true, content = @Content(schema = @Schema(implementation = createProjectsReq.class))), responses = {
             @ApiResponse(responseCode = "200", description = "Preguntas y respuestas", content = @Content(schema = @Schema(implementation = getQuestionsAnswerResp.class))),
             @ApiResponse(responseCode = "500", description = "Error interno del servidor")
-        }
-    )
+    })
     public void getQuestionsAnswer(@Suspended final AsyncResponse asyncResponse, final createProjectsReq request) {
         executorService.submit(new Runnable() {
             @Override
@@ -321,20 +280,12 @@ public class api {
      */
     @POST
     @Path(value = "/getQuestions")
-    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN})
-    @Consumes({MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN})
-    @Operation(
-        summary = "Obtener preguntas",
-        description = "Devuelve las preguntas para un proyecto.",
-        requestBody = @RequestBody(
-            required = true,
-            content = @Content(schema = @Schema(implementation = createProjectsReq.class))
-        ),
-        responses = {
+    @Produces({ MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN })
+    @Consumes({ MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN })
+    @Operation(summary = "Obtener preguntas", description = "Devuelve las preguntas para un proyecto.", requestBody = @RequestBody(required = true, content = @Content(schema = @Schema(implementation = createProjectsReq.class))), responses = {
             @ApiResponse(responseCode = "200", description = "Preguntas", content = @Content(schema = @Schema(implementation = getQuestionsResp.class))),
             @ApiResponse(responseCode = "500", description = "Error interno del servidor")
-        }
-    )
+    })
     public void getQuestions(@Suspended final AsyncResponse asyncResponse, final createProjectsReq request) {
         executorService.submit(new Runnable() {
             @Override
@@ -359,20 +310,12 @@ public class api {
      */
     @POST
     @Path(value = "/getAnswers")
-    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN})
-    @Consumes({MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN})
-    @Operation(
-        summary = "Obtener respuestas",
-        description = "Devuelve las respuestas para una pregunta de un proyecto.",
-        requestBody = @RequestBody(
-            required = true,
-            content = @Content(schema = @Schema(implementation = answerReq.class))
-        ),
-        responses = {
+    @Produces({ MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN })
+    @Consumes({ MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN })
+    @Operation(summary = "Obtener respuestas", description = "Devuelve las respuestas para una pregunta de un proyecto.", requestBody = @RequestBody(required = true, content = @Content(schema = @Schema(implementation = answerReq.class))), responses = {
             @ApiResponse(responseCode = "200", description = "Respuestas", content = @Content(schema = @Schema(implementation = getAnswerResp.class))),
             @ApiResponse(responseCode = "500", description = "Error interno del servidor")
-        }
-    )
+    })
     public void getAnswers(@Suspended final AsyncResponse asyncResponse, final answerReq request) {
         executorService.submit(new Runnable() {
             @Override
@@ -397,20 +340,12 @@ public class api {
      */
     @POST
     @Path(value = "/createProject")
-    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN})
-    @Consumes({MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN})
-    @Operation(
-        summary = "Crear proyecto",
-        description = "Crea un nuevo proyecto.",
-        requestBody = @RequestBody(
-            required = true,
-            content = @Content(schema = @Schema(implementation = projectDTO.class))
-        ),
-        responses = {
+    @Produces({ MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN })
+    @Consumes({ MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN })
+    @Operation(summary = "Crear proyecto", description = "Crea un nuevo proyecto.", requestBody = @RequestBody(required = true, content = @Content(schema = @Schema(implementation = projectDTO.class))), responses = {
             @ApiResponse(responseCode = "200", description = "Proyecto creado", content = @Content(schema = @Schema(implementation = projectDTO.class))),
             @ApiResponse(responseCode = "500", description = "Error interno del servidor")
-        }
-    )
+    })
     public void createProyect(@Suspended final AsyncResponse asyncResponse, final projectDTO request) {
         executorService.submit(new Runnable() {
             @Override
@@ -435,20 +370,12 @@ public class api {
      */
     @POST
     @Path(value = "/createUpdateManyQuestions")
-    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN})
-    @Consumes({MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN})
-    @Operation(
-        summary = "Crear o actualizar muchas preguntas",
-        description = "Crea o actualiza varias preguntas para un proyecto.",
-        requestBody = @RequestBody(
-            required = true,
-            content = @Content(schema = @Schema(implementation = createQuestionsReq.class))
-        ),
-        responses = {
+    @Produces({ MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN })
+    @Consumes({ MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN })
+    @Operation(summary = "Crear o actualizar muchas preguntas", description = "Crea o actualiza varias preguntas para un proyecto.", requestBody = @RequestBody(required = true, content = @Content(schema = @Schema(implementation = createQuestionsReq.class))), responses = {
             @ApiResponse(responseCode = "200", description = "Preguntas procesadas", content = @Content(schema = @Schema(implementation = createQuestionsResp.class))),
             @ApiResponse(responseCode = "500", description = "Error interno del servidor")
-        }
-    )
+    })
     public void createManyQuestions(@Suspended final AsyncResponse asyncResponse, final createQuestionsReq request) {
         executorService.submit(new Runnable() {
             @Override
@@ -465,7 +392,7 @@ public class api {
         response = ctrl.createQuestions(request);
         return response;
     }
-    
+
     /**
      *
      * @param asyncResponse
@@ -473,20 +400,12 @@ public class api {
      */
     @POST
     @Path(value = "/createUpdateOneQuestion")
-    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN})
-    @Consumes({MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN})
-    @Operation(
-        summary = "Crear o actualizar una pregunta",
-        description = "Crea o actualiza una pregunta para un proyecto.",
-        requestBody = @RequestBody(
-            required = true,
-            content = @Content(schema = @Schema(implementation = questionsDTO.class))
-        ),
-        responses = {
+    @Produces({ MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN })
+    @Consumes({ MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN })
+    @Operation(summary = "Crear o actualizar una pregunta", description = "Crea o actualiza una pregunta para un proyecto.", requestBody = @RequestBody(required = true, content = @Content(schema = @Schema(implementation = questionsDTO.class))), responses = {
             @ApiResponse(responseCode = "200", description = "Pregunta procesada", content = @Content(schema = @Schema(implementation = msgError.class))),
             @ApiResponse(responseCode = "500", description = "Error interno del servidor")
-        }
-    )
+    })
     public void createOneQuestion(@Suspended final AsyncResponse asyncResponse, final questionsDTO request) {
         executorService.submit(new Runnable() {
             @Override
@@ -503,7 +422,7 @@ public class api {
         response = ctrl.createUpdateQuestions(request);
         return response;
     }
-    
+
     /**
      *
      * @param asyncResponse
@@ -511,20 +430,12 @@ public class api {
      */
     @POST
     @Path(value = "/createUpdateOneAnswer")
-    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN})
-    @Consumes({MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN})
-    @Operation(
-        summary = "Crear o actualizar una respuesta",
-        description = "Crea o actualiza una respuesta para una pregunta.",
-        requestBody = @RequestBody(
-            required = true,
-            content = @Content(schema = @Schema(implementation = answerDTO.class))
-        ),
-        responses = {
+    @Produces({ MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN })
+    @Consumes({ MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN })
+    @Operation(summary = "Crear o actualizar una respuesta", description = "Crea o actualiza una respuesta para una pregunta.", requestBody = @RequestBody(required = true, content = @Content(schema = @Schema(implementation = answerDTO.class))), responses = {
             @ApiResponse(responseCode = "200", description = "Respuesta procesada", content = @Content(schema = @Schema(implementation = msgError.class))),
             @ApiResponse(responseCode = "500", description = "Error interno del servidor")
-        }
-    )
+    })
     public void createOneAnswer(@Suspended final AsyncResponse asyncResponse, final answerDTO request) {
         executorService.submit(new Runnable() {
             @Override
@@ -541,29 +452,21 @@ public class api {
         response = ctrl.updateCreateAnswers(request);
         return response;
     }
-    
-        /**
+
+    /**
      *
      * @param asyncResponse
      * @param request
      */
     @POST
     @Path(value = "/updateProject")
-    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN})
-    @Consumes({MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN})
-    @Operation(
-        summary = "Actualizar proyecto",
-        description = "Actualiza un proyecto existente.",
-        requestBody = @RequestBody(
-            required = true,
-            content = @Content(schema = @Schema(implementation = projectDTO.class))
-        ),
-        responses = {
+    @Produces({ MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN })
+    @Consumes({ MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN })
+    @Operation(summary = "Actualizar proyecto", description = "Actualiza un proyecto existente.", requestBody = @RequestBody(required = true, content = @Content(schema = @Schema(implementation = projectDTO.class))), responses = {
             @ApiResponse(responseCode = "200", description = "Proyecto actualizado", content = @Content(schema = @Schema(implementation = msgError.class))),
             @ApiResponse(responseCode = "500", description = "Error interno del servidor")
-        }
-    )
-    public void updateProject (@Suspended final AsyncResponse asyncResponse, final projectDTO request) {
+    })
+    public void updateProject(@Suspended final AsyncResponse asyncResponse, final projectDTO request) {
         executorService.submit(new Runnable() {
             @Override
             public void run() {
@@ -572,37 +475,28 @@ public class api {
         });
     }
 
-    private msgError doUpdateProject (projectDTO request) {
+    private msgError doUpdateProject(projectDTO request) {
 
         msgError response = new msgError();
         projectController ctrl = new projectController();
         response = ctrl.updateProject(request);
         return response;
     }
-    
-    
-        /**
+
+    /**
      *
      * @param asyncResponse
      * @param request
      */
     @POST
     @Path(value = "/configDevices")
-    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN})
-    @Consumes({MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN})
-    @Operation(
-        summary = "Obtener configuración de dispositivos",
-        description = "Obtiene la configuración de dispositivos para un proyecto.",
-        requestBody = @RequestBody(
-            required = true,
-            content = @Content(schema = @Schema(implementation = raspiReq.class))
-        ),
-        responses = {
+    @Produces({ MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN })
+    @Consumes({ MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN })
+    @Operation(summary = "Obtener configuración de dispositivos", description = "Obtiene la configuración de dispositivos para un proyecto.", requestBody = @RequestBody(required = true, content = @Content(schema = @Schema(implementation = raspiReq.class))), responses = {
             @ApiResponse(responseCode = "200", description = "Configuración de dispositivos", content = @Content(schema = @Schema(implementation = raspiResp.class))),
             @ApiResponse(responseCode = "500", description = "Error interno del servidor")
-        }
-    )
-    public void configDevices (@Suspended final AsyncResponse asyncResponse, final raspiReq request) {
+    })
+    public void configDevices(@Suspended final AsyncResponse asyncResponse, final raspiReq request) {
         executorService.submit(new Runnable() {
             @Override
             public void run() {
@@ -611,35 +505,27 @@ public class api {
         });
     }
 
-    private raspiResp doConfigDevices (raspiReq request) {
+    private raspiResp doConfigDevices(raspiReq request) {
         raspiResp response = new raspiResp();
         devicesConfigController ctrl = new devicesConfigController();
         response = ctrl.getConfigDevice(request);
         return response;
     }
-    
-        /**
+
+    /**
      *
      * @param asyncResponse
      * @param request
      */
     @POST
     @Path(value = "/createConfigDevices")
-    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN})
-    @Consumes({MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN})
-    @Operation(
-        summary = "Crear configuración de dispositivos",
-        description = "Crea la configuración de dispositivos para un proyecto.",
-        requestBody = @RequestBody(
-            required = true,
-            content = @Content(schema = @Schema(implementation = raspiDTO.class))
-        ),
-        responses = {
+    @Produces({ MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN })
+    @Consumes({ MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN })
+    @Operation(summary = "Crear configuración de dispositivos", description = "Crea la configuración de dispositivos para un proyecto.", requestBody = @RequestBody(required = true, content = @Content(schema = @Schema(implementation = raspiDTO.class))), responses = {
             @ApiResponse(responseCode = "200", description = "Configuración creada", content = @Content(schema = @Schema(implementation = msgError.class))),
             @ApiResponse(responseCode = "500", description = "Error interno del servidor")
-        }
-    )
-    public void createConfigDevices (@Suspended final AsyncResponse asyncResponse, final raspiDTO request) {
+    })
+    public void createConfigDevices(@Suspended final AsyncResponse asyncResponse, final raspiDTO request) {
         executorService.submit(new Runnable() {
             @Override
             public void run() {
@@ -661,43 +547,19 @@ public class api {
      */
     @POST
     @Path(value = "/login")
-    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN})
-    @Operation(
-        summary = "Login de usuario con Firebase",
-        description = "Autentica un usuario usando el token de Firebase y retorna información y perfiles.",
-        requestBody = @RequestBody(
-            required = false,
-            description = "No se requiere body, solo el header Authorization: Bearer <firebase-token>"
-        ),
-        responses = {
-            @ApiResponse(
-                responseCode = "200",
-                description = "Login exitoso",
-                content = @Content(
-                    mediaType = "application/json",
-                    schema = @Schema(implementation = LoginResponse.class),
-                    examples = @ExampleObject(
-                        value = "{\n  \"isNewUser\": true,\n  \"created\": true,\n  \"profiles\": [{\n    \"id\": 3,\n    \"name\": \"Cliente Internet\",\n    \"description\": \"Cliente de servicios de internet\",\n    \"active\": true\n  }]\n}"
-                    )
-                )
-            ),
-            @ApiResponse(
-                responseCode = "401",
-                description = "No autorizado"
-            ),
-            @ApiResponse(
-                responseCode = "500",
-                description = "Error interno del servidor"
-            )
-        }
-    )
+    @Produces({ MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN })
+    @Operation(summary = "Login de usuario con Firebase", description = "Autentica un usuario usando el token de Firebase y retorna información y perfiles.", requestBody = @RequestBody(required = false, description = "No se requiere body, solo el header Authorization: Bearer <firebase-token>"), responses = {
+            @ApiResponse(responseCode = "200", description = "Login exitoso", content = @Content(mediaType = "application/json", schema = @Schema(implementation = LoginResponse.class), examples = @ExampleObject(value = "{\n  \"isNewUser\": true,\n  \"created\": true,\n  \"profiles\": [{\n    \"id\": 3,\n    \"name\": \"Cliente Internet\",\n    \"description\": \"Cliente de servicios de internet\",\n    \"active\": true\n  }]\n}"))),
+            @ApiResponse(responseCode = "401", description = "No autorizado"),
+            @ApiResponse(responseCode = "500", description = "Error interno del servidor")
+    })
     public void login(@Suspended final AsyncResponse asyncResponse, @Context ContainerRequestContext requestContext) {
         FirebaseToken decodedToken = (FirebaseToken) requestContext.getProperty("user");
-        
+
         if (decodedToken == null) {
             asyncResponse.resume(Response.status(Response.Status.UNAUTHORIZED)
-                .entity("No autorizado")
-                .build());
+                    .entity("No autorizado")
+                    .build());
             return;
         }
 
@@ -706,8 +568,8 @@ public class api {
                 asyncResponse.resume(doLogin(decodedToken));
             } catch (Exception e) {
                 asyncResponse.resume(Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                    .entity(new msgError(-1, e.getMessage()))
-                    .build());
+                        .entity(new msgError(-1, e.getMessage()))
+                        .build());
             }
         });
     }
@@ -753,56 +615,22 @@ public class api {
      */
     @POST
     @Path(value = "/assignProfile")
-    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN})
-    @Consumes({MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN})
-    @Operation(
-        summary = "Asignar perfiles a usuario",
-        description = "Permite a un administrador asignar una lista de perfiles a un usuario. Elimina las relaciones previas y asigna los nuevos perfiles.",
-        requestBody = @RequestBody(
-            required = true,
-            content = @Content(
-                mediaType = "application/json",
-                schema = @Schema(implementation = AssignProfileRequest.class),
-                examples = @ExampleObject(
-                    value = "{\n  \"userId\": \"uid123\",\n  \"profileIds\": [1,2,3]\n}"
-                )
-            )
-        ),
-        responses = {
-            @ApiResponse(
-                responseCode = "200",
-                description = "Perfiles asignados correctamente",
-                content = @Content(
-                    mediaType = "application/json",
-                    examples = @ExampleObject(value = "{\n  \"code\": 0,\n  \"message\": \"Perfiles asignados correctamente\"\n}")
-                )
-            ),
-            @ApiResponse(
-                responseCode = "400",
-                description = "Solicitud inválida",
-                content = @Content(
-                    mediaType = "application/json",
-                    examples = @ExampleObject(value = "{\n  \"code\": -1,\n  \"message\": \"No se pudieron asignar los perfiles\"\n}")
-                )
-            ),
-            @ApiResponse(
-                responseCode = "401",
-                description = "No autorizado"
-            ),
-            @ApiResponse(
-                responseCode = "403",
-                description = "Acceso denegado"
-            )
-        }
-    )
-    public void assignProfile(@Suspended final AsyncResponse asyncResponse, 
-                            final AssignProfileRequest request,
-                            @Context ContainerRequestContext requestContext) {
+    @Produces({ MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN })
+    @Consumes({ MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN })
+    @Operation(summary = "Asignar perfiles a usuario", description = "Permite a un administrador asignar una lista de perfiles a un usuario. Elimina las relaciones previas y asigna los nuevos perfiles.", requestBody = @RequestBody(required = true, content = @Content(mediaType = "application/json", schema = @Schema(implementation = AssignProfileRequest.class), examples = @ExampleObject(value = "{\n  \"userId\": \"uid123\",\n  \"profileIds\": [1,2,3]\n}"))), responses = {
+            @ApiResponse(responseCode = "200", description = "Perfiles asignados correctamente", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = "{\n  \"code\": 0,\n  \"message\": \"Perfiles asignados correctamente\"\n}"))),
+            @ApiResponse(responseCode = "400", description = "Solicitud inválida", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = "{\n  \"code\": -1,\n  \"message\": \"No se pudieron asignar los perfiles\"\n}"))),
+            @ApiResponse(responseCode = "401", description = "No autorizado"),
+            @ApiResponse(responseCode = "403", description = "Acceso denegado")
+    })
+    public void assignProfile(@Suspended final AsyncResponse asyncResponse,
+            final AssignProfileRequest request,
+            @Context ContainerRequestContext requestContext) {
         FirebaseToken decodedToken = (FirebaseToken) requestContext.getProperty("user");
         if (decodedToken == null) {
             asyncResponse.resume(Response.status(Response.Status.UNAUTHORIZED)
-                .entity("No autorizado")
-                .build());
+                    .entity("No autorizado")
+                    .build());
             return;
         }
         executorService.submit(() -> {
@@ -810,8 +638,8 @@ public class api {
                 asyncResponse.resume(doAssignProfiles(request, decodedToken.getUid()));
             } catch (Exception e) {
                 asyncResponse.resume(Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                    .entity(new msgError(-1, e.getMessage()))
-                    .build());
+                        .entity(new msgError(-1, e.getMessage()))
+                        .build());
             }
         });
     }
@@ -821,28 +649,29 @@ public class api {
         // Verificar si el usuario que hace la petición es administrador
         if (!profileDAO.isUserAdmin(adminUserId)) {
             return Response.status(Response.Status.FORBIDDEN)
-                .entity(new msgError(-1, "Solo los administradores pueden asignar perfiles"))
-                .build();
+                    .entity(new msgError(-1, "Solo los administradores pueden asignar perfiles"))
+                    .build();
         }
         // Validar entrada
         if (request.getUserId() == null || request.getProfileIds() == null || request.getProfileIds().isEmpty()) {
             return Response.status(Response.Status.BAD_REQUEST)
-                .entity(new msgError(-1, "Debe especificar el usuario y al menos un perfil"))
-                .build();
+                    .entity(new msgError(-1, "Debe especificar el usuario y al menos un perfil"))
+                    .build();
         }
         // Eliminar relaciones previas
         boolean deleted = profileDAO.deleteAllProfilesForUser(request.getUserId());
         boolean allAssigned = true;
         for (Integer profileId : request.getProfileIds()) {
             boolean assigned = profileDAO.assignProfileToUser(request.getUserId(), profileId);
-            if (!assigned) allAssigned = false;
+            if (!assigned)
+                allAssigned = false;
         }
         if (allAssigned && deleted) {
             return Response.ok(new msgError(0, "Perfiles asignados correctamente")).build();
         } else {
             return Response.status(Response.Status.BAD_REQUEST)
-                .entity(new msgError(-1, "No se pudieron asignar los perfiles"))
-                .build();
+                    .entity(new msgError(-1, "No se pudieron asignar los perfiles"))
+                    .build();
         }
     }
 
@@ -851,40 +680,20 @@ public class api {
      */
     @GET
     @Path(value = "/users")
-    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN})
-    @Operation(
-        summary = "Obtener usuarios registrados",
-        description = "Permite a un administrador consultar todos los usuarios registrados.",
-        responses = {
-            @ApiResponse(
-                responseCode = "200",
-                description = "Lista de usuarios",
-                content = @Content(
-                    mediaType = "application/json",
-                    schema = @Schema(implementation = UserDTO.class),
-                    examples = @ExampleObject(
-                        value = "[{\n  \"id\": \"uid123\",\n  \"email\": \"user@mail.com\",\n  \"displayName\": \"Juan Perez\",\n  \"photoUrl\": null,\n  \"emailVerified\": true,\n  \"disabled\": false\n}]"
-                    )
-                )
-            ),
-            @ApiResponse(
-                responseCode = "401",
-                description = "No autorizado"
-            ),
-            @ApiResponse(
-                responseCode = "403",
-                description = "Acceso denegado"
-            )
-        }
-    )
+    @Produces({ MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN })
+    @Operation(summary = "Obtener usuarios registrados", description = "Permite a un administrador consultar todos los usuarios registrados.", responses = {
+            @ApiResponse(responseCode = "200", description = "Lista de usuarios", content = @Content(mediaType = "application/json", schema = @Schema(implementation = UserDTO.class), examples = @ExampleObject(value = "[{\n  \"id\": \"uid123\",\n  \"email\": \"user@mail.com\",\n  \"displayName\": \"Juan Perez\",\n  \"photoUrl\": null,\n  \"emailVerified\": true,\n  \"disabled\": false\n}]"))),
+            @ApiResponse(responseCode = "401", description = "No autorizado"),
+            @ApiResponse(responseCode = "403", description = "Acceso denegado")
+    })
     public void getUsers(@Suspended final AsyncResponse asyncResponse,
-                        @Context ContainerRequestContext requestContext) {
+            @Context ContainerRequestContext requestContext) {
         FirebaseToken decodedToken = (FirebaseToken) requestContext.getProperty("user");
-        
+
         if (decodedToken == null) {
             asyncResponse.resume(Response.status(Response.Status.UNAUTHORIZED)
-                .entity("No autorizado")
-                .build());
+                    .entity("No autorizado")
+                    .build());
             return;
         }
 
@@ -893,8 +702,8 @@ public class api {
                 asyncResponse.resume(doGetUsers(decodedToken.getUid()));
             } catch (Exception e) {
                 asyncResponse.resume(Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                    .entity(new msgError(-1, e.getMessage()))
-                    .build());
+                        .entity(new msgError(-1, e.getMessage()))
+                        .build());
             }
         });
     }
@@ -921,8 +730,8 @@ public class api {
         }
         if (!isAdmin) {
             return Response.status(Response.Status.FORBIDDEN)
-                .entity(new msgError(-1, "Solo los administradores pueden consultar usuarios"))
-                .build();
+                    .entity(new msgError(-1, "Solo los administradores pueden consultar usuarios"))
+                    .build();
         }
         if (empresaDesc != null && !"Administrador".equalsIgnoreCase(empresaDesc)) {
             // Buscar la empresa por nombre (descripción) y obtener su id
@@ -938,8 +747,8 @@ public class api {
             }
             if (empresaId == null) {
                 return Response.status(Response.Status.NOT_FOUND)
-                    .entity(new msgError(-1, "No se encontró la empresa asociada al perfil"))
-                    .build();
+                        .entity(new msgError(-1, "No se encontró la empresa asociada al perfil"))
+                        .build();
             }
             List<UserDTO> users = userDAO.readAllByEmpresaId(empresaId);
             return Response.ok(users).build();
@@ -955,20 +764,12 @@ public class api {
      */
     @POST
     @Path(value = "/createEmpresa")
-    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN})
-    @Consumes({MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN})
-    @Operation(
-        summary = "Crear empresa",
-        description = "Crea una nueva empresa.",
-        requestBody = @RequestBody(
-            required = true,
-            content = @Content(schema = @Schema(implementation = EmpresaDTO.class))
-        ),
-        responses = {
+    @Produces({ MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN })
+    @Consumes({ MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN })
+    @Operation(summary = "Crear empresa", description = "Crea una nueva empresa.", requestBody = @RequestBody(required = true, content = @Content(schema = @Schema(implementation = EmpresaDTO.class))), responses = {
             @ApiResponse(responseCode = "200", description = "Empresa creada", content = @Content(schema = @Schema(implementation = Boolean.class))),
             @ApiResponse(responseCode = "500", description = "Error interno del servidor")
-        }
-    )
+    })
     public void createEmpresa(@Suspended final AsyncResponse asyncResponse, final EmpresaDTO request) {
         executorService.submit(() -> {
             EmpresaDAO dao = new EmpresaDAO();
@@ -982,20 +783,12 @@ public class api {
      */
     @POST
     @Path(value = "/updateEmpresa")
-    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN})
-    @Consumes({MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN})
-    @Operation(
-        summary = "Actualizar empresa",
-        description = "Actualiza una empresa existente.",
-        requestBody = @RequestBody(
-            required = true,
-            content = @Content(schema = @Schema(implementation = EmpresaDTO.class))
-        ),
-        responses = {
+    @Produces({ MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN })
+    @Consumes({ MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN })
+    @Operation(summary = "Actualizar empresa", description = "Actualiza una empresa existente.", requestBody = @RequestBody(required = true, content = @Content(schema = @Schema(implementation = EmpresaDTO.class))), responses = {
             @ApiResponse(responseCode = "200", description = "Empresa actualizada", content = @Content(schema = @Schema(implementation = Boolean.class))),
             @ApiResponse(responseCode = "500", description = "Error interno del servidor")
-        }
-    )
+    })
     public void updateEmpresa(@Suspended final AsyncResponse asyncResponse, final EmpresaDTO request) {
         executorService.submit(() -> {
             EmpresaDAO dao = new EmpresaDAO();
@@ -1009,20 +802,12 @@ public class api {
      */
     @POST
     @Path(value = "/deleteEmpresa")
-    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN})
-    @Consumes({MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN})
-    @Operation(
-        summary = "Eliminar empresa",
-        description = "Elimina una empresa existente.",
-        requestBody = @RequestBody(
-            required = true,
-            content = @Content(schema = @Schema(implementation = EmpresaDTO.class))
-        ),
-        responses = {
+    @Produces({ MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN })
+    @Consumes({ MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN })
+    @Operation(summary = "Eliminar empresa", description = "Elimina una empresa existente.", requestBody = @RequestBody(required = true, content = @Content(schema = @Schema(implementation = EmpresaDTO.class))), responses = {
             @ApiResponse(responseCode = "200", description = "Empresa eliminada", content = @Content(schema = @Schema(implementation = Boolean.class))),
             @ApiResponse(responseCode = "500", description = "Error interno del servidor")
-        }
-    )
+    })
     public void deleteEmpresa(@Suspended final AsyncResponse asyncResponse, final EmpresaDTO request) {
         executorService.submit(() -> {
             EmpresaDAO dao = new EmpresaDAO();
@@ -1036,24 +821,14 @@ public class api {
      */
     @GET
     @Path("/usersByEmpresa/{empresaId}")
-    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN})
-    @Operation(
-        summary = "Obtener usuarios por empresa",
-        description = "Devuelve los usuarios asociados a una empresa específica.",
-        responses = {
-            @ApiResponse(
-                responseCode = "200",
-                description = "Lista de usuarios",
-                content = @Content(
-                    mediaType = "application/json",
-                    schema = @Schema(implementation = UserDTO.class)
-                )
-            ),
+    @Produces({ MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN })
+    @Operation(summary = "Obtener usuarios por empresa", description = "Devuelve los usuarios asociados a una empresa específica.", responses = {
+            @ApiResponse(responseCode = "200", description = "Lista de usuarios", content = @Content(mediaType = "application/json", schema = @Schema(implementation = UserDTO.class))),
             @ApiResponse(responseCode = "404", description = "Empresa no encontrada"),
             @ApiResponse(responseCode = "500", description = "Error interno del servidor")
-        }
-    )
-    public void getUsersByEmpresa(@Suspended final AsyncResponse asyncResponse, @javax.ws.rs.PathParam("empresaId") Integer empresaId) {
+    })
+    public void getUsersByEmpresa(@Suspended final AsyncResponse asyncResponse,
+            @javax.ws.rs.PathParam("empresaId") Integer empresaId) {
         executorService.submit(() -> {
             UserDAO userDAO = new UserDAO();
             List<UserDTO> users = userDAO.readAllByEmpresaId(empresaId);
@@ -1066,35 +841,28 @@ public class api {
      */
     @POST
     @Path(value = "/createUser")
-    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN})
-    @Consumes({MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN})
-    @Operation(
-        summary = "Crear usuario",
-        description = "Permite crear un usuario según reglas de perfil y empresa.",
-        requestBody = @RequestBody(
-            required = true,
-            content = @Content(schema = @Schema(implementation = UserDTO.class))
-        ),
-        responses = {
+    @Produces({ MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN })
+    @Consumes({ MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN })
+    @Operation(summary = "Crear usuario", description = "Permite crear un usuario según reglas de perfil y empresa.", requestBody = @RequestBody(required = true, content = @Content(schema = @Schema(implementation = UserDTO.class))), responses = {
             @ApiResponse(responseCode = "200", description = "Usuario creado", content = @Content(schema = @Schema(implementation = Boolean.class))),
             @ApiResponse(responseCode = "403", description = "No tiene permisos para crear usuarios"),
             @ApiResponse(responseCode = "400", description = "Datos inválidos o empresa no encontrada")
-        }
-    )
-    public void createUser(@Suspended final AsyncResponse asyncResponse, final UserDTO request, @Context ContainerRequestContext requestContext) {
+    })
+    public void createUser(@Suspended final AsyncResponse asyncResponse, final UserDTO request,
+            @Context ContainerRequestContext requestContext) {
         FirebaseToken decodedToken = (FirebaseToken) requestContext.getProperty("user");
         if (decodedToken == null) {
             asyncResponse.resume(Response.status(Response.Status.UNAUTHORIZED)
-                .entity("No autorizado")
-                .build());
+                    .entity("No autorizado")
+                    .build());
             return;
         }
         // Validar tipo y número de identificación
         if (request.getTipoIdentificacion() == null || request.getTipoIdentificacion().trim().isEmpty() ||
-            request.getNumeroIdentificacion() == null || request.getNumeroIdentificacion().trim().isEmpty()) {
+                request.getNumeroIdentificacion() == null || request.getNumeroIdentificacion().trim().isEmpty()) {
             asyncResponse.resume(Response.status(Response.Status.BAD_REQUEST)
-                .entity(new msgError(-1, "El tipo y número de identificación son obligatorios"))
-                .build());
+                    .entity(new msgError(-1, "El tipo y número de identificación son obligatorios"))
+                    .build());
             return;
         }
         // Validar formato E.164 para phoneNumber si viene presente
@@ -1102,8 +870,9 @@ public class api {
             String phone = request.getPhoneNumber();
             if (!phone.matches("^\\+[1-9]\\d{1,14}$")) {
                 asyncResponse.resume(Response.status(Response.Status.BAD_REQUEST)
-                    .entity(new msgError(-1, "El número de teléfono debe estar en formato internacional E.164, por ejemplo: +573001234567"))
-                    .build());
+                        .entity(new msgError(-1,
+                                "El número de teléfono debe estar en formato internacional E.164, por ejemplo: +573001234567"))
+                        .build());
                 return;
             }
         }
@@ -1140,8 +909,8 @@ public class api {
         }
         if (!isAdmin && !isTecnico) {
             return Response.status(Response.Status.FORBIDDEN)
-                .entity(new msgError(-1, "No tiene permisos para crear usuarios"))
-                .build();
+                    .entity(new msgError(-1, "No tiene permisos para crear usuarios"))
+                    .build();
         }
         Integer empresaId = null;
         if (adminGlobal) {
@@ -1149,11 +918,12 @@ public class api {
             empresaId = newUser.getEmpresaId();
             if (empresaId == null) {
                 return Response.status(Response.Status.BAD_REQUEST)
-                    .entity(new msgError(-1, "Debe especificar la empresa para el usuario"))
-                    .build();
+                        .entity(new msgError(-1, "Debe especificar la empresa para el usuario"))
+                        .build();
             }
         } else {
-            // Si el request no trae empresaId o es null, buscar la empresa asociada al admin
+            // Si el request no trae empresaId o es null, buscar la empresa asociada al
+            // admin
             if (newUser.getEmpresaId() == null) {
                 List<EmpresaDTO> empresas = empresaDAO.readAll();
                 for (EmpresaDTO empresa : empresas) {
@@ -1164,8 +934,8 @@ public class api {
                 }
                 if (empresaId == null) {
                     return Response.status(Response.Status.BAD_REQUEST)
-                        .entity(new msgError(-1, "No se encontró la empresa asociada al perfil del administrador"))
-                        .build();
+                            .entity(new msgError(-1, "No se encontró la empresa asociada al perfil del administrador"))
+                            .build();
                 }
             } else {
                 empresaId = newUser.getEmpresaId();
@@ -1175,9 +945,9 @@ public class api {
         // Crear usuario en Firebase primero
         try {
             CreateRequest fbRequest = new CreateRequest()
-                .setEmail(newUser.getEmail())
-                .setPassword(newUser.getNumeroIdentificacion())
-                .setDisplayName(newUser.getDisplayName());
+                    .setEmail(newUser.getEmail())
+                    .setPassword(newUser.getNumeroIdentificacion())
+                    .setDisplayName(newUser.getDisplayName());
             if (newUser.getPhoneNumber() != null && !newUser.getPhoneNumber().isEmpty()) {
                 fbRequest.setPhoneNumber(newUser.getPhoneNumber());
             }
@@ -1185,8 +955,8 @@ public class api {
             newUser.setId(userRecord.getUid());
         } catch (Exception e) {
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                .entity(new msgError(-1, "Error creando usuario en Firebase: " + e.getMessage()))
-                .build();
+                    .entity(new msgError(-1, "Error creando usuario en Firebase: " + e.getMessage()))
+                    .build();
         }
         boolean created = userDAO.create(newUser);
         return Response.ok(created).build();
@@ -1197,27 +967,20 @@ public class api {
      */
     @POST
     @Path(value = "/updateUser")
-    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN})
-    @Consumes({MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN})
-    @Operation(
-        summary = "Actualizar usuario",
-        description = "Permite actualizar un usuario según reglas de perfil y empresa.",
-        requestBody = @RequestBody(
-            required = true,
-            content = @Content(schema = @Schema(implementation = UserDTO.class))
-        ),
-        responses = {
+    @Produces({ MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN })
+    @Consumes({ MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN })
+    @Operation(summary = "Actualizar usuario", description = "Permite actualizar un usuario según reglas de perfil y empresa.", requestBody = @RequestBody(required = true, content = @Content(schema = @Schema(implementation = UserDTO.class))), responses = {
             @ApiResponse(responseCode = "200", description = "Usuario actualizado", content = @Content(schema = @Schema(implementation = Boolean.class))),
             @ApiResponse(responseCode = "403", description = "No tiene permisos para actualizar usuarios"),
             @ApiResponse(responseCode = "400", description = "Datos inválidos o empresa no encontrada")
-        }
-    )
-    public void updateUser(@Suspended final AsyncResponse asyncResponse, final UserDTO request, @Context ContainerRequestContext requestContext) {
+    })
+    public void updateUser(@Suspended final AsyncResponse asyncResponse, final UserDTO request,
+            @Context ContainerRequestContext requestContext) {
         FirebaseToken decodedToken = (FirebaseToken) requestContext.getProperty("user");
         if (decodedToken == null) {
             asyncResponse.resume(Response.status(Response.Status.UNAUTHORIZED)
-                .entity("No autorizado")
-                .build());
+                    .entity("No autorizado")
+                    .build());
             return;
         }
         executorService.submit(() -> {
@@ -1253,8 +1016,8 @@ public class api {
         }
         if (!isAdmin && !isTecnico) {
             return Response.status(Response.Status.FORBIDDEN)
-                .entity(new msgError(-1, "No tiene permisos para actualizar usuarios"))
-                .build();
+                    .entity(new msgError(-1, "No tiene permisos para actualizar usuarios"))
+                    .build();
         }
         Integer empresaId = null;
         if (adminGlobal) {
@@ -1262,22 +1025,22 @@ public class api {
             empresaId = userToUpdate.getEmpresaId();
             if (empresaId == null) {
                 return Response.status(Response.Status.BAD_REQUEST)
-                    .entity(new msgError(-1, "Debe especificar la empresa para el usuario"))
-                    .build();
+                        .entity(new msgError(-1, "Debe especificar la empresa para el usuario"))
+                        .build();
             }
         } else {
             // Buscar la empresa por nombre (de la descripción del perfil)
             List<EmpresaDTO> empresas = empresaDAO.readAll();
             int idBussiness = 0;
-            try{
+            try {
                 idBussiness = Integer.parseInt(empresaDesc);
                 empresaId = idBussiness;
-                
+
             } catch (NumberFormatException e) {
                 // Manejar el caso en que la descripción de la empresa no es un número
                 return Response.status(Response.Status.BAD_REQUEST)
-                    .entity(new msgError(-1, "La descripción de la empresa no es válida"))
-                    .build();
+                        .entity(new msgError(-1, "La descripción de la empresa no es válida"))
+                        .build();
             }
             for (EmpresaDTO empresa : empresas) {
                 if (idBussiness == empresa.getId()) {
@@ -1288,8 +1051,8 @@ public class api {
             // Solo puede actualizar usuarios de su empresa
             if (!empresaId.equals(userToUpdate.getEmpresaId())) {
                 return Response.status(Response.Status.FORBIDDEN)
-                    .entity(new msgError(-1, "No puede actualizar usuarios de otra empresa"))
-                    .build();
+                        .entity(new msgError(-1, "No puede actualizar usuarios de otra empresa"))
+                        .build();
             }
         }
         userToUpdate.setEmpresaId(empresaId);
@@ -1302,38 +1065,19 @@ public class api {
      */
     @GET
     @Path("/activeProfiles")
-    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN})
-    @Operation(
-        summary = "Obtener perfiles activos",
-        description = "Permite a un usuario con perfil Administrador consultar los perfiles activos. Si el perfil es Administrador y la descripción es 'Administrador', retorna todos los perfiles activos. Si la descripción es diferente, retorna solo los perfiles activos con la misma descripción.",
-        responses = {
-            @ApiResponse(
-                responseCode = "200",
-                description = "Lista de perfiles activos",
-                content = @Content(
-                    mediaType = "application/json",
-                    schema = @Schema(implementation = ProfileDTO.class),
-                    examples = @ExampleObject(
-                        value = "[{\n  \"id\": 1,\n  \"name\": \"Administrador\",\n  \"description\": \"Administrador\",\n  \"active\": true\n}]"
-                    )
-                )
-            ),
-            @ApiResponse(
-                responseCode = "401",
-                description = "No autorizado"
-            ),
-            @ApiResponse(
-                responseCode = "403",
-                description = "Acceso denegado"
-            )
-        }
-    )
-    public void getActiveProfiles(@Suspended final AsyncResponse asyncResponse, @Context ContainerRequestContext requestContext) {
+    @Produces({ MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN })
+    @Operation(summary = "Obtener perfiles activos", description = "Permite a un usuario con perfil Administrador consultar los perfiles activos. Si el perfil es Administrador y la descripción es 'Administrador', retorna todos los perfiles activos. Si la descripción es diferente, retorna solo los perfiles activos con la misma descripción.", responses = {
+            @ApiResponse(responseCode = "200", description = "Lista de perfiles activos", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ProfileDTO.class), examples = @ExampleObject(value = "[{\n  \"id\": 1,\n  \"name\": \"Administrador\",\n  \"description\": \"Administrador\",\n  \"active\": true\n}]"))),
+            @ApiResponse(responseCode = "401", description = "No autorizado"),
+            @ApiResponse(responseCode = "403", description = "Acceso denegado")
+    })
+    public void getActiveProfiles(@Suspended final AsyncResponse asyncResponse,
+            @Context ContainerRequestContext requestContext) {
         FirebaseToken decodedToken = (FirebaseToken) requestContext.getProperty("user");
         if (decodedToken == null) {
             asyncResponse.resume(Response.status(Response.Status.UNAUTHORIZED)
-                .entity("No autorizado")
-                .build());
+                    .entity("No autorizado")
+                    .build());
             return;
         }
         executorService.submit(() -> {
@@ -1355,8 +1099,8 @@ public class api {
         }
         if (!isAdmin) {
             return Response.status(Response.Status.FORBIDDEN)
-                .entity(new msgError(-1, "Solo los administradores pueden consultar perfiles"))
-                .build();
+                    .entity(new msgError(-1, "Solo los administradores pueden consultar perfiles"))
+                    .build();
         }
         List<ProfileDTO> result;
         if ("Administrador".equalsIgnoreCase(adminDesc)) {
@@ -1373,45 +1117,35 @@ public class api {
     @GET
     @Path("/user/devices")
     @Produces(MediaType.APPLICATION_JSON)
-    @Operation(
-        summary = "Consultar dispositivos de usuario",
-        description = "Devuelve la estructura de dispositivos Raspberry asociados al usuario autenticado.",
-        responses = {
-            @ApiResponse(
-                responseCode = "200",
-                description = "Estructura de dispositivos",
-                content = @Content(
-                    mediaType = "application/json",
-                    schema = @Schema(implementation = RaspberryNewDTO.class)
-                )
-            ),
+    @Operation(summary = "Consultar dispositivos de usuario", description = "Devuelve la estructura de dispositivos Raspberry asociados al usuario autenticado.", responses = {
+            @ApiResponse(responseCode = "200", description = "Estructura de dispositivos", content = @Content(mediaType = "application/json", schema = @Schema(implementation = RaspberryNewDTO.class))),
             @ApiResponse(responseCode = "401", description = "No autorizado"),
             @ApiResponse(responseCode = "404", description = "No se encontraron dispositivos asociados")
-        }
-    )
-    public void getUserDevices(@Suspended final AsyncResponse asyncResponse, @Context ContainerRequestContext requestContext) {
+    })
+    public void getUserDevices(@Suspended final AsyncResponse asyncResponse,
+            @Context ContainerRequestContext requestContext) {
         FirebaseToken decodedToken = (FirebaseToken) requestContext.getProperty("user");
         if (decodedToken == null) {
             asyncResponse.resume(Response.status(Response.Status.UNAUTHORIZED)
-                .entity("No autorizado")
-                .build());
+                    .entity("No autorizado")
+                    .build());
             return;
         }
         executorService.submit(() -> {
-            try (Connection conn = DriverManager.getConnection("jdbc:tu_url_bd", "usuario", "password")) {
-                RaspberryNewDAO dao = new RaspberryNewDAO(conn);
+            RaspberryNewDAO dao = new RaspberryNewDAO();
+            try {
                 RaspberryNewDTO dto = dao.getRaspberryByUserId(decodedToken.getUid());
                 if (dto == null) {
                     asyncResponse.resume(Response.status(Response.Status.NOT_FOUND)
-                        .entity("No se encontraron dispositivos asociados")
-                        .build());
+                            .entity("No se encontraron dispositivos asociados")
+                            .build());
                 } else {
                     asyncResponse.resume(Response.ok(dto).build());
                 }
-            } catch (Exception e) {
+            } catch (java.sql.SQLException e) {
                 asyncResponse.resume(Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                    .entity(e.getMessage())
-                    .build());
+                        .entity("Error al consultar dispositivos: " + e.getMessage())
+                        .build());
             }
         });
     }
@@ -1422,37 +1156,27 @@ public class api {
     @GET
     @Path("/user/devices/by-number/{number}")
     @Produces(MediaType.APPLICATION_JSON)
-    @Operation(
-        summary = "Consultar dispositivos por número de celular",
-        description = "Devuelve la estructura de dispositivos Raspberry asociados al número de celular.",
-        responses = {
-            @ApiResponse(
-                responseCode = "200",
-                description = "Estructura de dispositivos",
-                content = @Content(
-                    mediaType = "application/json",
-                    schema = @Schema(implementation = RaspberryNewDTO.class)
-                )
-            ),
+    @Operation(summary = "Consultar dispositivos por número de celular", description = "Devuelve la estructura de dispositivos Raspberry asociados al número de celular.", responses = {
+            @ApiResponse(responseCode = "200", description = "Estructura de dispositivos", content = @Content(mediaType = "application/json", schema = @Schema(implementation = RaspberryNewDTO.class))),
             @ApiResponse(responseCode = "404", description = "No se encontraron dispositivos asociados")
-        }
-    )
-    public void getUserDevicesByNumber(@Suspended final AsyncResponse asyncResponse, @javax.ws.rs.PathParam("number") String number) {
+    })
+    public void getUserDevicesByNumber(@Suspended final AsyncResponse asyncResponse,
+            @javax.ws.rs.PathParam("number") String number) {
         executorService.submit(() -> {
-            try (Connection conn = DriverManager.getConnection("jdbc:tu_url_bd", "usuario", "password")) {
-                RaspberryNewDAO dao = new RaspberryNewDAO(conn);
+            RaspberryNewDAO dao = new RaspberryNewDAO();
+            try {
                 RaspberryNewDTO dto = dao.getRaspberryByUserNumber(number);
                 if (dto == null) {
                     asyncResponse.resume(Response.status(Response.Status.NOT_FOUND)
-                        .entity("No se encontraron dispositivos asociados")
-                        .build());
+                            .entity("No se encontraron dispositivos asociados")
+                            .build());
                 } else {
                     asyncResponse.resume(Response.ok(dto).build());
                 }
-            } catch (Exception e) {
+            } catch (java.sql.SQLException e) {
                 asyncResponse.resume(Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                    .entity(e.getMessage())
-                    .build());
+                        .entity("Error al consultar dispositivos: " + e.getMessage())
+                        .build());
             }
         });
     }
@@ -1464,75 +1188,58 @@ public class api {
     @Path("/user/devices")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    @Operation(
-        summary = "Crear o actualizar dispositivos y asociaciones",
-        description = "Crea o actualiza la configuración de una Raspberry y asocia usuarios por userId y/o número de celular.",
-        requestBody = @RequestBody(
-            required = true,
-            content = @Content(schema = @Schema(implementation = RaspberryNewDTO.class))
-        ),
-        responses = {
+    @Operation(summary = "Crear o actualizar dispositivos y asociaciones", description = "Crea o actualiza la configuración de una Raspberry y asocia usuarios por userId y/o número de celular.", requestBody = @RequestBody(required = true, content = @Content(schema = @Schema(implementation = RaspberryNewDTO.class))), responses = {
             @ApiResponse(responseCode = "200", description = "Configuración guardada correctamente"),
             @ApiResponse(responseCode = "400", description = "Datos inválidos"),
             @ApiResponse(responseCode = "500", description = "Error interno del servidor")
-        }
-    )
+    })
     public void createOrUpdateUserDevices(@Suspended final AsyncResponse asyncResponse, final RaspberryNewDTO request) {
         executorService.submit(() -> {
-            try (Connection conn = DriverManager.getConnection("jdbc:tu_url_bd", "usuario", "password")) {
-                RaspberryNewDAO dao = new RaspberryNewDAO(conn);
+            RaspberryNewDAO dao = new RaspberryNewDAO();
+            try {
                 boolean ok = dao.createOrUpdateRaspberryWithUsers(request);
                 if (ok) {
                     asyncResponse.resume(Response.ok("Configuración guardada correctamente").build());
                 } else {
                     asyncResponse.resume(Response.status(Response.Status.BAD_REQUEST)
-                        .entity("No se pudo guardar la configuración")
-                        .build());
+                            .entity("No se pudo guardar la configuración")
+                            .build());
                 }
-            } catch (Exception e) {
+            } catch (java.sql.SQLException e) {
                 asyncResponse.resume(Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                    .entity(e.getMessage())
-                    .build());
+                        .entity("Error al guardar la configuración: " + e.getMessage())
+                        .build());
             }
         });
     }
 
     /**
-     * Endpoint para consultar los perfiles asignados a un usuario (solo administradores)
+     * Endpoint para consultar los perfiles asignados a un usuario (solo
+     * administradores)
      */
     @GET
     @Path("/user/{userId}/profiles")
     @Produces(MediaType.APPLICATION_JSON)
-    @Operation(
-        summary = "Obtener perfiles de un usuario",
-        description = "Permite a un administrador consultar los perfiles asignados a un usuario.",
-        responses = {
-            @ApiResponse(
-                responseCode = "200",
-                description = "Lista de perfiles",
-                content = @Content(
-                    mediaType = "application/json",
-                    schema = @Schema(implementation = ProfileDTO.class)
-                )
-            ),
+    @Operation(summary = "Obtener perfiles de un usuario", description = "Permite a un administrador consultar los perfiles asignados a un usuario.", responses = {
+            @ApiResponse(responseCode = "200", description = "Lista de perfiles", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ProfileDTO.class))),
             @ApiResponse(responseCode = "401", description = "No autorizado"),
             @ApiResponse(responseCode = "403", description = "Acceso denegado")
-        }
-    )
-    public void getUserProfiles(@Suspended final AsyncResponse asyncResponse, @javax.ws.rs.PathParam("userId") String userId, @Context ContainerRequestContext requestContext) {
+    })
+    public void getUserProfiles(@Suspended final AsyncResponse asyncResponse,
+            @javax.ws.rs.PathParam("userId") String userId, @Context ContainerRequestContext requestContext) {
         FirebaseToken decodedToken = (FirebaseToken) requestContext.getProperty("user");
         if (decodedToken == null) {
             asyncResponse.resume(Response.status(Response.Status.UNAUTHORIZED)
-                .entity("No autorizado")
-                .build());
+                    .entity("No autorizado")
+                    .build());
             return;
         }
         executorService.submit(() -> {
             ProfileDAO profileDAO = new ProfileDAO();
             if (!profileDAO.isUserAdmin(decodedToken.getUid())) {
                 asyncResponse.resume(Response.status(Response.Status.FORBIDDEN)
-                    .entity("Solo los administradores pueden consultar perfiles de otros usuarios")
-                    .build());
+                        .entity("Solo los administradores pueden consultar perfiles de otros usuarios")
+                        .build());
                 return;
             }
             List<ProfileDTO> profiles = profileDAO.getUserProfiles(userId);
@@ -1546,28 +1253,18 @@ public class api {
     @GET
     @Path("/empresas")
     @Produces(MediaType.APPLICATION_JSON)
-    @Operation(
-        summary = "Obtener todas las empresas",
-        description = "Permite a un administrador global (name=Administrador y description=Administrador) consultar todas las empresas registradas.",
-        responses = {
-            @ApiResponse(
-                responseCode = "200",
-                description = "Lista de empresas",
-                content = @Content(
-                    mediaType = "application/json",
-                    schema = @Schema(implementation = EmpresaDTO.class)
-                )
-            ),
+    @Operation(summary = "Obtener todas las empresas", description = "Permite a un administrador global (name=Administrador y description=Administrador) consultar todas las empresas registradas.", responses = {
+            @ApiResponse(responseCode = "200", description = "Lista de empresas", content = @Content(mediaType = "application/json", schema = @Schema(implementation = EmpresaDTO.class))),
             @ApiResponse(responseCode = "401", description = "No autorizado"),
             @ApiResponse(responseCode = "403", description = "Acceso denegado")
-        }
-    )
-    public void getAllEmpresas(@Suspended final AsyncResponse asyncResponse, @Context ContainerRequestContext requestContext) {
+    })
+    public void getAllEmpresas(@Suspended final AsyncResponse asyncResponse,
+            @Context ContainerRequestContext requestContext) {
         FirebaseToken decodedToken = (FirebaseToken) requestContext.getProperty("user");
         if (decodedToken == null) {
             asyncResponse.resume(Response.status(Response.Status.UNAUTHORIZED)
-                .entity("No autorizado")
-                .build());
+                    .entity("No autorizado")
+                    .build());
             return;
         }
         executorService.submit(() -> {
@@ -1575,15 +1272,16 @@ public class api {
             List<ProfileDTO> profiles = profileDAO.getUserProfiles(decodedToken.getUid());
             boolean isAdminGlobal = false;
             for (ProfileDTO profile : profiles) {
-                if ("Administrador".equalsIgnoreCase(profile.getName()) && "Administrador".equalsIgnoreCase(profile.getDescription())) {
+                if ("Administrador".equalsIgnoreCase(profile.getName())
+                        && "Administrador".equalsIgnoreCase(profile.getDescription())) {
                     isAdminGlobal = true;
                     break;
                 }
             }
             if (!isAdminGlobal) {
                 asyncResponse.resume(Response.status(Response.Status.FORBIDDEN)
-                    .entity("Solo administradores globales pueden consultar todas las empresas")
-                    .build());
+                        .entity("Solo administradores globales pueden consultar todas las empresas")
+                        .build());
                 return;
             }
             EmpresaDAO empresaDAO = new EmpresaDAO();
@@ -1599,20 +1297,9 @@ public class api {
     @Path("/devices")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    @Operation(
-        summary = "Crear dispositivo",
-        description = "Crea un dispositivo. Solo permitido para Administrador global.",
-        requestBody = @RequestBody(
-            required = true,
-            content = @Content(schema = @Schema(implementation = RaspberryNewDTO.class))
-        ),
-        responses = {
-            @ApiResponse(responseCode = "200", description = "Dispositivo creado correctamente"),
-            @ApiResponse(responseCode = "403", description = "No autorizado"),
-            @ApiResponse(responseCode = "500", description = "Error interno del servidor")
-        }
-    )
-    public void createDevice(@Suspended final AsyncResponse asyncResponse, final RaspberryNewDTO request, @Context ContainerRequestContext requestContext) {
+    @Operation(summary = "Crear dispositivo", description = "Crea un dispositivo. Solo permitido para Administrador global.", requestBody = @RequestBody(required = true, content = @Content(schema = @Schema(implementation = RaspberryNewDTO.class))))
+    public void createDevice(@Suspended final AsyncResponse asyncResponse, final RaspberryNewDTO request,
+            @Context ContainerRequestContext requestContext) {
         FirebaseToken user = (FirebaseToken) requestContext.getProperty("user");
         if (user == null) {
             asyncResponse.resume(Response.status(Response.Status.UNAUTHORIZED).entity("No autorizado").build());
@@ -1623,23 +1310,24 @@ public class api {
                 ProfileDAO profileDAO = new ProfileDAO();
                 List<ProfileDTO> profiles = profileDAO.getUserProfiles(user.getUid());
                 boolean isAdminGlobal = profiles.stream().anyMatch(
-                    p -> "Administrador".equalsIgnoreCase(p.getName()) && "Administrador".equalsIgnoreCase(p.getDescription())
-                );
+                        p -> "Administrador".equalsIgnoreCase(p.getName())
+                                && "Administrador".equalsIgnoreCase(p.getDescription()));
                 if (!isAdminGlobal) {
-                    asyncResponse.resume(Response.status(Response.Status.FORBIDDEN).entity("Solo permitido para Administrador global").build());
+                    asyncResponse.resume(Response.status(Response.Status.FORBIDDEN)
+                            .entity("Solo permitido para Administrador global").build());
                     return;
                 }
-                try (Connection conn = DriverManager.getConnection("jdbc:tu_url_bd", "usuario", "password")) {
-                    RaspberryNewDAO dao = new RaspberryNewDAO(conn);
-                    boolean ok = dao.createOrUpdateRaspberryWithUsers(request);
-                    if (ok) {
-                        asyncResponse.resume(Response.ok("Raspberry creada correctamente").build());
-                    } else {
-                        asyncResponse.resume(Response.status(Response.Status.BAD_REQUEST).entity("No se pudo crear la Raspberry").build());
-                    }
+                RaspberryNewDAO dao = new RaspberryNewDAO();
+                boolean ok = dao.createOrUpdateRaspberryWithUsers(request);
+                if (ok) {
+                    asyncResponse.resume(Response.ok("Raspberry creada correctamente").build());
+                } else {
+                    asyncResponse.resume(Response.status(Response.Status.BAD_REQUEST)
+                            .entity("No se pudo crear la Raspberry").build());
                 }
             } catch (Exception e) {
-                asyncResponse.resume(Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build());
+                asyncResponse
+                        .resume(Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build());
             }
         });
     }
@@ -1650,16 +1338,13 @@ public class api {
     @GET
     @Path("/devices")
     @Produces(MediaType.APPLICATION_JSON)
-    @Operation(
-        summary = "Consultar todas las Raspberrys",
-        description = "Devuelve todas las Raspberrys. Solo permitido para Administrador global.",
-        responses = {
+    @Operation(summary = "Consultar todas las Raspberrys", description = "Devuelve todas las Raspberrys. Solo permitido para Administrador global.", responses = {
             @ApiResponse(responseCode = "200", description = "Lista de Raspberrys", content = @Content(schema = @Schema(implementation = RaspberryNewDTO.class))),
             @ApiResponse(responseCode = "403", description = "No autorizado"),
             @ApiResponse(responseCode = "500", description = "Error interno del servidor")
-        }
-    )
-    public void getAllRaspberrys(@Suspended final AsyncResponse asyncResponse, @Context ContainerRequestContext requestContext) {
+    })
+    public void getAllRaspberrys(@Suspended final AsyncResponse asyncResponse,
+            @Context ContainerRequestContext requestContext) {
         FirebaseToken user = (FirebaseToken) requestContext.getProperty("user");
         if (user == null) {
             asyncResponse.resume(Response.status(Response.Status.UNAUTHORIZED).entity("No autorizado").build());
@@ -1670,19 +1355,65 @@ public class api {
                 ProfileDAO profileDAO = new ProfileDAO();
                 List<ProfileDTO> profiles = profileDAO.getUserProfiles(user.getUid());
                 boolean isAdminGlobal = profiles.stream().anyMatch(
-                    p -> "Administrador".equalsIgnoreCase(p.getName()) && "Administrador".equalsIgnoreCase(p.getDescription())
-                );
+                        p -> "Administrador".equalsIgnoreCase(p.getName())
+                                && "Administrador".equalsIgnoreCase(p.getDescription()));
                 if (!isAdminGlobal) {
-                    asyncResponse.resume(Response.status(Response.Status.FORBIDDEN).entity("Solo permitido para Administrador global").build());
+                    asyncResponse.resume(Response.status(Response.Status.FORBIDDEN)
+                            .entity("Solo permitido para Administrador global").build());
                     return;
                 }
-                try (Connection conn = DriverManager.getConnection("jdbc:tu_url_bd", "usuario", "password")) {
-                    RaspberryNewDAO dao = new RaspberryNewDAO(conn);
-                    List<RaspberryNewDTO> raspberrys = dao.getAllRaspberrys();
-                    asyncResponse.resume(Response.ok(raspberrys).build());
+                RaspberryNewDAO dao = new RaspberryNewDAO();
+                List<RaspberryNewDTO> raspberrys = dao.getAllRaspberrys();
+                asyncResponse.resume(Response.ok(raspberrys).build());
+            } catch (Exception e) {
+                asyncResponse
+                        .resume(Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build());
+            }
+        });
+    }
+
+    /**
+     * Endpoint para crear una relación entre un usuario y una Raspberry
+     */
+    @POST
+    @Path("/user/raspberry/relation")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(summary = "Crear relación entre usuario y Raspberry", description = "Permite a un administrador global (name=Administrador y description=Administrador) crear una relación entre un usuario y una Raspberry.", requestBody = @RequestBody(required = true, content = @Content(schema = @Schema(implementation = RaspberryNewDTO.class))), responses = {
+            @ApiResponse(responseCode = "200", description = "Relación creada correctamente"),
+            @ApiResponse(responseCode = "403", description = "No autorizado"),
+            @ApiResponse(responseCode = "500", description = "Error interno del servidor")
+    })
+    public void createUserRaspberryRelation(@Suspended final AsyncResponse asyncResponse, final RaspberryNewDTO request,
+            @Context ContainerRequestContext requestContext) {
+        FirebaseToken user = (FirebaseToken) requestContext.getProperty("user");
+        if (user == null) {
+            asyncResponse.resume(Response.status(Response.Status.UNAUTHORIZED).entity("No autorizado").build());
+            return;
+        }
+        executorService.submit(() -> {
+            try {
+                ProfileDAO profileDAO = new ProfileDAO();
+                List<ProfileDTO> profiles = profileDAO.getUserProfiles(user.getUid());
+                boolean isAdminGlobal = profiles.stream().anyMatch(
+                        p -> "Administrador".equalsIgnoreCase(p.getName())
+                                && "Administrador".equalsIgnoreCase(p.getDescription()));
+                if (!isAdminGlobal) {
+                    asyncResponse.resume(Response.status(Response.Status.FORBIDDEN)
+                            .entity("Solo permitido para Administrador global").build());
+                    return;
+                }
+                RaspberryNewDAO dao = new RaspberryNewDAO();
+                boolean success = dao.createUserRaspberryRelation(user.getUid(), request);
+                if (success) {
+                    asyncResponse.resume(Response.ok("Relación creada correctamente").build());
+                } else {
+                    asyncResponse.resume(Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                            .entity("Error al crear la relación").build());
                 }
             } catch (Exception e) {
-                asyncResponse.resume(Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build());
+                asyncResponse
+                        .resume(Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build());
             }
         });
     }
