@@ -337,4 +337,17 @@ public class RaspberryNewDAO {
             return ps.executeUpdate() > 0;
         }
     }
+
+    // Método para actualizar una Raspberry solo con los campos de la tabla dommapi.raspberry
+    public boolean updateRaspberry(RaspberryDTO dto) throws SQLException {
+        String updateRaspberry = "UPDATE dommapi.raspberry SET name_admin = ?, name_tec = ?, topic = ?, mikrotik = ? WHERE id = ?";
+        try (PreparedStatement ps = conn.getCnn().prepareStatement(updateRaspberry)) {
+            ps.setString(1, dto.getNameDeviceAdmin());
+            ps.setString(2, dto.getNameDeviceTec());
+            ps.setString(3, dto.getTopic());
+            ps.setBoolean(4, dto.isMikrotik());
+            ps.setInt(5, dto.getId());
+            return ps.executeUpdate() > 0;
+        }
+    }
 }

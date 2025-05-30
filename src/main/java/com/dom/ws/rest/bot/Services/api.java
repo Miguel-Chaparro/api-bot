@@ -1296,14 +1296,14 @@ public class api {
     @Path("/devices")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    @Operation(summary = "Crear dispositivo simple", description = "Crea un dispositivo solo con los campos de la tabla dommapi.raspberry. Solo permitido para Administrador global.",
+    @Operation(summary = "Crear o actualizar dispositivo simple", description = "Crea o actualiza un dispositivo solo con los campos de la tabla dommapi.raspberry. Si se envía el id, actualiza; si no, crea. Solo permitido para Administrador global.",
         requestBody = @RequestBody(required = true, content = @Content(schema = @Schema(implementation = RaspberryDTO.class))),
         responses = {
-            @ApiResponse(responseCode = "200", description = "Dispositivo creado correctamente"),
+            @ApiResponse(responseCode = "200", description = "Dispositivo procesado correctamente"),
             @ApiResponse(responseCode = "403", description = "No autorizado"),
             @ApiResponse(responseCode = "500", description = "Error interno del servidor")
         })
-    public void createDevice(@Suspended final AsyncResponse asyncResponse, final RaspberryDTO request, @Context ContainerRequestContext requestContext) {
+    public void createOrUpdateDevice(@Suspended final AsyncResponse asyncResponse, final RaspberryDTO request, @Context ContainerRequestContext requestContext) {
         FirebaseToken user = (FirebaseToken) requestContext.getProperty("user");
         if (user == null) {
             asyncResponse.resume(Response.status(Response.Status.UNAUTHORIZED).entity("No autorizado").build());
@@ -1320,11 +1320,16 @@ public class api {
                     return;
                 }
                 RaspberryNewDAO dao = new RaspberryNewDAO();
-                boolean ok = dao.createRaspberry(request);
-                if (ok) {
-                    asyncResponse.resume(Response.ok("Raspberry creada correctamente").build());
+                boolean ok;
+                if (request.getId() > 0) {
+                    ok = dao.updateRaspberry(request);
                 } else {
-                    asyncResponse.resume(Response.status(Response.Status.BAD_REQUEST).entity("No se pudo crear la Raspberry").build());
+                    ok = dao.createRaspberry(request);
+                }
+                if (ok) {
+                    asyncResponse.resume(Response.ok("Dispositivo procesado correctamente").build());
+                } else {
+                    asyncResponse.resume(Response.status(Response.Status.BAD_REQUEST).entity("No se pudo procesar la Raspberry").build());
                 }
             } catch (Exception e) {
                 asyncResponse.resume(Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build());
