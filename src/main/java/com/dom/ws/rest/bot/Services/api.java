@@ -1306,7 +1306,7 @@ public class api {
     public void createOrUpdateDevice(@Suspended final AsyncResponse asyncResponse, final RaspberryDTO request, @Context ContainerRequestContext requestContext) {
         FirebaseToken user = (FirebaseToken) requestContext.getProperty("user");
         if (user == null) {
-            asyncResponse.resume(Response.status(Response.Status.UNAUTHORIZED).entity("No autorizado").build());
+            asyncResponse.resume(Response.status(Response.Status.UNAUTHORIZED).entity(new msgError(-1, "No autorizado")).build());
             return;
         }
         executorService.submit(() -> {
@@ -1316,7 +1316,7 @@ public class api {
                 boolean isAdminGlobal = profiles.stream().anyMatch(
                         p -> "Administrador".equalsIgnoreCase(p.getName()) && "Administrador".equalsIgnoreCase(p.getDescription()));
                 if (!isAdminGlobal) {
-                    asyncResponse.resume(Response.status(Response.Status.FORBIDDEN).entity("Solo permitido para Administrador global").build());
+                    asyncResponse.resume(Response.status(Response.Status.FORBIDDEN).entity(new msgError(-1, "Solo permitido para Administrador global")).build());
                     return;
                 }
                 RaspberryNewDAO dao = new RaspberryNewDAO();
@@ -1327,12 +1327,12 @@ public class api {
                     ok = dao.createRaspberry(request);
                 }
                 if (ok) {
-                    asyncResponse.resume(Response.ok("Dispositivo procesado correctamente").build());
+                    asyncResponse.resume(Response.ok(new msgError(0, "Dispositivo procesado correctamente")).build());
                 } else {
-                    asyncResponse.resume(Response.status(Response.Status.BAD_REQUEST).entity("No se pudo procesar la Raspberry").build());
+                    asyncResponse.resume(Response.status(Response.Status.BAD_REQUEST).entity(new msgError(-1, "No se pudo procesar la Raspberry")).build());
                 }
             } catch (Exception e) {
-                asyncResponse.resume(Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build());
+                asyncResponse.resume(Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(new msgError(-1, e.getMessage())).build());
             }
         });
     }
