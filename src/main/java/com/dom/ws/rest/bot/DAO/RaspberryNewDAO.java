@@ -350,4 +350,47 @@ public class RaspberryNewDAO {
             return ps.executeUpdate() > 0;
         }
     }
+
+    // Método para obtener las relaciones usuario-raspberry filtradas por raspberry_id
+    public List<RaspberryUserRelationDTO> getRaspberryUserRelationsByRaspberryId(int raspberryId) throws SQLException {
+        List<RaspberryUserRelationDTO> relations = new ArrayList<>();
+        String sql = "SELECT id, raspberry_id, user_number, user_id, role, name, topic, device FROM dommapi.raspberry_user WHERE raspberry_id = ?";
+        try (PreparedStatement ps = conn.getCnn().prepareStatement(sql)) {
+            ps.setInt(1, raspberryId);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                RaspberryUserRelationDTO dto = new RaspberryUserRelationDTO();
+                dto.setId(rs.getInt("id"));
+                dto.setRaspberryId(rs.getInt("raspberry_id"));
+                dto.setUserNumber(rs.getString("user_number"));
+                dto.setUserId(rs.getString("user_id"));
+                dto.setRole(rs.getString("role"));
+                dto.setName(rs.getString("name"));
+                dto.setTopic(rs.getString("topic"));
+                dto.setDevice(rs.getString("device"));
+                relations.add(dto);
+            }
+        }
+        return relations;
+    }
+
+    // Método para obtener todas las Raspberrys relacionadas a un usuario (por user_id en dommapi.raspberry_user)
+    public List<RaspberryDTO> getRaspberrysSimpleByUserId(String userId) throws SQLException {
+        List<RaspberryDTO> raspberryList = new ArrayList<>();
+        String sql = "SELECT DISTINCT r.id, r.name_admin, r.name_tec, r.topic, r.mikrotik FROM dommapi.raspberry r INNER JOIN dommapi.raspberry_user ru ON r.id = ru.raspberry_id WHERE ru.user_id = ?";
+        try (PreparedStatement ps = conn.getCnn().prepareStatement(sql)) {
+            ps.setString(1, userId);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                RaspberryDTO dto = new RaspberryDTO();
+                dto.setId(rs.getInt("id"));
+                dto.setNameDeviceAdmin(rs.getString("name_admin"));
+                dto.setNameDeviceTec(rs.getString("name_tec"));
+                dto.setTopic(rs.getString("topic"));
+                dto.setMikrotik(rs.getBoolean("mikrotik"));
+                raspberryList.add(dto);
+            }
+        }
+        return raspberryList;
+    }
 }

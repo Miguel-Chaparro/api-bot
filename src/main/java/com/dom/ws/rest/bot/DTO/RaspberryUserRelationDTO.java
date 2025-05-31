@@ -8,6 +8,7 @@ public class RaspberryUserRelationDTO {
     private String topic;
     private String device;
     private String userId;
+    private int id;
 
     public int getRaspberryId() { return raspberryId; }
     public void setRaspberryId(int raspberryId) { this.raspberryId = raspberryId; }
@@ -23,4 +24,6 @@ public class RaspberryUserRelationDTO {
     public void setDevice(String device) { this.device = device; }
     public String getUserId() { return userId; }
     public void setUserId(String userId) { this.userId = userId; }
+    public int getId() { return id; }
+    public void setId(int id) { this.id = id; }
 }

@@ -1361,12 +1361,18 @@ public class api {
                 List<ProfileDTO> profiles = profileDAO.getUserProfiles(user.getUid());
                 boolean isAdminGlobal = profiles.stream().anyMatch(
                         p -> "Administrador".equalsIgnoreCase(p.getName()) && "Administrador".equalsIgnoreCase(p.getDescription()));
-                if (!isAdminGlobal) {
-                    asyncResponse.resume(Response.status(Response.Status.FORBIDDEN).entity("Solo permitido para Administrador global").build());
+                boolean isAdmin = profiles.stream().anyMatch(
+                        p -> "Administrador".equalsIgnoreCase(p.getName()));
+                RaspberryNewDAO dao = new RaspberryNewDAO();
+                List<RaspberryDTO> raspberrys;
+                if (isAdminGlobal) {
+                    raspberrys = dao.getAllRaspberrysSimple();
+                } else if (isAdmin) {
+                    raspberrys = dao.getRaspberrysSimpleByUserId(user.getUid());
+                } else {
+                    asyncResponse.resume(Response.status(Response.Status.FORBIDDEN).entity("Solo permitido para Administrador").build());
                     return;
                 }
-                RaspberryNewDAO dao = new RaspberryNewDAO();
-                List<RaspberryDTO> raspberrys = dao.getAllRaspberrysSimple();
                 asyncResponse.resume(Response.ok(raspberrys).build());
             } catch (Exception e) {
                 asyncResponse.resume(Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build());
@@ -1411,6 +1417,45 @@ public class api {
                 } else {
                     asyncResponse.resume(Response.status(Response.Status.BAD_REQUEST).entity("No se pudo crear la relación").build());
                 }
+            } catch (Exception e) {
+                asyncResponse.resume(Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build());
+            }
+        });
+    }
+
+    /**
+     * Endpoint para consultar relaciones usuario-raspberry por raspberry_id (solo Administrador global)
+     */
+    @GET
+    @Path("/user/raspberry/relations/{raspberryId}")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(summary = "Consultar relaciones usuario-raspberry por raspberry_id", description = "Devuelve las relaciones usuario-raspberry filtradas por raspberry_id. Solo permitido para Administrador global.",
+        responses = {
+            @ApiResponse(responseCode = "200", description = "Lista de relaciones", content = @Content(schema = @Schema(implementation = RaspberryUserRelationDTO.class))),
+            @ApiResponse(responseCode = "403", description = "No autorizado"),
+            @ApiResponse(responseCode = "500", description = "Error interno del servidor")
+        })
+    public void getRaspberryUserRelationsByRaspberryId(@Suspended final AsyncResponse asyncResponse,
+            @javax.ws.rs.PathParam("raspberryId") int raspberryId,
+            @Context ContainerRequestContext requestContext) {
+        FirebaseToken user = (FirebaseToken) requestContext.getProperty("user");
+        if (user == null) {
+            asyncResponse.resume(Response.status(Response.Status.UNAUTHORIZED).entity("No autorizado").build());
+            return;
+        }
+        executorService.submit(() -> {
+            try {
+                ProfileDAO profileDAO = new ProfileDAO();
+                List<ProfileDTO> profiles = profileDAO.getUserProfiles(user.getUid());
+                boolean isAdmin = profiles.stream().anyMatch(
+                        p -> "Administrador".equalsIgnoreCase(p.getName()));
+                if (!isAdmin) {
+                    asyncResponse.resume(Response.status(Response.Status.FORBIDDEN).entity("Solo permitido para Administrador global").build());
+                    return;
+                }
+                RaspberryNewDAO dao = new RaspberryNewDAO();
+                List<RaspberryUserRelationDTO> relations = dao.getRaspberryUserRelationsByRaspberryId(raspberryId);
+                asyncResponse.resume(Response.ok(relations).build());
             } catch (Exception e) {
                 asyncResponse.resume(Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build());
             }
