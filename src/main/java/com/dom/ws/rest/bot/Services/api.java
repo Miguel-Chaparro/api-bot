@@ -1390,14 +1390,14 @@ public class api {
     @Operation(summary = "Crear relación usuario-raspberry simple", description = "Crea la relación usuario-raspberry solo con los campos de la tabla dommapi.raspberry_user. Solo permitido para Administrador global.",
         requestBody = @RequestBody(required = true, content = @Content(schema = @Schema(implementation = RaspberryUserRelationDTO.class))),
         responses = {
-            @ApiResponse(responseCode = "200", description = "Relación creada correctamente"),
+            @ApiResponse(responseCode = "200", description = "Relación creada correctamente", content = @Content(schema = @Schema(implementation = msgError.class))),
             @ApiResponse(responseCode = "403", description = "No autorizado"),
             @ApiResponse(responseCode = "500", description = "Error interno del servidor")
         })
     public void createUserRaspberryRelation(@Suspended final AsyncResponse asyncResponse, final RaspberryUserRelationDTO request, @Context ContainerRequestContext requestContext) {
         FirebaseToken user = (FirebaseToken) requestContext.getProperty("user");
         if (user == null) {
-            asyncResponse.resume(Response.status(Response.Status.UNAUTHORIZED).entity("No autorizado").build());
+            asyncResponse.resume(Response.status(Response.Status.UNAUTHORIZED).entity(new msgError(-1, "No autorizado")).build());
             return;
         }
         executorService.submit(() -> {
@@ -1407,18 +1407,18 @@ public class api {
                 boolean isAdminGlobal = profiles.stream().anyMatch(
                         p -> "Administrador".equalsIgnoreCase(p.getName()) && "Administrador".equalsIgnoreCase(p.getDescription()));
                 if (!isAdminGlobal) {
-                    asyncResponse.resume(Response.status(Response.Status.FORBIDDEN).entity("Solo permitido para Administrador global").build());
+                    asyncResponse.resume(Response.status(Response.Status.FORBIDDEN).entity(new msgError(-1, "Solo permitido para Administrador global")).build());
                     return;
                 }
                 RaspberryNewDAO dao = new RaspberryNewDAO();
                 boolean ok = dao.createRaspberryUserRelation(request);
                 if (ok) {
-                    asyncResponse.resume(Response.ok("Relación creada correctamente").build());
+                    asyncResponse.resume(Response.ok(new msgError(0, "Relación creada correctamente")).build());
                 } else {
-                    asyncResponse.resume(Response.status(Response.Status.BAD_REQUEST).entity("No se pudo crear la relación").build());
+                    asyncResponse.resume(Response.status(Response.Status.BAD_REQUEST).entity(new msgError(-1, "No se pudo crear la relación")).build());
                 }
             } catch (Exception e) {
-                asyncResponse.resume(Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build());
+                asyncResponse.resume(Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(new msgError(-1, e.getMessage())).build());
             }
         });
     }
