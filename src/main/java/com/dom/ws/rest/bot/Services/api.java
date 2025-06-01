@@ -1461,4 +1461,89 @@ public class api {
             }
         });
     }
+
+    /**
+     * Obtener las IPs de una Raspberry (solo Administrador)
+     */
+    @GET
+    @Path("/raspberry/{raspberryId}/ips")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(summary = "Obtener IPs de una Raspberry", description = "Devuelve las IPs asignadas a una Raspberry. Solo permitido para Administrador.",
+        responses = {
+            @ApiResponse(responseCode = "200", description = "Lista de IPs", content = @Content(schema = @Schema(implementation = RaspberryNewDTO.RaspiIpDTO.class))),
+            @ApiResponse(responseCode = "403", description = "No autorizado"),
+            @ApiResponse(responseCode = "500", description = "Error interno del servidor")
+        })
+    public void getRaspberryIps(@Suspended final AsyncResponse asyncResponse,
+                                @javax.ws.rs.PathParam("raspberryId") int raspberryId,
+                                @Context ContainerRequestContext requestContext) {
+        FirebaseToken user = (FirebaseToken) requestContext.getProperty("user");
+        if (user == null) {
+            asyncResponse.resume(Response.status(Response.Status.UNAUTHORIZED).entity("No autorizado").build());
+            return;
+        }
+        executorService.submit(() -> {
+            try {
+                ProfileDAO profileDAO = new ProfileDAO();
+                List<ProfileDTO> profiles = profileDAO.getUserProfiles(user.getUid());
+                boolean isAdmin = profiles.stream().anyMatch(
+                        p -> "Administrador".equalsIgnoreCase(p.getName()));
+                if (!isAdmin) {
+                    asyncResponse.resume(Response.status(Response.Status.FORBIDDEN).entity("Solo permitido para Administrador").build());
+                    return;
+                }
+                RaspberryNewDAO dao = new RaspberryNewDAO();
+                List<RaspberryNewDTO.RaspiIpDTO> ips = dao.getIpsByRaspberryId(raspberryId);
+                asyncResponse.resume(Response.ok(ips).build());
+            } catch (Exception e) {
+                asyncResponse.resume(Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build());
+            }
+        });
+    }
+
+    /**
+     * Crear o actualizar una IP de una Raspberry (solo Administrador)
+     */
+    @POST
+    @Path("/raspberry/{raspberryId}/ip")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(summary = "Crear o actualizar IP de una Raspberry", description = "Crea o actualiza una IP de la tabla dommapi.raspberry_ip para una Raspberry. Solo permitido para Administrador.",
+        requestBody = @RequestBody(required = true, content = @Content(schema = @Schema(implementation = RaspberryNewDTO.RaspiIpDTO.class))),
+        responses = {
+            @ApiResponse(responseCode = "200", description = "IP procesada correctamente", content = @Content(schema = @Schema(implementation = msgError.class))),
+            @ApiResponse(responseCode = "403", description = "No autorizado"),
+            @ApiResponse(responseCode = "500", description = "Error interno del servidor")
+        })
+    public void createOrUpdateRaspberryIp(@Suspended final AsyncResponse asyncResponse,
+                                          @javax.ws.rs.PathParam("raspberryId") int raspberryId,
+                                          final RaspberryNewDTO.RaspiIpDTO ipDTO,
+                                          @Context ContainerRequestContext requestContext) {
+        FirebaseToken user = (FirebaseToken) requestContext.getProperty("user");
+        if (user == null) {
+            asyncResponse.resume(Response.status(Response.Status.UNAUTHORIZED).entity(new msgError(-1, "No autorizado")).build());
+            return;
+        }
+        executorService.submit(() -> {
+            try {
+                ProfileDAO profileDAO = new ProfileDAO();
+                List<ProfileDTO> profiles = profileDAO.getUserProfiles(user.getUid());
+                boolean isAdmin = profiles.stream().anyMatch(
+                        p -> "Administrador".equalsIgnoreCase(p.getName()));
+                if (!isAdmin) {
+                    asyncResponse.resume(Response.status(Response.Status.FORBIDDEN).entity(new msgError(-1, "Solo permitido para Administrador")).build());
+                    return;
+                }
+                RaspberryNewDAO dao = new RaspberryNewDAO();
+                boolean ok = dao.createOrUpdateIp(ipDTO, raspberryId);
+                if (ok) {
+                    asyncResponse.resume(Response.ok(new msgError(0, "IP procesada correctamente")).build());
+                } else {
+                    asyncResponse.resume(Response.status(Response.Status.BAD_REQUEST).entity(new msgError(-1, "No se pudo procesar la IP")).build());
+                }
+            } catch (Exception e) {
+                asyncResponse.resume(Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(new msgError(-1, e.getMessage())).build());
+            }
+        });
+    }
 }

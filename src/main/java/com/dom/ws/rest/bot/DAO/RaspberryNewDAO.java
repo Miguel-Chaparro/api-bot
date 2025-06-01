@@ -393,4 +393,49 @@ public class RaspberryNewDAO {
         }
         return raspberryList;
     }
+
+    // Obtener las IPs de una Raspberry por su id
+    public List<RaspberryNewDTO.RaspiIpDTO> getIpsByRaspberryId(int raspberryId) throws SQLException {
+        List<RaspberryNewDTO.RaspiIpDTO> list = new ArrayList<>();
+        String sql = "SELECT id, ip, nodo, grupo FROM dommapi.raspberry_ip WHERE raspberry_id = ?";
+        try (PreparedStatement ps = conn.getCnn().prepareStatement(sql)) {
+            ps.setInt(1, raspberryId);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                RaspberryNewDTO.RaspiIpDTO ip = new RaspberryNewDTO.RaspiIpDTO();
+                ip.setId(rs.getInt("id"));
+                ip.setIp(rs.getString("ip"));
+                ip.setNodo(rs.getString("nodo"));
+                ip.setGroup(rs.getString("grupo"));
+                list.add(ip);
+            }
+        }
+        return list;
+    }
+
+    // Crear o actualizar una IP de una Raspberry
+    public boolean createOrUpdateIp(RaspberryNewDTO.RaspiIpDTO ipDTO, int raspberryId) throws SQLException {
+        if (ipDTO.getId() > 0) {
+            // Actualizar
+            String update = "UPDATE dommapi.raspberry_ip SET ip = ?, nodo = ?, grupo = ? WHERE id = ? AND raspberry_id = ?";
+            try (PreparedStatement ps = conn.getCnn().prepareStatement(update)) {
+                ps.setString(1, ipDTO.getIp());
+                ps.setString(2, ipDTO.getNodo());
+                ps.setString(3, ipDTO.getGroup());
+                ps.setInt(4, ipDTO.getId());
+                ps.setInt(5, raspberryId);
+                return ps.executeUpdate() > 0;
+            }
+        } else {
+            // Crear
+            String insert = "INSERT INTO dommapi.raspberry_ip (raspberry_id, ip, nodo, grupo) VALUES (?, ?, ?, ?)";
+            try (PreparedStatement ps = conn.getCnn().prepareStatement(insert)) {
+                ps.setInt(1, raspberryId);
+                ps.setString(2, ipDTO.getIp());
+                ps.setString(3, ipDTO.getNodo());
+                ps.setString(4, ipDTO.getGroup());
+                return ps.executeUpdate() > 0;
+            }
+        }
+    }
 }
