@@ -438,4 +438,61 @@ public class RaspberryNewDAO {
             }
         }
     }
+
+    // Obtener los dispositivos asociados a una Raspberry por su id
+    public List<RaspberryNewDTO.RaspiDeviceDTO> getDevicesByRaspberryId(int raspberryId) throws SQLException {
+        List<RaspberryNewDTO.RaspiDeviceDTO> list = new ArrayList<>();
+        String sql = "SELECT id, device, ip, port, username, password, service, type_mikrotik FROM dommapi.raspberry_device WHERE raspberry_id = ?";
+        try (PreparedStatement ps = conn.getCnn().prepareStatement(sql)) {
+            ps.setInt(1, raspberryId);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                RaspberryNewDTO.RaspiDeviceDTO d = new RaspberryNewDTO.RaspiDeviceDTO();
+                d.setId(rs.getString("id"));
+                d.setDevice(rs.getString("device"));
+                d.setIp(rs.getString("ip"));
+                d.setPort(rs.getString("port"));
+                d.setUser(rs.getString("username"));
+                d.setPassword(rs.getString("password"));
+                d.setService(rs.getString("service"));
+                d.setTypeMicrotik(rs.getBoolean("type_mikrotik"));
+                list.add(d);
+            }
+        }
+        return list;
+    }
+
+    // Crear o actualizar un dispositivo asociado a una Raspberry
+    public boolean createOrUpdateDevice(RaspberryNewDTO.RaspiDeviceDTO deviceDTO, int raspberryId) throws SQLException {
+        if (deviceDTO.getId() != null && !deviceDTO.getId().isEmpty()) {
+            // Actualizar
+            String update = "UPDATE dommapi.raspberry_device SET device = ?, ip = ?, port = ?, username = ?, password = ?, service = ?, type_mikrotik = ? WHERE id = ? AND raspberry_id = ?";
+            try (PreparedStatement ps = conn.getCnn().prepareStatement(update)) {
+                ps.setString(1, deviceDTO.getDevice());
+                ps.setString(2, deviceDTO.getIp());
+                ps.setString(3, deviceDTO.getPort());
+                ps.setString(4, deviceDTO.getUser());
+                ps.setString(5, deviceDTO.getPassword());
+                ps.setString(6, deviceDTO.getService());
+                ps.setBoolean(7, deviceDTO.isTypeMicrotik());
+                ps.setInt(8, Integer.parseInt(deviceDTO.getId())); // Assuming deviceDTO.getId() returns a valid ID
+                ps.setInt(9, raspberryId);
+                return ps.executeUpdate() > 0;
+            }
+        } else {
+            // Crear
+            String insert = "INSERT INTO dommapi.raspberry_device (raspberry_id, device, ip, port, username, password, service, type_mikrotik) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+            try (PreparedStatement ps = conn.getCnn().prepareStatement(insert)) {
+                ps.setInt(1, raspberryId);
+                ps.setString(2, deviceDTO.getDevice());
+                ps.setString(3, deviceDTO.getIp());
+                ps.setString(4, deviceDTO.getPort());
+                ps.setString(5, deviceDTO.getUser());
+                ps.setString(6, deviceDTO.getPassword());
+                ps.setString(7, deviceDTO.getService());
+                ps.setBoolean(8, deviceDTO.isTypeMicrotik());
+                return ps.executeUpdate() > 0;
+            }
+        }
+    }
 }

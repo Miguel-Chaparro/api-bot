@@ -34,6 +34,7 @@ public class RaspberryNewDTO {
         public void setId(int id) { this.id = id; }
     }
     public static class RaspiDeviceDTO {
+        private String id;
         private String device;
         private String ip;
         private String port;
@@ -42,6 +43,8 @@ public class RaspberryNewDTO {
         private String service;
         private boolean typeMicrotik;
         // getters y setters
+        public String getId() { return id; }
+        public void setId(String id) { this.id = id; }
         public String getDevice() { return device; }
         public void setDevice(String device) { this.device = device; }
         public String getIp() { return ip; }

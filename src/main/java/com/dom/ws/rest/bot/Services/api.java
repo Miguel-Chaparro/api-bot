@@ -1546,4 +1546,83 @@ public class api {
             }
         });
     }
+
+     /**
+     * Obtener los dispositivos de una Raspberry (solo Administrador)
+     */
+    @GET
+    @Path("/raspberry/{raspberryId}/device")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(summary = "Obtener dispositivos de una Raspberry", description = "Obtiene la lista de dispositivos de una Raspberry. Solo permitido para Administrador.",
+        responses = {
+            @ApiResponse(responseCode = "200", description = "Lista de dispositivos", content = @Content(schema = @Schema(implementation = RaspberryNewDTO.RaspiDeviceDTO.class))),
+            @ApiResponse(responseCode = "403", description = "No autorizado"),
+            @ApiResponse(responseCode = "500", description = "Error interno del servidor")
+        })
+    public void getRaspberryDevices(@Suspended final AsyncResponse asyncResponse,
+                                     @javax.ws.rs.PathParam("raspberryId") int raspberryId,
+                                     @Context ContainerRequestContext requestContext) {
+        FirebaseToken user = (FirebaseToken) requestContext.getProperty("user");
+        if (user == null) {
+            asyncResponse.resume(Response.status(Response.Status.UNAUTHORIZED).entity("No autorizado").build());
+            return;
+        }
+        executorService.submit(() -> {
+            try {
+                ProfileDAO profileDAO = new ProfileDAO();
+                List<ProfileDTO> profiles = profileDAO.getUserProfiles(user.getUid());
+                boolean isAdmin = profiles.stream().anyMatch(
+                        p -> "Administrador".equalsIgnoreCase(p.getName()));
+                if (!isAdmin) {
+                    asyncResponse.resume(Response.status(Response.Status.FORBIDDEN).entity("Solo permitido para Administrador").build());
+                    return;
+                }
+                RaspberryNewDAO dao = new RaspberryNewDAO();
+                List<RaspberryNewDTO.RaspiDeviceDTO> devices = dao.getDevicesByRaspberryId(raspberryId);
+                asyncResponse.resume(Response.ok(devices).build());
+            } catch (Exception e) {
+                asyncResponse.resume(Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build());
+            }
+        });
+    }
+
+    /**
+     * Crear o actualizar un dispositivo de una Raspberry (solo Administrador)
+     */
+    @POST
+    @Path("/raspberry/{raspberryId}/device")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public void createOrUpdateRaspberryDevice(@Suspended final AsyncResponse asyncResponse,
+                                               @javax.ws.rs.PathParam("raspberryId") int raspberryId,
+                                               final RaspberryNewDTO.RaspiDeviceDTO deviceDTO,
+                                               @Context ContainerRequestContext requestContext) {
+        FirebaseToken user = (FirebaseToken) requestContext.getProperty("user");
+        if (user == null) {
+            asyncResponse.resume(Response.status(Response.Status.UNAUTHORIZED).entity(new msgError(-1, "No autorizado")).build());
+            return;
+        }
+        executorService.submit(() -> {
+            try {
+                ProfileDAO profileDAO = new ProfileDAO();
+                List<ProfileDTO> profiles = profileDAO.getUserProfiles(user.getUid());
+                boolean isAdmin = profiles.stream().anyMatch(
+                        p -> "Administrador".equalsIgnoreCase(p.getName()));
+                if (!isAdmin) {
+                    asyncResponse.resume(Response.status(Response.Status.FORBIDDEN).entity(new msgError(-1, "Solo permitido para Administrador")).build());
+                    return;
+                }
+                RaspberryNewDAO dao = new RaspberryNewDAO();
+                boolean ok = dao.createOrUpdateDevice(deviceDTO, raspberryId);
+                if (ok) {
+                    asyncResponse.resume(Response.ok(new msgError(0, "Dispositivo procesado correctamente")).build());
+                } else {
+                    asyncResponse.resume(Response.status(Response.Status.BAD_REQUEST).entity(new msgError(-1, "No se pudo procesar el dispositivo")).build());
+                }
+            } catch (Exception e) {
+                asyncResponse.resume(Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(new msgError(-1, e.getMessage())).build());
+            }
+        });
+    }
+
 }
