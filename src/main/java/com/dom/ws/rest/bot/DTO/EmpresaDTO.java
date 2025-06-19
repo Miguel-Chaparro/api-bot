@@ -8,10 +8,11 @@ public class EmpresaDTO {
     private String telefono;
     private String email;
     private int estado;
+    private String numeroChatbot;
 
     public EmpresaDTO() {}
 
-    public EmpresaDTO(int id, String nombre, String nit, String direccion, String telefono, String email, int estado) {
+    public EmpresaDTO(int id, String nombre, String nit, String direccion, String telefono, String email, int estado, String numeroChatbot) {
         this.id = id;
         this.nombre = nombre;
         this.nit = nit;
@@ -19,6 +20,7 @@ public class EmpresaDTO {
         this.telefono = telefono;
         this.email = email;
         this.estado = estado;
+        this.numeroChatbot = numeroChatbot;
     }
 
     public int getId() { return id; }
@@ -41,4 +43,7 @@ public class EmpresaDTO {
 
     public int getEstado() { return estado; }
     public void setEstado(int estado) { this.estado = estado; }
+
+    public String getNumeroChatbot() { return numeroChatbot; }
+    public void setNumeroChatbot(String numeroChatbot) { this.numeroChatbot = numeroChatbot; }
 }

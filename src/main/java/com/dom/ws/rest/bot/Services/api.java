@@ -15,6 +15,7 @@ import com.dom.ws.rest.bot.DAO.ProfileDAO;
 import com.dom.ws.rest.bot.DAO.UserDAO;
 import com.dom.ws.rest.bot.DAO.EmpresaDAO;
 import com.dom.ws.rest.bot.DAO.RaspberryNewDAO;
+import com.dom.ws.rest.bot.DAO.projectsDAO;
 import com.dom.ws.rest.bot.DTO.ProfileDTO;
 import com.dom.ws.rest.bot.DTO.UserDTO;
 import com.dom.ws.rest.bot.DTO.answerDTO;
@@ -358,6 +359,7 @@ public class api {
 
         projectDTO response = new projectDTO();
         projectController ctrl = new projectController();
+        request.setUser(null); // O asigna el usuario admin si aplica
         response = ctrl.createProjects(request);
         return response;
     }
@@ -773,7 +775,42 @@ public class api {
         executorService.submit(() -> {
             EmpresaDAO dao = new EmpresaDAO();
             boolean created = dao.create(request);
-            asyncResponse.resume(created);
+            boolean allProjectsCreated = true;
+            String errorMsg = null;
+            if (created) {
+                try {
+                    // Crear los 3 proyectos por defecto
+                    String[] perfiles = {"Administrador", "Tecnico", "Customer"};
+                    projectsDAO projectsDao = new projectsDAO();
+                    for (String perfil : perfiles) {
+                        projectDTO project = new projectDTO();
+                        project.setUser(null); // O asigna el usuario admin si aplica
+                        project.setProjectDesc(request.getNombre() + "-" + perfil);
+                        project.setIdFrom(request.getNumeroChatbot());
+                        project.setDateProject(new java.sql.Timestamp(System.currentTimeMillis()));
+                        project.setOpenProject(1); // O el valor por defecto
+                        project.setEndProject(null);
+                        project.setStatusProject(1); // O el valor por defecto
+                        project.setFlgEndProject(0); // O el valor por defecto
+                        boolean projectCreated = projectsDao.create(project);
+                        if (!projectCreated) {
+                            allProjectsCreated = false;
+                            errorMsg = "No se pudo crear el proyecto: " + project.getProjectDesc();
+                            break;
+                        }
+                    }
+                } catch (Exception e) {
+                    allProjectsCreated = false;
+                    errorMsg = e.getMessage();
+                }
+            }
+            if (created && allProjectsCreated) {
+                asyncResponse.resume(true);
+            } else if (!created) {
+                asyncResponse.resume(false);
+            } else {
+                asyncResponse.resume(new msgError(-1, errorMsg != null ? errorMsg : "Error creando proyectos por defecto"));
+            }
         });
     }
 
@@ -913,7 +950,6 @@ public class api {
         }
         Integer empresaId = null;
         if (adminGlobal) {
-            // Debe venir la empresa en el request
             empresaId = newUser.getEmpresaId();
             if (empresaId == null) {
                 return Response.status(Response.Status.BAD_REQUEST)
@@ -921,8 +957,6 @@ public class api {
                         .build();
             }
         } else {
-            // Si el request no trae empresaId o es null, buscar la empresa asociada al
-            // admin
             if (newUser.getEmpresaId() == null) {
                 List<EmpresaDTO> empresas = empresaDAO.readAll();
                 for (EmpresaDTO empresa : empresas) {
@@ -958,11 +992,58 @@ public class api {
                     .build();
         }
         boolean created = userDAO.create(newUser);
+        // Asignar perfil
+        String tipoPerfil = newUser.getTipoPerfil() != null ? newUser.getTipoPerfil() : "Customer";
+        int idPerfil = -1;
+        try {
+            List<ProfileDTO> perfilesEmpresa = profileDAO.getAllActiveProfiles();
+            for (ProfileDTO perfil : perfilesEmpresa) {
+                int perfilId = -1;
+                try {
+                    // Intentar convertir a número para comparar
+                     perfilId = Integer.parseInt(perfil.getDescription());
+                    
+                } catch (NumberFormatException e) {
+                    // Si no es un número, comparar por nombre
+                    return Response.status(Response.Status.BAD_REQUEST)
+                            .entity(new msgError(-1, "El perfil debe tener una descripción numérica o un nombre válido"))
+                            .build();
+                }
+                if (tipoPerfil.equalsIgnoreCase(perfil.getName()) && perfilId == empresaId) {
+                    idPerfil = perfil.getId();
+                    break;
+                }
+            }
+            // Si no se encuentra el perfil solicitado, asignar Customer
+            if (idPerfil == -1) {
+                for (ProfileDTO perfil : perfilesEmpresa) {
+                    if ("Customer".equalsIgnoreCase(perfil.getName())) {
+                        idPerfil = perfil.getId();
+                        break;
+                    }
+                }
+            }
+            if (idPerfil != -1) {
+                profileDAO.assignProfileToUser(newUser.getId(), idPerfil);
+            }
+        } catch (Exception e) {
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity(new msgError(-1, "Usuario creado pero error asignando perfil: " + e.getMessage()))
+                    .build();
+        }
+        // Crear registro en customerWhatsapp
+        try {
+            CustomerWhatsappHelper.createCustomerWhatsappForUser(newUser, userId);
+        } catch (Exception e) {
+            // Log error, pero no impedir creación de usuario
+        }
         return Response.ok(created).build();
     }
 
     /**
-     * Actualizar un usuario (solo administradores y técnicos)
+     *
+     * @param asyncResponse
+     * @param request
      */
     @POST
     @Path(value = "/updateUser")

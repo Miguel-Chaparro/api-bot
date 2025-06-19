@@ -28,6 +28,7 @@ public class UserDTO {
     private String direccion;
     private String tipoIdentificacion;
     private String numeroIdentificacion;
+    private String tipoPerfil = "Customer"; // Por defecto
 
     public UserDTO() {
     }
@@ -123,4 +124,7 @@ public class UserDTO {
 
     public String getNumeroIdentificacion() { return numeroIdentificacion; }
     public void setNumeroIdentificacion(String numeroIdentificacion) { this.numeroIdentificacion = numeroIdentificacion; }
+
+    public String getTipoPerfil() { return tipoPerfil; }
+    public void setTipoPerfil(String tipoPerfil) { this.tipoPerfil = tipoPerfil; }
 }
