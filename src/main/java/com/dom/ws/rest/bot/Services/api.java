@@ -977,24 +977,46 @@ public class api {
         }
         newUser.setEmpresaId(empresaId);
         // Crear usuario en Firebase primero
+        boolean firebaseUserExists = false;
         try {
-            CreateRequest fbRequest = new CreateRequest()
-                    .setEmail(newUser.getEmail())
-                    .setPassword(newUser.getNumeroIdentificacion())
-                    .setDisplayName(newUser.getDisplayName());
-            if (newUser.getPhoneNumber() != null && !newUser.getPhoneNumber().isEmpty()) {
-                fbRequest.setPhoneNumber(newUser.getPhoneNumber());
+            UserRecord userRecord;
+            try {
+                userRecord = FirebaseAuth.getInstance().getUserByEmail(newUser.getEmail());
+                firebaseUserExists = true;
+                newUser.setId(userRecord.getUid());
+            } catch (com.google.firebase.auth.FirebaseAuthException ex) {
+                if (ex.getAuthErrorCode() != null && ex.getAuthErrorCode().name().equals("USER_NOT_FOUND")) {
+                    firebaseUserExists = false;
+                } else {
+                    return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                        .entity(new msgError(-1, "Error consultando usuario en Firebase: " + ex.getMessage()))
+                        .build();
+                }
             }
-            UserRecord userRecord = FirebaseAuth.getInstance().createUser(fbRequest);
-            newUser.setId(userRecord.getUid());
+            if (!firebaseUserExists) {
+                CreateRequest fbRequest = new CreateRequest()
+                        .setEmail(newUser.getEmail())
+                        .setPassword(newUser.getNumeroIdentificacion())
+                        .setDisplayName(newUser.getDisplayName());
+                if (newUser.getPhoneNumber() != null && !newUser.getPhoneNumber().isEmpty()) {
+                    fbRequest.setPhoneNumber(newUser.getPhoneNumber());
+                }
+                userRecord = FirebaseAuth.getInstance().createUser(fbRequest);
+                newUser.setId(userRecord.getUid());
+            }
         } catch (Exception e) {
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                    .entity(new msgError(-1, "Error creando usuario en Firebase: " + e.getMessage()))
+                    .entity(new msgError(-1, "Error creando/consultando usuario en Firebase: " + e.getMessage()))
                     .build();
         }
-        boolean created = userDAO.create(newUser);
+        boolean created;
+        if (firebaseUserExists) {
+            // Solo actualiza la información en la BD
+            created = userDAO.update(newUser);
+        } else {
+            created = userDAO.create(newUser);
+        }
         // Asignar perfil
-       
         int idPerfil = -1;
         try {
             List<ProfileDTO> perfilesEmpresa = profileDAO.getAllActiveProfiles();
