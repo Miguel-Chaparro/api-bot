@@ -780,7 +780,7 @@ public class api {
             if (created) {
                 try {
                     // Crear los 3 proyectos por defecto
-                    String[] perfiles = {"Administrador", "Tecnico", "Customer"};
+                    String[] perfiles = { "Administrador", "Tecnico", "Customer" };
                     projectsDAO projectsDao = new projectsDAO();
                     for (String perfil : perfiles) {
                         projectDTO project = new projectDTO();
@@ -809,7 +809,8 @@ public class api {
             } else if (!created) {
                 asyncResponse.resume(false);
             } else {
-                asyncResponse.resume(new msgError(-1, errorMsg != null ? errorMsg : "Error creando proyectos por defecto"));
+                asyncResponse
+                        .resume(new msgError(-1, errorMsg != null ? errorMsg : "Error creando proyectos por defecto"));
             }
         });
     }
@@ -993,26 +994,32 @@ public class api {
         }
         boolean created = userDAO.create(newUser);
         // Asignar perfil
-        String tipoPerfil = newUser.getTipoPerfil() != null ? newUser.getTipoPerfil() : "Customer";
+       
         int idPerfil = -1;
         try {
             List<ProfileDTO> perfilesEmpresa = profileDAO.getAllActiveProfiles();
             for (ProfileDTO perfil : perfilesEmpresa) {
-                int perfilId = -1;
-                try {
-                    // Intentar convertir a número para comparar
-                     perfilId = Integer.parseInt(perfil.getDescription());
-                    
-                } catch (NumberFormatException e) {
-                    // Si no es un número, comparar por nombre
-                    return Response.status(Response.Status.BAD_REQUEST)
-                            .entity(new msgError(-1, "El perfil debe tener una descripción numérica o un nombre válido"))
-                            .build();
+                
+                if (!perfil.getDescription().equalsIgnoreCase("Administrador") ) {
+
+                    try {
+                        // Intentar convertir a número para comparar
+                        idPerfil = Integer.parseInt(perfil.getDescription());
+                        if (idPerfil == newUser.getEmpresaId()) {
+                            // Si el perfil es un número y coincide con la empresa, asignar
+                            idPerfil = perfil.getId();
+                            break;
+                        }
+
+                    } catch (NumberFormatException e) {
+                        // Si no es un número, comparar por nombre
+                        return Response.status(Response.Status.BAD_REQUEST)
+                                .entity(new msgError(-1,
+                                        "El perfil debe tener una descripción numérica o un nombre válido"))
+                                .build();
+                    }
                 }
-                if (tipoPerfil.equalsIgnoreCase(perfil.getName()) && perfilId == empresaId) {
-                    idPerfil = perfil.getId();
-                    break;
-                }
+
             }
             // Si no se encuentra el perfil solicitado, asignar Customer
             if (idPerfil == -1) {
@@ -1377,17 +1384,17 @@ public class api {
     @Path("/devices")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    @Operation(summary = "Crear o actualizar dispositivo simple", description = "Crea o actualiza un dispositivo solo con los campos de la tabla dommapi.raspberry. Si se envía el id, actualiza; si no, crea. Solo permitido para Administrador global.",
-        requestBody = @RequestBody(required = true, content = @Content(schema = @Schema(implementation = RaspberryDTO.class))),
-        responses = {
+    @Operation(summary = "Crear o actualizar dispositivo simple", description = "Crea o actualiza un dispositivo solo con los campos de la tabla dommapi.raspberry. Si se envía el id, actualiza; si no, crea. Solo permitido para Administrador global.", requestBody = @RequestBody(required = true, content = @Content(schema = @Schema(implementation = RaspberryDTO.class))), responses = {
             @ApiResponse(responseCode = "200", description = "Dispositivo procesado correctamente"),
             @ApiResponse(responseCode = "403", description = "No autorizado"),
             @ApiResponse(responseCode = "500", description = "Error interno del servidor")
-        })
-    public void createOrUpdateDevice(@Suspended final AsyncResponse asyncResponse, final RaspberryDTO request, @Context ContainerRequestContext requestContext) {
+    })
+    public void createOrUpdateDevice(@Suspended final AsyncResponse asyncResponse, final RaspberryDTO request,
+            @Context ContainerRequestContext requestContext) {
         FirebaseToken user = (FirebaseToken) requestContext.getProperty("user");
         if (user == null) {
-            asyncResponse.resume(Response.status(Response.Status.UNAUTHORIZED).entity(new msgError(-1, "No autorizado")).build());
+            asyncResponse.resume(
+                    Response.status(Response.Status.UNAUTHORIZED).entity(new msgError(-1, "No autorizado")).build());
             return;
         }
         executorService.submit(() -> {
@@ -1395,9 +1402,11 @@ public class api {
                 ProfileDAO profileDAO = new ProfileDAO();
                 List<ProfileDTO> profiles = profileDAO.getUserProfiles(user.getUid());
                 boolean isAdminGlobal = profiles.stream().anyMatch(
-                        p -> "Administrador".equalsIgnoreCase(p.getName()) && "Administrador".equalsIgnoreCase(p.getDescription()));
+                        p -> "Administrador".equalsIgnoreCase(p.getName())
+                                && "Administrador".equalsIgnoreCase(p.getDescription()));
                 if (!isAdminGlobal) {
-                    asyncResponse.resume(Response.status(Response.Status.FORBIDDEN).entity(new msgError(-1, "Solo permitido para Administrador global")).build());
+                    asyncResponse.resume(Response.status(Response.Status.FORBIDDEN)
+                            .entity(new msgError(-1, "Solo permitido para Administrador global")).build());
                     return;
                 }
                 RaspberryNewDAO dao = new RaspberryNewDAO();
@@ -1410,27 +1419,30 @@ public class api {
                 if (ok) {
                     asyncResponse.resume(Response.ok(new msgError(0, "Dispositivo procesado correctamente")).build());
                 } else {
-                    asyncResponse.resume(Response.status(Response.Status.BAD_REQUEST).entity(new msgError(-1, "No se pudo procesar la Raspberry")).build());
+                    asyncResponse.resume(Response.status(Response.Status.BAD_REQUEST)
+                            .entity(new msgError(-1, "No se pudo procesar la Raspberry")).build());
                 }
             } catch (Exception e) {
-                asyncResponse.resume(Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(new msgError(-1, e.getMessage())).build());
+                asyncResponse.resume(Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                        .entity(new msgError(-1, e.getMessage())).build());
             }
         });
     }
 
     /**
-     * Endpoint para consultar todas las Raspberrys (solo campos de dommapi.raspberry)
+     * Endpoint para consultar todas las Raspberrys (solo campos de
+     * dommapi.raspberry)
      */
     @GET
     @Path("/devices")
     @Produces(MediaType.APPLICATION_JSON)
-    @Operation(summary = "Consultar todas las Raspberrys simple", description = "Devuelve todas las Raspberrys solo con los campos de la tabla dommapi.raspberry. Solo permitido para Administrador global.",
-        responses = {
+    @Operation(summary = "Consultar todas las Raspberrys simple", description = "Devuelve todas las Raspberrys solo con los campos de la tabla dommapi.raspberry. Solo permitido para Administrador global.", responses = {
             @ApiResponse(responseCode = "200", description = "Lista de Raspberrys", content = @Content(schema = @Schema(implementation = RaspberryDTO.class))),
             @ApiResponse(responseCode = "403", description = "No autorizado"),
             @ApiResponse(responseCode = "500", description = "Error interno del servidor")
-        })
-    public void getAllRaspberrys(@Suspended final AsyncResponse asyncResponse, @Context ContainerRequestContext requestContext) {
+    })
+    public void getAllRaspberrys(@Suspended final AsyncResponse asyncResponse,
+            @Context ContainerRequestContext requestContext) {
         FirebaseToken user = (FirebaseToken) requestContext.getProperty("user");
         if (user == null) {
             asyncResponse.resume(Response.status(Response.Status.UNAUTHORIZED).entity("No autorizado").build());
@@ -1441,7 +1453,8 @@ public class api {
                 ProfileDAO profileDAO = new ProfileDAO();
                 List<ProfileDTO> profiles = profileDAO.getUserProfiles(user.getUid());
                 boolean isAdminGlobal = profiles.stream().anyMatch(
-                        p -> "Administrador".equalsIgnoreCase(p.getName()) && "Administrador".equalsIgnoreCase(p.getDescription()));
+                        p -> "Administrador".equalsIgnoreCase(p.getName())
+                                && "Administrador".equalsIgnoreCase(p.getDescription()));
                 boolean isAdmin = profiles.stream().anyMatch(
                         p -> "Administrador".equalsIgnoreCase(p.getName()));
                 RaspberryNewDAO dao = new RaspberryNewDAO();
@@ -1451,34 +1464,37 @@ public class api {
                 } else if (isAdmin) {
                     raspberrys = dao.getRaspberrysSimpleByUserId(user.getUid());
                 } else {
-                    asyncResponse.resume(Response.status(Response.Status.FORBIDDEN).entity("Solo permitido para Administrador").build());
+                    asyncResponse.resume(Response.status(Response.Status.FORBIDDEN)
+                            .entity("Solo permitido para Administrador").build());
                     return;
                 }
                 asyncResponse.resume(Response.ok(raspberrys).build());
             } catch (Exception e) {
-                asyncResponse.resume(Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build());
+                asyncResponse
+                        .resume(Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build());
             }
         });
     }
 
     /**
-     * Endpoint para crear la relación usuario-raspberry (solo campos de dommapi.raspberry_user)
+     * Endpoint para crear la relación usuario-raspberry (solo campos de
+     * dommapi.raspberry_user)
      */
     @POST
     @Path("/user/raspberry/relation")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    @Operation(summary = "Crear relación usuario-raspberry simple", description = "Crea la relación usuario-raspberry solo con los campos de la tabla dommapi.raspberry_user. Solo permitido para Administrador global.",
-        requestBody = @RequestBody(required = true, content = @Content(schema = @Schema(implementation = RaspberryUserRelationDTO.class))),
-        responses = {
+    @Operation(summary = "Crear relación usuario-raspberry simple", description = "Crea la relación usuario-raspberry solo con los campos de la tabla dommapi.raspberry_user. Solo permitido para Administrador global.", requestBody = @RequestBody(required = true, content = @Content(schema = @Schema(implementation = RaspberryUserRelationDTO.class))), responses = {
             @ApiResponse(responseCode = "200", description = "Relación creada correctamente", content = @Content(schema = @Schema(implementation = msgError.class))),
             @ApiResponse(responseCode = "403", description = "No autorizado"),
             @ApiResponse(responseCode = "500", description = "Error interno del servidor")
-        })
-    public void createUserRaspberryRelation(@Suspended final AsyncResponse asyncResponse, final RaspberryUserRelationDTO request, @Context ContainerRequestContext requestContext) {
+    })
+    public void createUserRaspberryRelation(@Suspended final AsyncResponse asyncResponse,
+            final RaspberryUserRelationDTO request, @Context ContainerRequestContext requestContext) {
         FirebaseToken user = (FirebaseToken) requestContext.getProperty("user");
         if (user == null) {
-            asyncResponse.resume(Response.status(Response.Status.UNAUTHORIZED).entity(new msgError(-1, "No autorizado")).build());
+            asyncResponse.resume(
+                    Response.status(Response.Status.UNAUTHORIZED).entity(new msgError(-1, "No autorizado")).build());
             return;
         }
         executorService.submit(() -> {
@@ -1486,9 +1502,11 @@ public class api {
                 ProfileDAO profileDAO = new ProfileDAO();
                 List<ProfileDTO> profiles = profileDAO.getUserProfiles(user.getUid());
                 boolean isAdminGlobal = profiles.stream().anyMatch(
-                        p -> "Administrador".equalsIgnoreCase(p.getName()) && "Administrador".equalsIgnoreCase(p.getDescription()));
+                        p -> "Administrador".equalsIgnoreCase(p.getName())
+                                && "Administrador".equalsIgnoreCase(p.getDescription()));
                 if (!isAdminGlobal) {
-                    asyncResponse.resume(Response.status(Response.Status.FORBIDDEN).entity(new msgError(-1, "Solo permitido para Administrador global")).build());
+                    asyncResponse.resume(Response.status(Response.Status.FORBIDDEN)
+                            .entity(new msgError(-1, "Solo permitido para Administrador global")).build());
                     return;
                 }
                 RaspberryNewDAO dao = new RaspberryNewDAO();
@@ -1496,26 +1514,28 @@ public class api {
                 if (ok) {
                     asyncResponse.resume(Response.ok(new msgError(0, "Relación creada correctamente")).build());
                 } else {
-                    asyncResponse.resume(Response.status(Response.Status.BAD_REQUEST).entity(new msgError(-1, "No se pudo crear la relación")).build());
+                    asyncResponse.resume(Response.status(Response.Status.BAD_REQUEST)
+                            .entity(new msgError(-1, "No se pudo crear la relación")).build());
                 }
             } catch (Exception e) {
-                asyncResponse.resume(Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(new msgError(-1, e.getMessage())).build());
+                asyncResponse.resume(Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                        .entity(new msgError(-1, e.getMessage())).build());
             }
         });
     }
 
     /**
-     * Endpoint para consultar relaciones usuario-raspberry por raspberry_id (solo Administrador global)
+     * Endpoint para consultar relaciones usuario-raspberry por raspberry_id (solo
+     * Administrador global)
      */
     @GET
     @Path("/user/raspberry/relations/{raspberryId}")
     @Produces(MediaType.APPLICATION_JSON)
-    @Operation(summary = "Consultar relaciones usuario-raspberry por raspberry_id", description = "Devuelve las relaciones usuario-raspberry filtradas por raspberry_id. Solo permitido para Administrador global.",
-        responses = {
+    @Operation(summary = "Consultar relaciones usuario-raspberry por raspberry_id", description = "Devuelve las relaciones usuario-raspberry filtradas por raspberry_id. Solo permitido para Administrador global.", responses = {
             @ApiResponse(responseCode = "200", description = "Lista de relaciones", content = @Content(schema = @Schema(implementation = RaspberryUserRelationDTO.class))),
             @ApiResponse(responseCode = "403", description = "No autorizado"),
             @ApiResponse(responseCode = "500", description = "Error interno del servidor")
-        })
+    })
     public void getRaspberryUserRelationsByRaspberryId(@Suspended final AsyncResponse asyncResponse,
             @javax.ws.rs.PathParam("raspberryId") int raspberryId,
             @Context ContainerRequestContext requestContext) {
@@ -1531,14 +1551,16 @@ public class api {
                 boolean isAdmin = profiles.stream().anyMatch(
                         p -> "Administrador".equalsIgnoreCase(p.getName()));
                 if (!isAdmin) {
-                    asyncResponse.resume(Response.status(Response.Status.FORBIDDEN).entity("Solo permitido para Administrador global").build());
+                    asyncResponse.resume(Response.status(Response.Status.FORBIDDEN)
+                            .entity("Solo permitido para Administrador global").build());
                     return;
                 }
                 RaspberryNewDAO dao = new RaspberryNewDAO();
                 List<RaspberryUserRelationDTO> relations = dao.getRaspberryUserRelationsByRaspberryId(raspberryId);
                 asyncResponse.resume(Response.ok(relations).build());
             } catch (Exception e) {
-                asyncResponse.resume(Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build());
+                asyncResponse
+                        .resume(Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build());
             }
         });
     }
@@ -1549,15 +1571,14 @@ public class api {
     @GET
     @Path("/raspberry/{raspberryId}/ips")
     @Produces(MediaType.APPLICATION_JSON)
-    @Operation(summary = "Obtener IPs de una Raspberry", description = "Devuelve las IPs asignadas a una Raspberry. Solo permitido para Administrador.",
-        responses = {
+    @Operation(summary = "Obtener IPs de una Raspberry", description = "Devuelve las IPs asignadas a una Raspberry. Solo permitido para Administrador.", responses = {
             @ApiResponse(responseCode = "200", description = "Lista de IPs", content = @Content(schema = @Schema(implementation = RaspberryNewDTO.RaspiIpDTO.class))),
             @ApiResponse(responseCode = "403", description = "No autorizado"),
             @ApiResponse(responseCode = "500", description = "Error interno del servidor")
-        })
+    })
     public void getRaspberryIps(@Suspended final AsyncResponse asyncResponse,
-                                @javax.ws.rs.PathParam("raspberryId") int raspberryId,
-                                @Context ContainerRequestContext requestContext) {
+            @javax.ws.rs.PathParam("raspberryId") int raspberryId,
+            @Context ContainerRequestContext requestContext) {
         FirebaseToken user = (FirebaseToken) requestContext.getProperty("user");
         if (user == null) {
             asyncResponse.resume(Response.status(Response.Status.UNAUTHORIZED).entity("No autorizado").build());
@@ -1570,14 +1591,16 @@ public class api {
                 boolean isAdmin = profiles.stream().anyMatch(
                         p -> "Administrador".equalsIgnoreCase(p.getName()));
                 if (!isAdmin) {
-                    asyncResponse.resume(Response.status(Response.Status.FORBIDDEN).entity("Solo permitido para Administrador").build());
+                    asyncResponse.resume(Response.status(Response.Status.FORBIDDEN)
+                            .entity("Solo permitido para Administrador").build());
                     return;
                 }
                 RaspberryNewDAO dao = new RaspberryNewDAO();
                 List<RaspberryNewDTO.RaspiIpDTO> ips = dao.getIpsByRaspberryId(raspberryId);
                 asyncResponse.resume(Response.ok(ips).build());
             } catch (Exception e) {
-                asyncResponse.resume(Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build());
+                asyncResponse
+                        .resume(Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build());
             }
         });
     }
@@ -1589,20 +1612,19 @@ public class api {
     @Path("/raspberry/{raspberryId}/ip")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    @Operation(summary = "Crear o actualizar IP de una Raspberry", description = "Crea o actualiza una IP de la tabla dommapi.raspberry_ip para una Raspberry. Solo permitido para Administrador.",
-        requestBody = @RequestBody(required = true, content = @Content(schema = @Schema(implementation = RaspberryNewDTO.RaspiIpDTO.class))),
-        responses = {
+    @Operation(summary = "Crear o actualizar IP de una Raspberry", description = "Crea o actualiza una IP de la tabla dommapi.raspberry_ip para una Raspberry. Solo permitido para Administrador.", requestBody = @RequestBody(required = true, content = @Content(schema = @Schema(implementation = RaspberryNewDTO.RaspiIpDTO.class))), responses = {
             @ApiResponse(responseCode = "200", description = "IP procesada correctamente", content = @Content(schema = @Schema(implementation = msgError.class))),
             @ApiResponse(responseCode = "403", description = "No autorizado"),
             @ApiResponse(responseCode = "500", description = "Error interno del servidor")
-        })
+    })
     public void createOrUpdateRaspberryIp(@Suspended final AsyncResponse asyncResponse,
-                                          @javax.ws.rs.PathParam("raspberryId") int raspberryId,
-                                          final RaspberryNewDTO.RaspiIpDTO ipDTO,
-                                          @Context ContainerRequestContext requestContext) {
+            @javax.ws.rs.PathParam("raspberryId") int raspberryId,
+            final RaspberryNewDTO.RaspiIpDTO ipDTO,
+            @Context ContainerRequestContext requestContext) {
         FirebaseToken user = (FirebaseToken) requestContext.getProperty("user");
         if (user == null) {
-            asyncResponse.resume(Response.status(Response.Status.UNAUTHORIZED).entity(new msgError(-1, "No autorizado")).build());
+            asyncResponse.resume(
+                    Response.status(Response.Status.UNAUTHORIZED).entity(new msgError(-1, "No autorizado")).build());
             return;
         }
         executorService.submit(() -> {
@@ -1612,7 +1634,8 @@ public class api {
                 boolean isAdmin = profiles.stream().anyMatch(
                         p -> "Administrador".equalsIgnoreCase(p.getName()));
                 if (!isAdmin) {
-                    asyncResponse.resume(Response.status(Response.Status.FORBIDDEN).entity(new msgError(-1, "Solo permitido para Administrador")).build());
+                    asyncResponse.resume(Response.status(Response.Status.FORBIDDEN)
+                            .entity(new msgError(-1, "Solo permitido para Administrador")).build());
                     return;
                 }
                 RaspberryNewDAO dao = new RaspberryNewDAO();
@@ -1620,29 +1643,30 @@ public class api {
                 if (ok) {
                     asyncResponse.resume(Response.ok(new msgError(0, "IP procesada correctamente")).build());
                 } else {
-                    asyncResponse.resume(Response.status(Response.Status.BAD_REQUEST).entity(new msgError(-1, "No se pudo procesar la IP")).build());
+                    asyncResponse.resume(Response.status(Response.Status.BAD_REQUEST)
+                            .entity(new msgError(-1, "No se pudo procesar la IP")).build());
                 }
             } catch (Exception e) {
-                asyncResponse.resume(Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(new msgError(-1, e.getMessage())).build());
+                asyncResponse.resume(Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                        .entity(new msgError(-1, e.getMessage())).build());
             }
         });
     }
 
-     /**
+    /**
      * Obtener los dispositivos de una Raspberry (solo Administrador)
      */
     @GET
     @Path("/raspberry/{raspberryId}/device")
     @Produces(MediaType.APPLICATION_JSON)
-    @Operation(summary = "Obtener dispositivos de una Raspberry", description = "Obtiene la lista de dispositivos de una Raspberry. Solo permitido para Administrador.",
-        responses = {
+    @Operation(summary = "Obtener dispositivos de una Raspberry", description = "Obtiene la lista de dispositivos de una Raspberry. Solo permitido para Administrador.", responses = {
             @ApiResponse(responseCode = "200", description = "Lista de dispositivos", content = @Content(schema = @Schema(implementation = RaspberryNewDTO.RaspiDeviceDTO.class))),
             @ApiResponse(responseCode = "403", description = "No autorizado"),
             @ApiResponse(responseCode = "500", description = "Error interno del servidor")
-        })
+    })
     public void getRaspberryDevices(@Suspended final AsyncResponse asyncResponse,
-                                     @javax.ws.rs.PathParam("raspberryId") int raspberryId,
-                                     @Context ContainerRequestContext requestContext) {
+            @javax.ws.rs.PathParam("raspberryId") int raspberryId,
+            @Context ContainerRequestContext requestContext) {
         FirebaseToken user = (FirebaseToken) requestContext.getProperty("user");
         if (user == null) {
             asyncResponse.resume(Response.status(Response.Status.UNAUTHORIZED).entity("No autorizado").build());
@@ -1655,14 +1679,16 @@ public class api {
                 boolean isAdmin = profiles.stream().anyMatch(
                         p -> "Administrador".equalsIgnoreCase(p.getName()));
                 if (!isAdmin) {
-                    asyncResponse.resume(Response.status(Response.Status.FORBIDDEN).entity("Solo permitido para Administrador").build());
+                    asyncResponse.resume(Response.status(Response.Status.FORBIDDEN)
+                            .entity("Solo permitido para Administrador").build());
                     return;
                 }
                 RaspberryNewDAO dao = new RaspberryNewDAO();
                 List<RaspberryNewDTO.RaspiDeviceDTO> devices = dao.getDevicesByRaspberryId(raspberryId);
                 asyncResponse.resume(Response.ok(devices).build());
             } catch (Exception e) {
-                asyncResponse.resume(Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build());
+                asyncResponse
+                        .resume(Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build());
             }
         });
     }
@@ -1675,12 +1701,13 @@ public class api {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public void createOrUpdateRaspberryDevice(@Suspended final AsyncResponse asyncResponse,
-                                               @javax.ws.rs.PathParam("raspberryId") int raspberryId,
-                                               final RaspberryNewDTO.RaspiDeviceDTO deviceDTO,
-                                               @Context ContainerRequestContext requestContext) {
+            @javax.ws.rs.PathParam("raspberryId") int raspberryId,
+            final RaspberryNewDTO.RaspiDeviceDTO deviceDTO,
+            @Context ContainerRequestContext requestContext) {
         FirebaseToken user = (FirebaseToken) requestContext.getProperty("user");
         if (user == null) {
-            asyncResponse.resume(Response.status(Response.Status.UNAUTHORIZED).entity(new msgError(-1, "No autorizado")).build());
+            asyncResponse.resume(
+                    Response.status(Response.Status.UNAUTHORIZED).entity(new msgError(-1, "No autorizado")).build());
             return;
         }
         executorService.submit(() -> {
@@ -1690,7 +1717,8 @@ public class api {
                 boolean isAdmin = profiles.stream().anyMatch(
                         p -> "Administrador".equalsIgnoreCase(p.getName()));
                 if (!isAdmin) {
-                    asyncResponse.resume(Response.status(Response.Status.FORBIDDEN).entity(new msgError(-1, "Solo permitido para Administrador")).build());
+                    asyncResponse.resume(Response.status(Response.Status.FORBIDDEN)
+                            .entity(new msgError(-1, "Solo permitido para Administrador")).build());
                     return;
                 }
                 RaspberryNewDAO dao = new RaspberryNewDAO();
@@ -1698,10 +1726,12 @@ public class api {
                 if (ok) {
                     asyncResponse.resume(Response.ok(new msgError(0, "Dispositivo procesado correctamente")).build());
                 } else {
-                    asyncResponse.resume(Response.status(Response.Status.BAD_REQUEST).entity(new msgError(-1, "No se pudo procesar el dispositivo")).build());
+                    asyncResponse.resume(Response.status(Response.Status.BAD_REQUEST)
+                            .entity(new msgError(-1, "No se pudo procesar el dispositivo")).build());
                 }
             } catch (Exception e) {
-                asyncResponse.resume(Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(new msgError(-1, e.getMessage())).build());
+                asyncResponse.resume(Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                        .entity(new msgError(-1, e.getMessage())).build());
             }
         });
     }
