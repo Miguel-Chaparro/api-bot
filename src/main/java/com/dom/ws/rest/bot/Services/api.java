@@ -1524,8 +1524,7 @@ public class api {
                 ProfileDAO profileDAO = new ProfileDAO();
                 List<ProfileDTO> profiles = profileDAO.getUserProfiles(user.getUid());
                 boolean isAdminGlobal = profiles.stream().anyMatch(
-                        p -> "Administrador".equalsIgnoreCase(p.getName())
-                                && "Administrador".equalsIgnoreCase(p.getDescription()));
+                        p -> "Administrador".equalsIgnoreCase(p.getName()));
                 if (!isAdminGlobal) {
                     asyncResponse.resume(Response.status(Response.Status.FORBIDDEN)
                             .entity(new msgError(-1, "Solo permitido para Administrador global")).build());
