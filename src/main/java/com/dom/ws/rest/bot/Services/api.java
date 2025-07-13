@@ -46,6 +46,7 @@ import com.google.firebase.auth.UserRecord;
 import com.google.firebase.auth.UserRecord.CreateRequest;
 import com.google.firebase.auth.FirebaseAuth;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import javax.ws.rs.Consumes;
@@ -1754,6 +1755,50 @@ public class api {
                 asyncResponse.resume(Response.status(Response.Status.INTERNAL_SERVER_ERROR)
                         .entity(new msgError(-1, e.getMessage())).build());
             }
+        });
+    }
+
+    /**
+     * Crear usuarios en lote (máximo 100 por solicitud)
+     */
+    @POST
+    @Path(value = "/createUsersBatch")
+    @Produces({ MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN })
+    @Consumes({ MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN })
+    @Operation(summary = "Crear usuarios en lote", description = "Permite crear hasta 100 usuarios en una sola solicitud.", requestBody = @RequestBody(required = true, content = @Content(schema = @Schema(implementation = UserDTO.class))), responses = {
+            @ApiResponse(responseCode = "200", description = "Usuarios procesados", content = @Content(schema = @Schema(implementation = Object.class))),
+            @ApiResponse(responseCode = "400", description = "Solicitud inválida")
+    })
+    public void createUsersBatch(@Suspended final AsyncResponse asyncResponse, final List<UserDTO> request,
+            @Context ContainerRequestContext requestContext) {
+        FirebaseToken decodedToken = (FirebaseToken) requestContext.getProperty("user");
+        if (decodedToken == null) {
+            asyncResponse.resume(Response.status(Response.Status.UNAUTHORIZED)
+                    .entity("No autorizado")
+                    .build());
+            return;
+        }
+        if (request == null || request.isEmpty()) {
+            asyncResponse.resume(Response.status(Response.Status.BAD_REQUEST)
+                    .entity(new msgError(-1, "Debe enviar al menos un usuario"))
+                    .build());
+            return;
+        }
+        if (request.size() > 100) {
+            asyncResponse.resume(Response.status(Response.Status.BAD_REQUEST)
+                    .entity(new msgError(-1, "Solo se pueden crear hasta 100 usuarios por solicitud"))
+                    .build());
+            return;
+        }
+        executorService.submit(() -> {
+            List<Object> results = new ArrayList<>();
+            for (UserDTO user : request) {
+                user.setCreatedBy(decodedToken.getUid());
+                Response resp = doCreateUser(decodedToken.getUid(), user);
+                Object entity = resp.getEntity();
+                results.add(entity);
+            }
+            asyncResponse.resume(results);
         });
     }
 
