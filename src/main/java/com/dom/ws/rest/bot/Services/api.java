@@ -63,6 +63,8 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.Provider;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -683,13 +685,18 @@ public class api {
     @GET
     @Path(value = "/users")
     @Produces({ MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN })
-    @Operation(summary = "Obtener usuarios registrados", description = "Permite a un administrador consultar todos los usuarios registrados.", responses = {
-            @ApiResponse(responseCode = "200", description = "Lista de usuarios", content = @Content(mediaType = "application/json", schema = @Schema(implementation = UserDTO.class), examples = @ExampleObject(value = "[{\n  \"id\": \"uid123\",\n  \"email\": \"user@mail.com\",\n  \"displayName\": \"Juan Perez\",\n  \"photoUrl\": null,\n  \"emailVerified\": true,\n  \"disabled\": false\n}]"))),
-            @ApiResponse(responseCode = "401", description = "No autorizado"),
-            @ApiResponse(responseCode = "403", description = "Acceso denegado")
+    @Operation(summary = "Obtener usuarios registrados", description = "Permite a un administrador consultar todos los usuarios registrados.", parameters = {
+        @Parameter(name = "page", description = "Página (1-based)", in = ParameterIn.QUERY),
+        @Parameter(name = "pageSize", description = "Tamaño de página (máximo 100)", in = ParameterIn.QUERY)
+    }, responses = {
+        @ApiResponse(responseCode = "200", description = "Página de usuarios", content = @Content(mediaType = "application/json", schema = @Schema(implementation = com.dom.ws.rest.bot.DTO.UsersPageDTO.class))),
+        @ApiResponse(responseCode = "401", description = "No autorizado"),
+        @ApiResponse(responseCode = "403", description = "Acceso denegado")
     })
     public void getUsers(@Suspended final AsyncResponse asyncResponse,
-            @Context ContainerRequestContext requestContext) {
+        @Context ContainerRequestContext requestContext,
+        @javax.ws.rs.QueryParam("page") Integer page,
+        @javax.ws.rs.QueryParam("pageSize") Integer pageSize) {
         FirebaseToken decodedToken = (FirebaseToken) requestContext.getProperty("user");
 
         if (decodedToken == null) {
@@ -701,7 +708,7 @@ public class api {
 
         executorService.submit(() -> {
             try {
-                asyncResponse.resume(doGetUsers(decodedToken.getUid()));
+                asyncResponse.resume(doGetUsers(decodedToken.getUid(), page, pageSize));
             } catch (Exception e) {
                 asyncResponse.resume(Response.status(Response.Status.INTERNAL_SERVER_ERROR)
                         .entity(new msgError(-1, e.getMessage()))
@@ -710,9 +717,24 @@ public class api {
         });
     }
 
-    private Response doGetUsers(String userId) {
+    // Helper DTO to return paginated users
+    public static class UsersPageDTO {
+        public List<UserDTO> users;
+        public int page;
+        public int pageSize;
+        public long total;
+        public boolean hasMore;
+
+        public UsersPageDTO() {}
+    }
+
+    private Response doGetUsers(String userId, Integer page, Integer pageSize) {
         ProfileDAO profileDAO = new ProfileDAO();
         UserDAO userDAO = new UserDAO();
+        if (page == null || page < 1) page = 1;
+        if (pageSize == null || pageSize < 1) pageSize = 100;
+        // enforce maximum page size 100
+        if (pageSize > 100) pageSize = 100;
         List<ProfileDTO> profiles = profileDAO.getUserProfiles(userId);
         boolean isAdmin = false;
         String empresaDesc = null;
@@ -735,7 +757,7 @@ public class api {
                     .entity(new msgError(-1, "Solo los administradores pueden consultar usuarios"))
                     .build();
         }
-        if (empresaDesc != null && !"Administrador".equalsIgnoreCase(empresaDesc)) {
+    if (empresaDesc != null && !"Administrador".equalsIgnoreCase(empresaDesc)) {
             // Buscar la empresa por nombre (descripción) y obtener su id
             // Suponiendo que el nombre de la empresa es único y está en la tabla empresa
             EmpresaDAO empresaDAO = new EmpresaDAO();
@@ -752,12 +774,87 @@ public class api {
                         .entity(new msgError(-1, "No se encontró la empresa asociada al perfil"))
                         .build();
             }
-            List<UserDTO> users = userDAO.readAllByEmpresaId(empresaId);
-            return Response.ok(users).build();
+            List<UserDTO> allUsers = userDAO.readAllByEmpresaId(empresaId);
+            long total = allUsers.size();
+            int fromIndex = (page - 1) * pageSize;
+            int toIndex = Math.min(fromIndex + pageSize, allUsers.size());
+            if (fromIndex >= allUsers.size()) {
+                UsersPageDTO pageResp = new UsersPageDTO();
+                pageResp.users = new ArrayList<>();
+                pageResp.page = page;
+                pageResp.pageSize = pageSize;
+                pageResp.total = total;
+                pageResp.hasMore = false;
+                return Response.ok(pageResp).build();
+            }
+            List<UserDTO> users = allUsers.subList(fromIndex, toIndex);
+            // Populate tipoPerfil for each user
+            for (UserDTO u : users) {
+                try {
+                    List<ProfileDTO> ups = profileDAO.getUserProfiles(u.getId());
+                    if (ups != null && !ups.isEmpty()) {
+                        // join profile names by comma
+                        StringBuilder sb = new StringBuilder();
+                        for (int i = 0; i < ups.size(); i++) {
+                            if (i > 0) sb.append(",");
+                            sb.append(ups.get(i).getName());
+                        }
+                        u.setTipoPerfil(sb.toString());
+                    } else {
+                        u.setTipoPerfil(null);
+                    }
+                } catch (Exception ex) {
+                    u.setTipoPerfil(null);
+                }
+            }
+            UsersPageDTO pageResp = new UsersPageDTO();
+            pageResp.users = users;
+            pageResp.page = page;
+            pageResp.pageSize = pageSize;
+            pageResp.total = total;
+            pageResp.hasMore = toIndex < total;
+            return Response.ok(pageResp).build();
         } else {
             // Admin global
-            List<UserDTO> users = userDAO.readAll();
-            return Response.ok(users).build();
+            List<UserDTO> allUsers = userDAO.readAll();
+            long total = allUsers.size();
+            int fromIndex = (page - 1) * pageSize;
+            int toIndex = Math.min(fromIndex + pageSize, allUsers.size());
+            if (fromIndex >= allUsers.size()) {
+                UsersPageDTO pageResp = new UsersPageDTO();
+                pageResp.users = new ArrayList<>();
+                pageResp.page = page;
+                pageResp.pageSize = pageSize;
+                pageResp.total = total;
+                pageResp.hasMore = false;
+                return Response.ok(pageResp).build();
+            }
+            List<UserDTO> users = allUsers.subList(fromIndex, toIndex);
+            // Populate tipoPerfil for each user
+            for (UserDTO u : users) {
+                try {
+                    List<ProfileDTO> ups = profileDAO.getUserProfiles(u.getId());
+                    if (ups != null && !ups.isEmpty()) {
+                        StringBuilder sb = new StringBuilder();
+                        for (int i = 0; i < ups.size(); i++) {
+                            if (i > 0) sb.append(",");
+                            sb.append(ups.get(i).getName());
+                        }
+                        u.setTipoPerfil(sb.toString());
+                    } else {
+                        u.setTipoPerfil(null);
+                    }
+                } catch (Exception ex) {
+                    u.setTipoPerfil(null);
+                }
+            }
+            UsersPageDTO pageResp = new UsersPageDTO();
+            pageResp.users = users;
+            pageResp.page = page;
+            pageResp.pageSize = pageSize;
+            pageResp.total = total;
+            pageResp.hasMore = toIndex < total;
+            return Response.ok(pageResp).build();
         }
     }
 

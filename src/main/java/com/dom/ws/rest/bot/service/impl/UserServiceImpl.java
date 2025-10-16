@@ -4,12 +4,44 @@ import com.dom.ws.rest.bot.DAO.UserDAO;
 import com.dom.ws.rest.bot.DAO.ProfileDAO;
 import com.dom.ws.rest.bot.DTO.ProfileDTO;
 import com.dom.ws.rest.bot.DTO.UserDTO;
+import com.dom.ws.rest.bot.Response.LoginResponse;
 import com.dom.ws.rest.bot.service.interfaces.UserService;
 import java.util.List;
+import com.google.firebase.auth.FirebaseToken;
 
 public class UserServiceImpl implements UserService {
     private final UserDAO userDAO;
     private final ProfileDAO profileDAO;
+
+    @Override
+    public UserDTO updateUser(UserDTO user, String id) {
+        // TODO: Implement updateUser logic
+        throw new UnsupportedOperationException("Unimplemented method 'updateUser'");
+    }
+
+    @Override
+    public void assignProfiles(String userId, List<Integer> profileIds) {
+        // TODO: Implement assignProfiles logic
+        throw new UnsupportedOperationException("Unimplemented method 'assignProfiles'");
+    }
+
+    @Override
+    public UserDTO createUser(UserDTO user, String extraParam) {
+        // TODO: Implement createUser logic
+        throw new UnsupportedOperationException("Unimplemented method 'createUser'");
+    }
+
+    @Override
+    public List<UserDTO> getUsers(String filter) {
+        // TODO: Implement getUsers logic
+        throw new UnsupportedOperationException("Unimplemented method 'getUsers'");
+    }
+
+    @Override
+    public LoginResponse login(FirebaseToken token) {
+        // TODO: Implement login logic
+        throw new UnsupportedOperationException("Unimplemented method 'login'");
+    }
 
     public UserServiceImpl() {
         this.userDAO = new UserDAO();
@@ -63,10 +95,7 @@ public class UserServiceImpl implements UserService {
         return null;
     }
 
-    @Override
-    public boolean assignProfile(String userId, int profileId) {
-        return profileDAO.assignProfileToUser(userId, profileId);
-    }
+    
 
     @Override
     public boolean isAdmin(String userId) {

@@ -5,39 +5,30 @@
  */
 package org.netbeans.rest.application.config;
 
-import java.util.Set;
 import javax.ws.rs.core.Application;
 import com.dom.ws.rest.bot.Conexion.FirebaseInitializer;
+import org.glassfish.jersey.server.ResourceConfig;
 
 /**
  *
  * @author MIGUEL
  */
 @javax.ws.rs.ApplicationPath("webresources")
-public class ApplicationConfig extends Application {
+public class ApplicationConfig extends ResourceConfig {
 
     public ApplicationConfig() {
         // Inicializar Firebase al arrancar la aplicación
         FirebaseInitializer.getInstance().initialize();
-    }
 
-
-    @Override
-    public Set<Class<?>> getClasses() {
-        Set<Class<?>> resources = new java.util.HashSet<>();
-        addRestResourceClasses(resources);
-        return resources;
-    }
-
-    /**
-     * Do not modify addRestResourceClasses() method.
-     * It is automatically populated with
-     * all resources defined in the project.
-     * If required, comment out calling this method in getClasses().
-     */
-    private void addRestResourceClasses(Set<Class<?>> resources) {
-        resources.add(com.dom.ws.rest.bot.Conexion.CORSFilter.class);
-        resources.add(com.dom.ws.rest.bot.Services.api.class);
+        // Registrar todos los recursos y providers en este paquete
+        packages("com.dom.ws.rest.bot");
+        
+        // Registrar manualmente las nuevas clases de recursos si el escaneo de paquetes falla
+        // register(com.dom.ws.rest.bot.Services.UserResource.class);
+        // register(com.dom.ws.rest.bot.Services.ProjectResource.class); // Y así para las demás
+        
+        // Registrar el filtro de CORS
+        register(com.dom.ws.rest.bot.Conexion.CORSFilter.class);
     }
     
 }

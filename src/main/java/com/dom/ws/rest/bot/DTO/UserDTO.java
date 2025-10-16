@@ -28,7 +28,7 @@ public class UserDTO {
     private String direccion;
     private String tipoIdentificacion;
     private String numeroIdentificacion;
-    private String tipoPerfil = "Customer"; // Por defecto
+    private String tipoPerfil; // Por
 
     public UserDTO() {
     }
