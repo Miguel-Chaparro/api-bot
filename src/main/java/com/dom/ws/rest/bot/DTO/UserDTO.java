@@ -2,6 +2,7 @@ package com.dom.ws.rest.bot.DTO;
 
 import com.dom.ws.rest.bot.vo.msgError;
 import java.sql.Timestamp;
+import java.util.List;
 
 public class UserDTO {
     private String id;              // UID de Firebase
@@ -22,6 +23,8 @@ public class UserDTO {
     private String createdBy;
     private String planInternet;
     private String planPaneles;
+    private Integer planInternetId; // nuevo: id del plan de internet
+    private java.math.BigDecimal precioMensual; // nuevo: precio mensual del plan
     private String ppoe;
     private String ciudad;
     private String departamento;
@@ -29,6 +32,8 @@ public class UserDTO {
     private String tipoIdentificacion;
     private String numeroIdentificacion;
     private String tipoPerfil; // Por
+    // Lista de movimientos solicitados al crear el usuario: inventario id + notas
+    private List<InventoryRequestDTO> inventoryRequests;
 
     public UserDTO() {
     }
@@ -107,6 +112,12 @@ public class UserDTO {
     public String getPlanPaneles() { return planPaneles; }
     public void setPlanPaneles(String planPaneles) { this.planPaneles = planPaneles; }
 
+    public Integer getPlanInternetId() { return planInternetId; }
+    public void setPlanInternetId(Integer planInternetId) { this.planInternetId = planInternetId; }
+
+    public java.math.BigDecimal getPrecioMensual() { return precioMensual; }
+    public void setPrecioMensual(java.math.BigDecimal precioMensual) { this.precioMensual = precioMensual; }
+
     public String getPpoe() { return ppoe; }
     public void setPpoe(String ppoe) { this.ppoe = ppoe; }
 
@@ -127,4 +138,7 @@ public class UserDTO {
 
     public String getTipoPerfil() { return tipoPerfil; }
     public void setTipoPerfil(String tipoPerfil) { this.tipoPerfil = tipoPerfil; }
+
+    public List<InventoryRequestDTO> getInventoryRequests() { return inventoryRequests; }
+    public void setInventoryRequests(List<InventoryRequestDTO> inventoryRequests) { this.inventoryRequests = inventoryRequests; }
 }

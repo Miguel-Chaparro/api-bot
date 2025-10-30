@@ -16,8 +16,13 @@ import com.dom.ws.rest.bot.DAO.UserDAO;
 import com.dom.ws.rest.bot.DAO.EmpresaDAO;
 import com.dom.ws.rest.bot.DAO.RaspberryNewDAO;
 import com.dom.ws.rest.bot.DAO.projectsDAO;
+import com.dom.ws.rest.bot.DAO.ContratoDAO;
+import com.dom.ws.rest.bot.DAO.InventoryMovementDAO;
 import com.dom.ws.rest.bot.DTO.ProfileDTO;
 import com.dom.ws.rest.bot.DTO.UserDTO;
+import com.dom.ws.rest.bot.DTO.ContratoDTO;
+import com.dom.ws.rest.bot.DTO.InventoryMovementDTO;
+import com.dom.ws.rest.bot.DTO.InventoryRequestDTO;
 import com.dom.ws.rest.bot.DTO.answerDTO;
 import com.dom.ws.rest.bot.DTO.projectDTO;
 import com.dom.ws.rest.bot.DTO.questionsDTO;
@@ -72,6 +77,9 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
+import java.sql.Date;
+import java.sql.Timestamp;
+import java.util.Calendar;
 
 /**
  *
@@ -978,11 +986,16 @@ public class api {
     @Path(value = "/createUser")
     @Produces({ MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN })
     @Consumes({ MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN })
-    @Operation(summary = "Crear usuario", description = "Permite crear un usuario según reglas de perfil y empresa.", requestBody = @RequestBody(required = true, content = @Content(schema = @Schema(implementation = UserDTO.class))), responses = {
+    @Operation(
+        summary = "Crear usuario",
+        description = "Permite crear un usuario según reglas de perfil y empresa. Si el perfil asignado al nuevo usuario es 'Customer', se crea automáticamente un contrato y movimientos de inventario (según inventoryRequests).",
+        requestBody = @RequestBody(required = true, content = @Content(schema = @Schema(implementation = UserDTO.class))),
+        responses = {
             @ApiResponse(responseCode = "200", description = "Usuario creado", content = @Content(schema = @Schema(implementation = Boolean.class))),
             @ApiResponse(responseCode = "403", description = "No tiene permisos para crear usuarios"),
             @ApiResponse(responseCode = "400", description = "Datos inválidos o empresa no encontrada")
-    })
+        }
+    )
     public void createUser(@Suspended final AsyncResponse asyncResponse, final UserDTO request,
             @Context ContainerRequestContext requestContext) {
         FirebaseToken decodedToken = (FirebaseToken) requestContext.getProperty("user");
@@ -1116,6 +1129,7 @@ public class api {
         }
         // Asignar perfil
         int idPerfil = -1;
+        String assignedProfileName = null;
         try {
             List<ProfileDTO> perfilesEmpresa = profileDAO.getAllActiveProfiles();
             for (ProfileDTO perfil : perfilesEmpresa) {
@@ -1128,6 +1142,7 @@ public class api {
                         if (idPerfil == newUser.getEmpresaId()) {
                             // Si el perfil es un número y coincide con la empresa, asignar
                             idPerfil = perfil.getId();
+                            assignedProfileName = perfil.getName();
                             break;
                         }
 
@@ -1146,6 +1161,7 @@ public class api {
                 for (ProfileDTO perfil : perfilesEmpresa) {
                     if ("Customer".equalsIgnoreCase(perfil.getName())) {
                         idPerfil = perfil.getId();
+                        assignedProfileName = perfil.getName();
                         break;
                     }
                 }
@@ -1163,6 +1179,79 @@ public class api {
             CustomerWhatsappHelper.createCustomerWhatsappForUser(newUser, userId);
         } catch (Exception e) {
             // Log error, pero no impedir creación de usuario
+        }
+    // Si el usuario fue creado ahora y el perfil asignado es Customer, generar contrato y movimiento de inventario
+    if (!firebaseUserExists && created && "Customer".equalsIgnoreCase(assignedProfileName)) {
+            try {
+                ContratoDAO contratoDAO = new ContratoDAO();
+                ContratoDTO contrato = new ContratoDTO();
+                contrato.setUsuarioId(newUser.getId());
+                contrato.setPlanInternetId(newUser.getPlanInternetId());
+                // Obtener la siguiente secuencia por empresa para componer el numero de contrato
+                int nextSeq = contratoDAO.getNextSeqForEmpresa(newUser.getEmpresaId());
+                String idRaspi = (newUser.getIdRaspi() != null && !newUser.getIdRaspi().isEmpty()) ? newUser.getIdRaspi() : "0";
+                String numeroContrato = newUser.getEmpresaId() + "-" + idRaspi + "-" + nextSeq;
+                contrato.setNumeroContrato(numeroContrato);
+                contrato.setFechaInicio(new Date(System.currentTimeMillis()));
+                contrato.setFechaFin(null);
+                contrato.setDireccionInstalacion(newUser.getDireccion());
+                contrato.setEstado("activo");
+                contrato.setPrecioMensual(newUser.getPrecioMensual());
+                Calendar cal = Calendar.getInstance();
+                int dia = cal.get(Calendar.DAY_OF_MONTH) + 1;
+                contrato.setDiaCorte(dia);
+                contrato.setObservaciones(null);
+                contrato.setEmpresaId(newUser.getEmpresaId());
+                boolean contratoOk = contratoDAO.create(contrato);
+                if (contratoOk) {
+                    try {
+                        InventoryMovementDAO imDao = new InventoryMovementDAO();
+                        // Crear movimientos a partir del arreglo enviado en la petición
+                        java.util.List<InventoryRequestDTO> invReqs = newUser.getInventoryRequests();
+                        if (invReqs != null && !invReqs.isEmpty()) {
+                            for (InventoryRequestDTO req : invReqs) {
+                                try {
+                                    InventoryMovementDTO mv = new InventoryMovementDTO();
+                                    mv.setEmpresaId(newUser.getEmpresaId());
+                                    mv.setInventarioId(req.getInventarioId());
+                                    mv.setEmpleadoId(userId); // quien realiza la accion
+                                    mv.setClienteId(newUser.getId());
+                                    mv.setTipoMovimiento("prestamo"); // default en creación
+                                    mv.setFechaMovimiento(new Timestamp(System.currentTimeMillis()));
+                                    mv.setNotas(req.getNotas());
+                                    mv.setMovimientoRelacionadoId(null);
+                                    boolean mvOk = imDao.create(mv);
+                                    if (!mvOk) {
+                                        // registrar fallo en movimiento (no impedimos retorno)
+                                    }
+                                } catch (Exception ex) {
+                                    // registrar fallo en movimiento individual
+                                }
+                            }
+                        } else {
+                            // Si no se envían movimientos específicos, crear un movimiento genérico de préstamo por contrato
+                            try {
+                                InventoryMovementDTO mv = new InventoryMovementDTO();
+                                mv.setEmpresaId(newUser.getEmpresaId());
+                                mv.setEmpleadoId(userId);
+                                mv.setClienteId(newUser.getId());
+                                mv.setTipoMovimiento("prestamo");
+                                mv.setFechaMovimiento(new Timestamp(System.currentTimeMillis()));
+                                mv.setNotas("Creacion de contrato " + numeroContrato);
+                                imDao.create(mv);
+                            } catch (Exception ex) {
+                                // registrar fallo
+                            }
+                        }
+                    } catch (Exception e) {
+                        // registrar fallo en movimiento (no impedimos retorno)
+                    }
+                } else {
+                    // registrar fallo en creacion de contrato (no impedimos retorno)
+                }
+            } catch (Exception e) {
+                // registrar excepcion general (no impedimos retorno)
+            }
         }
         return Response.ok(created).build();
     }
