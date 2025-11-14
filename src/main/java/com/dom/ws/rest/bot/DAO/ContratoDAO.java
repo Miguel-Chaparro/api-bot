@@ -5,7 +5,6 @@ import com.dom.ws.rest.bot.DTO.ContratoDTO;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 

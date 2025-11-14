@@ -18,11 +18,13 @@ import com.dom.ws.rest.bot.DAO.RaspberryNewDAO;
 import com.dom.ws.rest.bot.DAO.projectsDAO;
 import com.dom.ws.rest.bot.DAO.ContratoDAO;
 import com.dom.ws.rest.bot.DAO.InventoryMovementDAO;
+import com.dom.ws.rest.bot.DAO.ContratoServicioDetalleDAO;
 import com.dom.ws.rest.bot.DTO.ProfileDTO;
 import com.dom.ws.rest.bot.DTO.UserDTO;
 import com.dom.ws.rest.bot.DTO.ContratoDTO;
 import com.dom.ws.rest.bot.DTO.InventoryMovementDTO;
 import com.dom.ws.rest.bot.DTO.InventoryRequestDTO;
+import com.dom.ws.rest.bot.DTO.ContratoServicioDetalleDTO;
 import com.dom.ws.rest.bot.DTO.answerDTO;
 import com.dom.ws.rest.bot.DTO.projectDTO;
 import com.dom.ws.rest.bot.DTO.questionsDTO;
@@ -1121,12 +1123,19 @@ public class api {
                     .build();
         }
         boolean created;
-        if (firebaseUserExists) {
-            // Solo actualiza la información en la BD
-            created = userDAO.update(newUser);
-        } else {
-            created = userDAO.create(newUser);
+        // Crear o actualizar registro en la base de datos
+        created = userDAO.create(newUser);
+        if (!created) {
+            userDAO.update(newUser);
         }
+
+        // if (firebaseUserExists) {
+        //     //trata de crear un nuevo registro
+        //     // Solo actualiza la información en la BD
+        //     created = userDAO.update(newUser);
+        // } else {
+        //     created = userDAO.create(newUser);
+        // }
         // Asignar perfil
         int idPerfil = -1;
         String assignedProfileName = null;
@@ -1181,7 +1190,7 @@ public class api {
             // Log error, pero no impedir creación de usuario
         }
     // Si el usuario fue creado ahora y el perfil asignado es Customer, generar contrato y movimiento de inventario
-    if (!firebaseUserExists && created && "Customer".equalsIgnoreCase(assignedProfileName)) {
+    if (created && "Customer".equalsIgnoreCase(assignedProfileName)) {
             try {
                 ContratoDAO contratoDAO = new ContratoDAO();
                 ContratoDTO contrato = new ContratoDTO();
@@ -1204,6 +1213,31 @@ public class api {
                 contrato.setEmpresaId(newUser.getEmpresaId());
                 boolean contratoOk = contratoDAO.create(contrato);
                 if (contratoOk) {
+                    // Crear detalles del contrato a partir del arreglo de inventarios
+                    try {
+                        ContratoServicioDetalleDAO detalleDAO = new ContratoServicioDetalleDAO();
+                        java.util.List<InventoryRequestDTO> invReqs = newUser.getInventoryRequests();
+                        if (invReqs != null && !invReqs.isEmpty()) {
+                            for (InventoryRequestDTO req : invReqs) {
+                                try {
+                                    ContratoServicioDetalleDTO detalle = new ContratoServicioDetalleDTO();
+                                    detalle.setContratoServicioId(contrato.getId());
+                                    detalle.setInventarioId(req.getInventarioId());
+                                    detalle.setFechaAsignacion(new Timestamp(System.currentTimeMillis()));
+                                    detalle.setPrecioAsignacion(req.getPrecioAsignacion());
+                                    boolean detalleOk = detalleDAO.create(detalle);
+                                    if (!detalleOk) {
+                                        // registrar fallo en detalle (no impedimos retorno)
+                                    }
+                                } catch (Exception ex) {
+                                    // registrar fallo en detalle individual
+                                }
+                            }
+                        }
+                    } catch (Exception e) {
+                        // registrar fallo en detalles (no impedimos retorno)
+                    }
+                    
                     try {
                         InventoryMovementDAO imDao = new InventoryMovementDAO();
                         // Crear movimientos a partir del arreglo enviado en la petición
