@@ -227,6 +227,8 @@ public class UserDAO implements interfaces<UserDTO> {
                 user.setDireccion(rs.getString("direccion"));
                 user.setTipoIdentificacion(rs.getString("tipo_identificacion"));
                 user.setNumeroIdentificacion(rs.getString("numero_identificacion"));
+                // salir del while
+                return user;
             }
         } catch (SQLException ex) {
             log.log(Level.SEVERE, "Error reading user by id", ex);
