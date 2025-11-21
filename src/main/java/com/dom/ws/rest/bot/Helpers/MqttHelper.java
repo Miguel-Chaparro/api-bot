@@ -106,10 +106,14 @@ public class MqttHelper {
             String userEmail,
             Integer contractId,
             String phoneNumber) {
-        
-        return phoneNumber + "|Hola *" + userName + "* Bienvienido a *" + companyName + "* " +
-               "para continuar con la instalación del servicio por favor ingresa con el correo " +
-               "*" + userEmail + "* en la plataforma " +
-               "https://dashboard.dommatos.com/contract/" + contractId + " y acepta el contrato";
-    }
+        //mejora el mensaje para que sea más claro y profesional para el usuario
+        return phoneNumber + "|" +
+               "Hola *" + userName + "*,\n\n" +
+               "¡Bienvenido a *" + companyName + "*! Estamos encantados de tenerte con nosotros.\n\n" +
+               "Tu contrato ha sido creado exitosamente. Puedes acceder a los detalles de tu contrato y gestionar tus servicios a través de nuestro portal en línea.\n\n" +
+               "Para iniciar sesión, utiliza tu correo electrónico: *" + userEmail + "*\n" +
+               "Si tienes alguna pregunta o necesitas asistencia, no dudes en contactarnos. Estamos aquí para ayudarte.\n\n" +
+               "¡Gracias por elegir *" + companyName + "*!\n\n" +
+               "Saludos cordiales,\n" +
+               companyName;}
 }
