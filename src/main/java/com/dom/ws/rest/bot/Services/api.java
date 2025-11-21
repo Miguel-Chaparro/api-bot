@@ -983,19 +983,64 @@ public class api {
 
     /**
      * Crear un usuario (solo administradores y técnicos)
+     * 
+     * NOTA: Solo los usuarios con perfil "Administrador" o "Técnico" pueden crear usuarios.
+     * 
+     * Comportamiento según perfil asignado:
+     * - Si "Customer": Crea contrato y movimientos de inventario automáticamente
+     * - Otros perfiles: Solo crea el usuario y asigna el perfil
+     * 
+     * Tipos de servicio soportados en contrato:
+     * - "internet": Requiere ppoe (usuario) y ppoEPassword (contraseña)
+     * - "energia_solar": Requiere energiaTipoPanel (tipo de panel)
+     * - "evento": Requiere eventoTipo (tipo de evento)
+     * - "otro": Sin campos específicos obligatorios
+     * 
+     * Validaciones:
+     * - El teléfono debe estar en formato E.164 internacional (ej: +573001234567)
+     * - Tipo y número de identificación son obligatorios
+     * - Si usuario ya existe en Firebase, se actualiza; si no, se crea
      */
     @POST
     @Path(value = "/createUser")
     @Produces({ MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN })
     @Consumes({ MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN })
     @Operation(
-        summary = "Crear usuario",
-        description = "Permite crear un usuario según reglas de perfil y empresa. Si el perfil asignado al nuevo usuario es 'Customer', se crea automáticamente un contrato y movimientos de inventario (según inventoryRequests).",
-        requestBody = @RequestBody(required = true, content = @Content(schema = @Schema(implementation = UserDTO.class))),
+        summary = "Crear usuario individual con contrato",
+        description = "Crea un nuevo usuario con perfil y empresa. Si el perfil es 'Customer', automáticamente se genera un contrato con campos de servicio (internet, energía solar, eventos) y movimientos de inventario según los datos proporcionados. Para importaciones masivas sin contratos, use /createUsersBatch.",
+        tags = {"Usuarios"},
+        requestBody = @RequestBody(
+            required = true,
+            description = "Datos del usuario a crear",
+            content = @Content(
+                schema = @Schema(implementation = UserDTO.class),
+                examples = @ExampleObject(
+                    name = "Usuario Cliente Internet",
+                    summary = "Crear usuario cliente con servicio de internet y equipos",
+                    value = "{\"email\":\"cliente@empresa.com\",\"displayName\":\"Juan Pérez\",\"tipoIdentificacion\":\"CC\",\"numeroIdentificacion\":\"123456789\",\"phoneNumber\":\"+573001234567\",\"empresaId\":1,\"direccion\":\"Calle 10 #20-30, Apt 401\",\"planInternetId\":5,\"precioMensual\":49.99,\"ppoe\":\"usuario_pppoe\",\"ppoEPassword\":\"password_pppoe123\",\"tipoServicio\":\"internet\",\"idRaspi\":\"RASPI-001\",\"inventoryRequests\":[{\"inventarioId\":10,\"precioAsignacion\":150.00,\"notas\":\"Router TP-Link Archer C7\"},{\"inventarioId\":11,\"precioAsignacion\":25.00,\"notas\":\"Cable Ethernet Cat5e 20m\"}]}"
+                )
+            )
+        ),
         responses = {
-            @ApiResponse(responseCode = "200", description = "Usuario creado", content = @Content(schema = @Schema(implementation = Boolean.class))),
-            @ApiResponse(responseCode = "403", description = "No tiene permisos para crear usuarios"),
-            @ApiResponse(responseCode = "400", description = "Datos inválidos o empresa no encontrada")
+            @ApiResponse(
+                responseCode = "200",
+                description = "Usuario creado exitosamente (true si nuevo, false si actualizado)",
+                content = @Content(mediaType = "application/json", examples = @ExampleObject(value = "true"))
+            ),
+            @ApiResponse(
+                responseCode = "400",
+                description = "Errores de validación",
+                content = @Content(
+                    mediaType = "application/json",
+                    examples = {
+                        @ExampleObject(name = "Identificación faltante", value = "{\"code\":-1,\"message\":\"El tipo y número de identificación son obligatorios\"}"),
+                        @ExampleObject(name = "Teléfono incorrecto", value = "{\"code\":-1,\"message\":\"El número de teléfono debe estar en formato internacional E.164, por ejemplo: +573001234567\"}")
+                    }
+                )
+            ),
+            @ApiResponse(responseCode = "401", description = "No autorizado - Token inválido o ausente"),
+            @ApiResponse(responseCode = "403", description = "Permiso denegado - Usuario no es administrador ni técnico", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = "{\"code\":-1,\"message\":\"No tiene permisos para crear usuarios\"}"))),
+            @ApiResponse(responseCode = "500", description = "Error interno del servidor")
         }
     )
     public void createUser(@Suspended final AsyncResponse asyncResponse, final UserDTO request,
@@ -1183,9 +1228,11 @@ public class api {
                     .entity(new msgError(-1, "Usuario creado pero error asignando perfil: " + e.getMessage()))
                     .build();
         }
-        // Crear registro en customerWhatsapp
+        // Crear registro en customerWhatsapp solo si es usuario nuevo
         try {
-            CustomerWhatsappHelper.createCustomerWhatsappForUser(newUser, userId);
+            if (created) {
+                CustomerWhatsappHelper.createCustomerWhatsappForUser(newUser, userId);
+            }
         } catch (Exception e) {
             // Log error, pero no impedir creación de usuario
         }
@@ -1211,6 +1258,18 @@ public class api {
                 contrato.setDiaCorte(dia);
                 contrato.setObservaciones(null);
                 contrato.setEmpresaId(newUser.getEmpresaId());
+                
+                // Nuevos campos de tipo de servicio
+                contrato.setTipoServicio(newUser.getTipoServicio() != null ? newUser.getTipoServicio() : "internet");
+                if ("internet".equalsIgnoreCase(contrato.getTipoServicio())) {
+                    contrato.setInternetPpoEUsuario(newUser.getPpoe());
+                    contrato.setInternetPpoEPassword(newUser.getPpoEPassword());
+                } else if ("energia_solar".equalsIgnoreCase(contrato.getTipoServicio())) {
+                    contrato.setEnergiaTipoPanel(newUser.getEnergiaTipoPanel());
+                } else if ("evento".equalsIgnoreCase(contrato.getTipoServicio())) {
+                    contrato.setEventoTipo(newUser.getEventoTipo());
+                }
+                
                 boolean contratoOk = contratoDAO.create(contrato);
                 if (contratoOk) {
                     // Crear detalles del contrato a partir del arreglo de inventarios
@@ -1980,15 +2039,64 @@ public class api {
 
     /**
      * Crear usuarios en lote (máximo 100 por solicitud)
+     * 
+     * DIFERENCIA CON /createUser:
+     * - NO crea contratos ni detalles de contratos
+     * - NO crea movimientos de inventario
+     * - Solo crea usuarios con sus perfiles en forma masiva
+     * 
+     * Usa este endpoint para importaciones masivas cuando:
+     * - Los contratos se crearán después manualmente
+     * - Solo necesitas registrar los usuarios en el sistema
+     * - Harás un procesamiento batch posterior
+     * 
+     * Validaciones:
+     * - Máximo 100 usuarios por solicitud
+     * - Teléfono debe estar en formato E.164 (ej: +573001234567)
+     * - Tipo y número de identificación son obligatorios
      */
     @POST
     @Path(value = "/createUsersBatch")
     @Produces({ MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN })
     @Consumes({ MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN })
-    @Operation(summary = "Crear usuarios en lote", description = "Permite crear hasta 100 usuarios en una sola solicitud.", requestBody = @RequestBody(required = true, content = @Content(schema = @Schema(implementation = UserDTO.class))), responses = {
-            @ApiResponse(responseCode = "200", description = "Usuarios procesados", content = @Content(schema = @Schema(implementation = Object.class))),
-            @ApiResponse(responseCode = "400", description = "Solicitud inválida")
-    })
+    @Operation(
+        summary = "Crear usuarios en lote (sin contratos)",
+        description = "Crea múltiples usuarios (hasta 100) en una sola solicitud. A diferencia de /createUser, este endpoint NO crea contratos ni movimientos de inventario. Ideal para importaciones masivas de usuarios que requieren posterior asignación manual de contratos y servicios.",
+        tags = {"Usuarios"},
+        requestBody = @RequestBody(
+            required = true,
+            description = "Array de usuarios a crear (máximo 100)",
+            content = @Content(
+                schema = @Schema(type = "array", implementation = UserDTO.class),
+                examples = @ExampleObject(
+                    name = "Batch de 3 usuarios",
+                    summary = "Crear 3 usuarios sin contratos en una solicitud",
+                    value = "[{\"email\":\"usuario1@empresa.com\",\"displayName\":\"Carlos García\",\"tipoIdentificacion\":\"CC\",\"numeroIdentificacion\":\"111111111\",\"phoneNumber\":\"+573001111111\",\"empresaId\":1},{\"email\":\"usuario2@empresa.com\",\"displayName\":\"María López\",\"tipoIdentificacion\":\"CC\",\"numeroIdentificacion\":\"222222222\",\"phoneNumber\":\"+573002222222\",\"empresaId\":1},{\"email\":\"usuario3@empresa.com\",\"displayName\":\"Pedro Rodríguez\",\"tipoIdentificacion\":\"CC\",\"numeroIdentificacion\":\"333333333\",\"phoneNumber\":\"+573003333333\",\"empresaId\":1}]"
+                )
+            )
+        ),
+        responses = {
+            @ApiResponse(
+                responseCode = "200",
+                description = "Usuarios procesados exitosamente - Devuelve array de booleanos",
+                content = @Content(mediaType = "application/json", examples = @ExampleObject(name = "Respuesta exitosa", value = "[true,true,false]"))
+            ),
+            @ApiResponse(
+                responseCode = "400",
+                description = "Errores de validación",
+                content = @Content(
+                    mediaType = "application/json",
+                    examples = {
+                        @ExampleObject(name = "Array vacío", value = "{\"code\":-1,\"message\":\"Debe enviar al menos un usuario\"}"),
+                        @ExampleObject(name = "Excede límite", value = "{\"code\":-1,\"message\":\"Solo se pueden crear hasta 100 usuarios por solicitud\"}")
+                    }
+                )
+            ),
+            @ApiResponse(responseCode = "401", description = "No autorizado - Token inválido o ausente"),
+            @ApiResponse(responseCode = "403", description = "Permiso denegado - Usuario no es administrador ni técnico"),
+            @ApiResponse(responseCode = "500", description = "Error interno del servidor")
+        }
+    )
     public void createUsersBatch(@Suspended final AsyncResponse asyncResponse, final List<UserDTO> request,
             @Context ContainerRequestContext requestContext) {
         FirebaseToken decodedToken = (FirebaseToken) requestContext.getProperty("user");
@@ -2014,12 +2122,150 @@ public class api {
             List<Object> results = new ArrayList<>();
             for (UserDTO user : request) {
                 user.setCreatedBy(decodedToken.getUid());
-                Response resp = doCreateUser(decodedToken.getUid(), user);
+                // En batch, no crear contratos, solo usuario
+                Response resp = doCreateUserBatchSimple(decodedToken.getUid(), user);
                 Object entity = resp.getEntity();
                 results.add(entity);
             }
             asyncResponse.resume(results);
         });
+    }
+
+    /**
+     * Crear usuario en lote (sin contratos ni inventario)
+     */
+    private Response doCreateUserBatchSimple(String userId, UserDTO newUser) {
+        ProfileDAO profileDAO = new ProfileDAO();
+        EmpresaDAO empresaDAO = new EmpresaDAO();
+        UserDAO userDAO = new UserDAO();
+        List<ProfileDTO> profiles = profileDAO.getUserProfiles(userId);
+        boolean isAdmin = false;
+        boolean isTecnico = false;
+        String empresaDesc = null;
+        boolean adminGlobal = false;
+        for (ProfileDTO profile : profiles) {
+            if ("Administrador".equalsIgnoreCase(profile.getName())) {
+                isAdmin = true;
+                if ("Administrador".equalsIgnoreCase(profile.getDescription())) {
+                    adminGlobal = true;
+                } else {
+                    empresaDesc = profile.getDescription();
+                }
+                break;
+            } else if ("Tecnico".equalsIgnoreCase(profile.getName())) {
+                isTecnico = true;
+                empresaDesc = profile.getDescription();
+                break;
+            }
+        }
+        if (!isAdmin && !isTecnico) {
+            return Response.status(Response.Status.FORBIDDEN)
+                    .entity(new msgError(-1, "No tiene permisos para crear usuarios"))
+                    .build();
+        }
+        Integer empresaId = null;
+        if (adminGlobal) {
+            empresaId = newUser.getEmpresaId();
+            if (empresaId == null) {
+                return Response.status(Response.Status.BAD_REQUEST)
+                        .entity(new msgError(-1, "Debe especificar la empresa para el usuario"))
+                        .build();
+            }
+        } else {
+            if (newUser.getEmpresaId() == null) {
+                List<EmpresaDTO> empresas = empresaDAO.readAll();
+                for (EmpresaDTO empresa : empresas) {
+                    if (empresa.getId() == Integer.valueOf(empresaDesc)) {
+                        empresaId = empresa.getId();
+                        break;
+                    }
+                }
+                if (empresaId == null) {
+                    return Response.status(Response.Status.BAD_REQUEST)
+                            .entity(new msgError(-1, "No se encontró la empresa asociada al perfil del administrador"))
+                            .build();
+                }
+            } else {
+                empresaId = newUser.getEmpresaId();
+            }
+        }
+        newUser.setEmpresaId(empresaId);
+        // Crear usuario en Firebase primero
+        boolean firebaseUserExists = false;
+        try {
+            UserRecord userRecord;
+            try {
+                userRecord = FirebaseAuth.getInstance().getUserByEmail(newUser.getEmail());
+                firebaseUserExists = true;
+                newUser.setId(userRecord.getUid());
+            } catch (com.google.firebase.auth.FirebaseAuthException ex) {
+                if (ex.getAuthErrorCode() != null && ex.getAuthErrorCode().name().equals("USER_NOT_FOUND")) {
+                    firebaseUserExists = false;
+                } else {
+                    return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                        .entity(new msgError(-1, "Error consultando usuario en Firebase: " + ex.getMessage()))
+                        .build();
+                }
+            }
+            if (!firebaseUserExists) {
+                CreateRequest fbRequest = new CreateRequest()
+                        .setEmail(newUser.getEmail())
+                        .setPassword(newUser.getNumeroIdentificacion())
+                        .setDisplayName(newUser.getDisplayName());
+                if (newUser.getPhoneNumber() != null && !newUser.getPhoneNumber().isEmpty()) {
+                    fbRequest.setPhoneNumber(newUser.getPhoneNumber());
+                }
+                userRecord = FirebaseAuth.getInstance().createUser(fbRequest);
+                newUser.setId(userRecord.getUid());
+            }
+        } catch (Exception e) {
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity(new msgError(-1, "Error creando/consultando usuario en Firebase: " + e.getMessage()))
+                    .build();
+        }
+        boolean created;
+        created = userDAO.create(newUser);
+        if (!created) {
+            userDAO.update(newUser);
+        }
+        // Asignar perfil
+        int idPerfil = -1;
+        try {
+            List<ProfileDTO> perfilesEmpresa = profileDAO.getAllActiveProfiles();
+            for (ProfileDTO perfil : perfilesEmpresa) {
+                if (!perfil.getDescription().equalsIgnoreCase("Administrador") ) {
+                    try {
+                        idPerfil = Integer.parseInt(perfil.getDescription());
+                        if (idPerfil == newUser.getEmpresaId()) {
+                            idPerfil = perfil.getId();
+                            break;
+                        }
+                    } catch (NumberFormatException e) {
+                        return Response.status(Response.Status.BAD_REQUEST)
+                                .entity(new msgError(-1,
+                                        "El perfil debe tener una descripción numérica o un nombre válido"))
+                                .build();
+                    }
+                }
+            }
+            if (idPerfil == -1) {
+                for (ProfileDTO perfil : perfilesEmpresa) {
+                    if ("Customer".equalsIgnoreCase(perfil.getName())) {
+                        idPerfil = perfil.getId();
+                        break;
+                    }
+                }
+            }
+            if (idPerfil != -1) {
+                profileDAO.assignProfileToUser(newUser.getId(), idPerfil);
+            }
+        } catch (Exception e) {
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity(new msgError(-1, "Usuario creado pero error asignando perfil: " + e.getMessage()))
+                    .build();
+        }
+        // NO crear contratos ni movimientos en batch
+        return Response.ok(created).build();
     }
 
 }

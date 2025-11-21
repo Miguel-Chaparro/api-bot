@@ -34,6 +34,12 @@ public class UserDTO {
     private String tipoPerfil; // Por
     // Lista de movimientos solicitados al crear el usuario: inventario id + notas
     private List<InventoryRequestDTO> inventoryRequests;
+    
+    // Campos para contrato de servicios
+    private String tipoServicio; // 'internet', 'energia_solar', 'evento', 'otro'
+    private String ppoEPassword; // Contraseña PPoE para internet (ppoe es el usuario)
+    private String energiaTipoPanel; // Tipo de panel solar
+    private String eventoTipo; // Tipo de evento
 
     public UserDTO() {
     }
@@ -141,4 +147,16 @@ public class UserDTO {
 
     public List<InventoryRequestDTO> getInventoryRequests() { return inventoryRequests; }
     public void setInventoryRequests(List<InventoryRequestDTO> inventoryRequests) { this.inventoryRequests = inventoryRequests; }
+
+    public String getTipoServicio() { return tipoServicio; }
+    public void setTipoServicio(String tipoServicio) { this.tipoServicio = tipoServicio; }
+
+    public String getPpoEPassword() { return ppoEPassword; }
+    public void setPpoEPassword(String ppoEPassword) { this.ppoEPassword = ppoEPassword; }
+
+    public String getEnergiaTipoPanel() { return energiaTipoPanel; }
+    public void setEnergiaTipoPanel(String energiaTipoPanel) { this.energiaTipoPanel = energiaTipoPanel; }
+
+    public String getEventoTipo() { return eventoTipo; }
+    public void setEventoTipo(String eventoTipo) { this.eventoTipo = eventoTipo; }
 }

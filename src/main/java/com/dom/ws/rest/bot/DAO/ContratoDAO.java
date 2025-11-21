@@ -9,7 +9,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class ContratoDAO {
-    private static final String SQL_INSERT = "INSERT INTO dommapi.contratos_servicio (usuario_id, plan_internet_id, numero_contrato, fecha_inicio, fecha_fin, direccion_instalacion, estado, precio_mensual, dia_corte, observaciones, empresa_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+    private static final String SQL_INSERT = "INSERT INTO dommapi.contratos_servicio (usuario_id, plan_internet_id, numero_contrato, fecha_inicio, fecha_fin, direccion_instalacion, estado, precio_mensual, dia_corte, observaciones, empresa_id, tipo_servicio, internet_ppoe_usuario, internet_ppoe_password, energia_tipo_panel, evento_tipo) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
     private static final String SQL_MAX_SEQ = "SELECT COALESCE(MAX(id),0) as maxid FROM dommapi.contratos_servicio WHERE empresa_id = ?";
 
     private final conexionBD con = conexionBD.saberEstado();
@@ -32,6 +32,13 @@ public class ContratoDAO {
             if (dto.getDiaCorte() != null) ps.setObject(9, dto.getDiaCorte()); else ps.setNull(9, java.sql.Types.INTEGER);
             ps.setString(10, dto.getObservaciones());
             if (dto.getEmpresaId() != null) ps.setObject(11, dto.getEmpresaId()); else ps.setNull(11, java.sql.Types.INTEGER);
+            
+            // Nuevos campos
+            ps.setString(12, dto.getTipoServicio() != null ? dto.getTipoServicio() : "internet");
+            ps.setString(13, dto.getInternetPpoEUsuario());
+            ps.setString(14, dto.getInternetPpoEPassword());
+            ps.setString(15, dto.getEnergiaTipoPanel());
+            ps.setString(16, dto.getEventoTipo());
 
             int result = ps.executeUpdate();
             if (result > 0) {

@@ -15,6 +15,7 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
+import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 
 @Provider
@@ -24,8 +25,14 @@ public class CustomJsonProvider implements MessageBodyReader<Object>, MessageBod
     private final Gson gson;
 
     public CustomJsonProvider() {
+        NullSafeNumberDeserializer numberDeserializer = new NullSafeNumberDeserializer();
         this.gson = new GsonBuilder()
             .setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ")
+            .registerTypeAdapter(Integer.class, numberDeserializer)
+            .registerTypeAdapter(Long.class, numberDeserializer)
+            .registerTypeAdapter(Double.class, numberDeserializer)
+            .registerTypeAdapter(Float.class, numberDeserializer)
+            .registerTypeAdapter(BigDecimal.class, numberDeserializer)
             .create();
     }
 

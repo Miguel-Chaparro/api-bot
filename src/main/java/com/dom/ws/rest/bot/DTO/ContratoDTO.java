@@ -19,6 +19,13 @@ public class ContratoDTO {
     private Timestamp createdAt;
     private Timestamp updatedAt;
     private Integer empresaId;
+    
+    // Nuevos campos para tipos de servicio
+    private String tipoServicio; // 'internet', 'energia_solar', 'evento', 'otro'
+    private String internetPpoEUsuario; // Usuario PPoE para servicio internet
+    private String internetPpoEPassword; // Contraseña PPoE (opcional)
+    private String energiaTipoPanel; // Tipo/Modelo de panel solar
+    private String eventoTipo; // Tipo de evento
 
     public ContratoDTO() {}
 
@@ -63,4 +70,19 @@ public class ContratoDTO {
 
     public Integer getEmpresaId() { return empresaId; }
     public void setEmpresaId(Integer empresaId) { this.empresaId = empresaId; }
+
+    public String getTipoServicio() { return tipoServicio; }
+    public void setTipoServicio(String tipoServicio) { this.tipoServicio = tipoServicio; }
+
+    public String getInternetPpoEUsuario() { return internetPpoEUsuario; }
+    public void setInternetPpoEUsuario(String internetPpoEUsuario) { this.internetPpoEUsuario = internetPpoEUsuario; }
+
+    public String getInternetPpoEPassword() { return internetPpoEPassword; }
+    public void setInternetPpoEPassword(String internetPpoEPassword) { this.internetPpoEPassword = internetPpoEPassword; }
+
+    public String getEnergiaTipoPanel() { return energiaTipoPanel; }
+    public void setEnergiaTipoPanel(String energiaTipoPanel) { this.energiaTipoPanel = energiaTipoPanel; }
+
+    public String getEventoTipo() { return eventoTipo; }
+    public void setEventoTipo(String eventoTipo) { this.eventoTipo = eventoTipo; }
 }

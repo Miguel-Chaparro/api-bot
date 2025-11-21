@@ -64,6 +64,9 @@ public class customerWhatsappDAO implements interfaces<customerWhatsappDTO> {
             }
         } catch (SQLException ex) {
             log.log(Level.SEVERE, "Error create customerWhatsappDTO {0}", ex);
+            if (ex.getMessage().contains("Duplicate entry")) {
+                valida = true;
+            }
 
         } finally {
             con.cerrarConexion();
