@@ -1261,6 +1261,7 @@ public class api {
                 
                 // Nuevos campos de tipo de servicio
                 contrato.setTipoServicio(newUser.getTipoServicio() != null ? newUser.getTipoServicio() : "internet");
+                contrato.setDevice(newUser.getIdRaspi()); // Asignar el ID de la raspberry/dispositivo
                 if ("internet".equalsIgnoreCase(contrato.getTipoServicio())) {
                     contrato.setInternetPpoEUsuario(newUser.getPpoe());
                     contrato.setInternetPpoEPassword(newUser.getPpoEPassword());

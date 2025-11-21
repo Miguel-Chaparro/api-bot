@@ -26,6 +26,7 @@ public class ContratoDTO {
     private String internetPpoEPassword; // Contraseña PPoE (opcional)
     private String energiaTipoPanel; // Tipo/Modelo de panel solar
     private String eventoTipo; // Tipo de evento
+    private String device; // ID de la raspberry o dispositivo donde está alojado el servicio
 
     public ContratoDTO() {}
 
@@ -85,4 +86,7 @@ public class ContratoDTO {
 
     public String getEventoTipo() { return eventoTipo; }
     public void setEventoTipo(String eventoTipo) { this.eventoTipo = eventoTipo; }
+
+    public String getDevice() { return device; }
+    public void setDevice(String device) { this.device = device; }
 }
