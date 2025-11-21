@@ -33,6 +33,7 @@ import com.dom.ws.rest.bot.DTO.EmpresaDTO;
 import com.dom.ws.rest.bot.DTO.RaspberryNewDTO;
 import com.dom.ws.rest.bot.DTO.RaspberryDTO;
 import com.dom.ws.rest.bot.DTO.RaspberryUserRelationDTO;
+import com.dom.ws.rest.bot.Helpers.MqttHelper;
 import com.dom.ws.rest.bot.Request.AssignProfileRequest;
 import com.dom.ws.rest.bot.Request.answerReq;
 import com.dom.ws.rest.bot.Request.questionsAnswersReq;
@@ -1339,6 +1340,32 @@ public class api {
                         }
                     } catch (Exception e) {
                         // registrar fallo en movimiento (no impedimos retorno)
+                    }
+                    
+                    // Enviar notificación MQTT con información del contrato
+                    try {
+                        if (newUser.getPhoneNumber() != null && !newUser.getPhoneNumber().isEmpty()) {
+                            // Obtener el nombre de la empresa
+                            List<EmpresaDTO> empresas = empresaDAO.readAll();
+                            String companyName = "Dommatos SAS";
+                            for (EmpresaDTO emp : empresas) {
+                                if (emp.getId() == newUser.getEmpresaId()) {
+                                    companyName = emp.getNombre();
+                                    break;
+                                }
+                            }
+                            
+                            // Enviar mensaje MQTT
+                            MqttHelper.sendContractNotification(
+                                newUser.getPhoneNumber(),
+                                newUser.getDisplayName(),
+                                companyName,
+                                newUser.getEmail(),
+                                contrato.getId()
+                            );
+                        }
+                    } catch (Exception e) {
+                        // Log error pero no impedir creación (error no crítico)
                     }
                 } else {
                     // registrar fallo en creacion de contrato (no impedimos retorno)
