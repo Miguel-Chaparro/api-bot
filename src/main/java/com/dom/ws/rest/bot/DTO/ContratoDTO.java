@@ -27,6 +27,11 @@ public class ContratoDTO {
     private String energiaTipoPanel; // Tipo/Modelo de panel solar
     private String eventoTipo; // Tipo de evento
     private String device; // ID de la raspberry o dispositivo donde está alojado el servicio
+    
+    // Campos de identificación del contratante
+    private String tipoId; // Tipo de identificación (Cedula de Ciudadania, Pasaporte, etc.)
+    private String numId; // Número de identificación
+    private String contratoNombre; // Nombre completo de quien toma el contrato
 
     public ContratoDTO() {}
 
@@ -89,4 +94,13 @@ public class ContratoDTO {
 
     public String getDevice() { return device; }
     public void setDevice(String device) { this.device = device; }
+
+    public String getTipoId() { return tipoId; }
+    public void setTipoId(String tipoId) { this.tipoId = tipoId; }
+
+    public String getNumId() { return numId; }
+    public void setNumId(String numId) { this.numId = numId; }
+
+    public String getContratoNombre() { return contratoNombre; }
+    public void setContratoNombre(String contratoNombre) { this.contratoNombre = contratoNombre; }
 }

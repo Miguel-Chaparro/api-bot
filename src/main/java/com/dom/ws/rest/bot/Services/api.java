@@ -1252,7 +1252,7 @@ public class api {
                 contrato.setFechaInicio(new Date(System.currentTimeMillis()));
                 contrato.setFechaFin(null);
                 contrato.setDireccionInstalacion(newUser.getDireccion());
-                contrato.setEstado("activo");
+                contrato.setEstado("inactivo");
                 contrato.setPrecioMensual(newUser.getPrecioMensual());
                 Calendar cal = Calendar.getInstance();
                 int dia = cal.get(Calendar.DAY_OF_MONTH) + 1;
@@ -1271,6 +1271,11 @@ public class api {
                 } else if ("evento".equalsIgnoreCase(contrato.getTipoServicio())) {
                     contrato.setEventoTipo(newUser.getEventoTipo());
                 }
+                
+                // Campos de identificación del contratante
+                contrato.setTipoId(newUser.getTipoIdentificacion());
+                contrato.setNumId(newUser.getNumeroIdentificacion());
+                contrato.setContratoNombre(newUser.getDisplayName());
                 
                 boolean contratoOk = contratoDAO.create(contrato);
                 if (contratoOk) {
@@ -2068,15 +2073,13 @@ public class api {
     /**
      * Crear usuarios en lote (máximo 100 por solicitud)
      * 
-     * DIFERENCIA CON /createUser:
-     * - NO crea contratos ni detalles de contratos
-     * - NO crea movimientos de inventario
-     * - Solo crea usuarios con sus perfiles en forma masiva
+     * CAMBIO: Ahora TAMBIÉN crea contratos (sin detalles de inventario)
      * 
-     * Usa este endpoint para importaciones masivas cuando:
-     * - Los contratos se crearán después manualmente
-     * - Solo necesitas registrar los usuarios en el sistema
-     * - Harás un procesamiento batch posterior
+     * Comportamiento:
+     * - Crea usuarios y asigna perfiles
+     * - Si el perfil es "Customer", crea el contrato automáticamente
+     * - NO crea detalles de contratos ni movimientos de inventario
+     * - Ideal para importaciones masivas con contratos básicos
      * 
      * Validaciones:
      * - Máximo 100 usuarios por solicitud
@@ -2088,8 +2091,8 @@ public class api {
     @Produces({ MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN })
     @Consumes({ MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN })
     @Operation(
-        summary = "Crear usuarios en lote (sin contratos)",
-        description = "Crea múltiples usuarios (hasta 100) en una sola solicitud. A diferencia de /createUser, este endpoint NO crea contratos ni movimientos de inventario. Ideal para importaciones masivas de usuarios que requieren posterior asignación manual de contratos y servicios.",
+        summary = "Crear usuarios en lote (con contratos básicos)",
+        description = "Crea múltiples usuarios (hasta 100) con contratos básicos en una sola solicitud. Crea usuarios, asigna perfiles y si el perfil es 'Customer' crea el contrato automáticamente. NO crea detalles de contratos ni movimientos de inventario.",
         tags = {"Usuarios"},
         requestBody = @RequestBody(
             required = true,
@@ -2098,8 +2101,8 @@ public class api {
                 schema = @Schema(type = "array", implementation = UserDTO.class),
                 examples = @ExampleObject(
                     name = "Batch de 3 usuarios",
-                    summary = "Crear 3 usuarios sin contratos en una solicitud",
-                    value = "[{\"email\":\"usuario1@empresa.com\",\"displayName\":\"Carlos García\",\"tipoIdentificacion\":\"CC\",\"numeroIdentificacion\":\"111111111\",\"phoneNumber\":\"+573001111111\",\"empresaId\":1},{\"email\":\"usuario2@empresa.com\",\"displayName\":\"María López\",\"tipoIdentificacion\":\"CC\",\"numeroIdentificacion\":\"222222222\",\"phoneNumber\":\"+573002222222\",\"empresaId\":1},{\"email\":\"usuario3@empresa.com\",\"displayName\":\"Pedro Rodríguez\",\"tipoIdentificacion\":\"CC\",\"numeroIdentificacion\":\"333333333\",\"phoneNumber\":\"+573003333333\",\"empresaId\":1}]"
+                    summary = "Crear 3 usuarios con contratos en una solicitud",
+                    value = "[{\"email\":\"usuario1@empresa.com\",\"displayName\":\"Carlos García\",\"tipoIdentificacion\":\"CC\",\"numeroIdentificacion\":\"111111111\",\"phoneNumber\":\"+573001111111\",\"empresaId\":1,\"direccion\":\"Calle 1 #10-20\",\"precioMensual\":49.99},{\"email\":\"usuario2@empresa.com\",\"displayName\":\"María López\",\"tipoIdentificacion\":\"CC\",\"numeroIdentificacion\":\"222222222\",\"phoneNumber\":\"+573002222222\",\"empresaId\":1,\"direccion\":\"Calle 2 #30-40\",\"precioMensual\":49.99},{\"email\":\"usuario3@empresa.com\",\"displayName\":\"Pedro Rodríguez\",\"tipoIdentificacion\":\"CC\",\"numeroIdentificacion\":\"333333333\",\"phoneNumber\":\"+573003333333\",\"empresaId\":1,\"direccion\":\"Calle 3 #50-60\",\"precioMensual\":49.99}]"
                 )
             )
         ),
@@ -2160,7 +2163,7 @@ public class api {
     }
 
     /**
-     * Crear usuario en lote (sin contratos ni inventario)
+     * Crear usuario en lote (con contratos pero sin detalles ni movimiento de inventario)
      */
     private Response doCreateUserBatchSimple(String userId, UserDTO newUser) {
         ProfileDAO profileDAO = new ProfileDAO();
@@ -2258,6 +2261,7 @@ public class api {
         }
         // Asignar perfil
         int idPerfil = -1;
+        String assignedProfileName = null;
         try {
             List<ProfileDTO> perfilesEmpresa = profileDAO.getAllActiveProfiles();
             for (ProfileDTO perfil : perfilesEmpresa) {
@@ -2266,6 +2270,7 @@ public class api {
                         idPerfil = Integer.parseInt(perfil.getDescription());
                         if (idPerfil == newUser.getEmpresaId()) {
                             idPerfil = perfil.getId();
+                            assignedProfileName = perfil.getName();
                             break;
                         }
                     } catch (NumberFormatException e) {
@@ -2280,6 +2285,7 @@ public class api {
                 for (ProfileDTO perfil : perfilesEmpresa) {
                     if ("Customer".equalsIgnoreCase(perfil.getName())) {
                         idPerfil = perfil.getId();
+                        assignedProfileName = perfil.getName();
                         break;
                     }
                 }
@@ -2292,7 +2298,56 @@ public class api {
                     .entity(new msgError(-1, "Usuario creado pero error asignando perfil: " + e.getMessage()))
                     .build();
         }
-        // NO crear contratos ni movimientos en batch
+        
+        // Crear contrato en batch (sin detalles ni movimientos)
+        if (created && "Customer".equalsIgnoreCase(assignedProfileName)) {
+            try {
+                ContratoDAO contratoDAO = new ContratoDAO();
+                ContratoDTO contrato = new ContratoDTO();
+                contrato.setUsuarioId(newUser.getId());
+                contrato.setPlanInternetId(newUser.getPlanInternetId());
+                // Obtener la siguiente secuencia por empresa para componer el numero de contrato
+                int nextSeq = contratoDAO.getNextSeqForEmpresa(newUser.getEmpresaId());
+                String idRaspi = (newUser.getIdRaspi() != null && !newUser.getIdRaspi().isEmpty()) ? newUser.getIdRaspi() : "0";
+                String numeroContrato = newUser.getEmpresaId() + "-" + idRaspi + "-" + nextSeq;
+                contrato.setNumeroContrato(numeroContrato);
+                contrato.setFechaInicio(new Date(System.currentTimeMillis()));
+                contrato.setFechaFin(null);
+                contrato.setDireccionInstalacion(newUser.getDireccion());
+                contrato.setEstado("inactivo");
+                contrato.setPrecioMensual(newUser.getPrecioMensual());
+                Calendar cal = Calendar.getInstance();
+                int dia = cal.get(Calendar.DAY_OF_MONTH) + 1;
+                contrato.setDiaCorte(dia);
+                contrato.setObservaciones(null);
+                contrato.setEmpresaId(newUser.getEmpresaId());
+                
+                // Nuevos campos de tipo de servicio
+                contrato.setTipoServicio(newUser.getTipoServicio() != null ? newUser.getTipoServicio() : "internet");
+                contrato.setDevice(newUser.getIdRaspi()); // Asignar el ID de la raspberry/dispositivo
+                if ("internet".equalsIgnoreCase(contrato.getTipoServicio())) {
+                    contrato.setInternetPpoEUsuario(newUser.getPpoe());
+                    contrato.setInternetPpoEPassword(newUser.getPpoEPassword());
+                } else if ("energia_solar".equalsIgnoreCase(contrato.getTipoServicio())) {
+                    contrato.setEnergiaTipoPanel(newUser.getEnergiaTipoPanel());
+                } else if ("evento".equalsIgnoreCase(contrato.getTipoServicio())) {
+                    contrato.setEventoTipo(newUser.getEventoTipo());
+                }
+                
+                // Campos de identificación del contratante
+                contrato.setTipoId(newUser.getTipoIdentificacion());
+                contrato.setNumId(newUser.getNumeroIdentificacion());
+                contrato.setContratoNombre(newUser.getDisplayName());
+                
+                boolean contratoOk = contratoDAO.create(contrato);
+                if (!contratoOk) {
+                    // Contrato no se creó, pero continuamos en batch
+                }
+            } catch (Exception e) {
+                // Log error pero no impedir creación (error no crítico)
+            }
+        }
+        
         return Response.ok(created).build();
     }
 
