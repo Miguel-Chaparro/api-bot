@@ -1194,7 +1194,7 @@ public class api {
                     try {
                         // Intentar convertir a número para comparar
                         idPerfil = Integer.parseInt(perfil.getDescription());
-                        if (idPerfil == newUser.getEmpresaId()) {
+                        if (idPerfil == newUser.getEmpresaId() && perfil.getName().equalsIgnoreCase(newUser.getTipoPerfil())) {
                             // Si el perfil es un número y coincide con la empresa, asignar
                             idPerfil = perfil.getId();
                             assignedProfileName = perfil.getName();
