@@ -749,7 +749,9 @@ public class api {
         if (pageSize > 100) pageSize = 100;
         List<ProfileDTO> profiles = profileDAO.getUserProfiles(userId);
         boolean isAdmin = false;
+        boolean isOperator = false;
         String empresaDesc = null;
+        
         for (ProfileDTO profile : profiles) {
             if ("Administrador".equalsIgnoreCase(profile.getName())) {
                 if ("Administrador".equalsIgnoreCase(profile.getDescription())) {
@@ -762,14 +764,30 @@ public class api {
                     isAdmin = true;
                     break;
                 }
+            } else if ("Operator".equalsIgnoreCase(profile.getName())) {
+                // Operator: solo puede ver usuarios con perfil Customer
+                isOperator = true;
+                if (!"Administrador".equalsIgnoreCase(profile.getDescription())) {
+                    empresaDesc = profile.getDescription();
+                }
             }
         }
-        if (!isAdmin) {
+        
+        // Restricciones de acceso
+        if (!isAdmin && !isOperator) {
+            // Técnico, Customer o cualquier otro perfil no puede consultar usuarios
             return Response.status(Response.Status.FORBIDDEN)
-                    .entity(new msgError(-1, "Solo los administradores pueden consultar usuarios"))
+                    .entity(new msgError(-1, "No tiene permisos para consultar usuarios"))
                     .build();
         }
-    if (empresaDesc != null && !"Administrador".equalsIgnoreCase(empresaDesc)) {
+        
+        // Si es Operator, solo puede ver usuarios con perfil Customer
+        if (isOperator && !isAdmin) {
+            return getCustomersForOperator(profileDAO, userDAO, empresaDesc, page, pageSize);
+        }
+        
+        // Admin puede ver todos o solo su empresa
+        if (empresaDesc != null && !"Administrador".equalsIgnoreCase(empresaDesc)) {
             // Buscar la empresa por nombre (descripción) y obtener su id
             // Suponiendo que el nombre de la empresa es único y está en la tabla empresa
             EmpresaDAO empresaDAO = new EmpresaDAO();
@@ -868,6 +886,89 @@ public class api {
             pageResp.hasMore = toIndex < total;
             return Response.ok(pageResp).build();
         }
+    }
+    
+    /**
+     * Obtiene usuarios con perfil Customer para un Operator
+     */
+    private Response getCustomersForOperator(ProfileDAO profileDAO, UserDAO userDAO, String empresaDesc, Integer page, Integer pageSize) {
+        EmpresaDAO empresaDAO = new EmpresaDAO();
+        List<EmpresaDTO> empresas = empresaDAO.readAll();
+        Integer empresaId = null;
+        
+        if (empresaDesc != null) {
+            for (EmpresaDTO empresa : empresas) {
+                if (Integer.valueOf(empresaDesc).equals(empresa.getId())) {
+                    empresaId = empresa.getId();
+                    break;
+                }
+            }
+        }
+        
+        if (empresaId == null) {
+            return Response.status(Response.Status.NOT_FOUND)
+                    .entity(new msgError(-1, "No se encontró la empresa asociada al perfil"))
+                    .build();
+        }
+        
+        // Obtener todos los usuarios de la empresa
+        List<UserDTO> allUsers = userDAO.readAllByEmpresaId(empresaId);
+        
+        // Filtrar solo usuarios con perfil Customer
+        List<UserDTO> customerUsers = new ArrayList<>();
+        for (UserDTO u : allUsers) {
+            List<ProfileDTO> ups = profileDAO.getUserProfiles(u.getId());
+            if (ups != null) {
+                for (ProfileDTO p : ups) {
+                    if ("Customer".equalsIgnoreCase(p.getName())) {
+                        customerUsers.add(u);
+                        break;
+                    }
+                }
+            }
+        }
+        
+        long total = customerUsers.size();
+        int fromIndex = (page - 1) * pageSize;
+        int toIndex = Math.min(fromIndex + pageSize, customerUsers.size());
+        
+        if (fromIndex >= customerUsers.size()) {
+            UsersPageDTO pageResp = new UsersPageDTO();
+            pageResp.users = new ArrayList<>();
+            pageResp.page = page;
+            pageResp.pageSize = pageSize;
+            pageResp.total = total;
+            pageResp.hasMore = false;
+            return Response.ok(pageResp).build();
+        }
+        
+        List<UserDTO> users = customerUsers.subList(fromIndex, toIndex);
+        // Populate tipoPerfil for each user
+        for (UserDTO u : users) {
+            try {
+                List<ProfileDTO> ups = profileDAO.getUserProfiles(u.getId());
+                if (ups != null && !ups.isEmpty()) {
+                    StringBuilder sb = new StringBuilder();
+                    for (int i = 0; i < ups.size(); i++) {
+                        if (i > 0) sb.append(",");
+                        sb.append(ups.get(i).getName());
+                    }
+                    u.setTipoPerfil(sb.toString());
+                } else {
+                    u.setTipoPerfil(null);
+                }
+            } catch (Exception ex) {
+                u.setTipoPerfil(null);
+            }
+        }
+        
+        UsersPageDTO pageResp = new UsersPageDTO();
+        pageResp.users = users;
+        pageResp.page = page;
+        pageResp.pageSize = pageSize;
+        pageResp.total = total;
+        pageResp.hasMore = toIndex < total;
+        return Response.ok(pageResp).build();
     }
 
     /**
