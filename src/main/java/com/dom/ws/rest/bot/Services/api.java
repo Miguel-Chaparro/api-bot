@@ -18,6 +18,7 @@ import com.dom.ws.rest.bot.DAO.RaspberryNewDAO;
 import com.dom.ws.rest.bot.DAO.projectsDAO;
 import com.dom.ws.rest.bot.DAO.ContratoDAO;
 import com.dom.ws.rest.bot.DAO.InventoryMovementDAO;
+import com.dom.ws.rest.bot.DAO.InventarioDAO;
 import com.dom.ws.rest.bot.DAO.ContratoServicioDetalleDAO;
 import com.dom.ws.rest.bot.DTO.ProfileDTO;
 import com.dom.ws.rest.bot.DTO.UserDTO;
@@ -1306,6 +1307,7 @@ public class api {
                     
                     try {
                         InventoryMovementDAO imDao = new InventoryMovementDAO();
+                        InventarioDAO inventarioDAO = new InventarioDAO();
                         // Crear movimientos a partir del arreglo enviado en la petición
                         java.util.List<InventoryRequestDTO> invReqs = newUser.getInventoryRequests();
                         if (invReqs != null && !invReqs.isEmpty()) {
@@ -1321,8 +1323,9 @@ public class api {
                                     mv.setNotas(req.getNotas());
                                     mv.setMovimientoRelacionadoId(null);
                                     boolean mvOk = imDao.create(mv);
-                                    if (!mvOk) {
-                                        // registrar fallo en movimiento (no impedimos retorno)
+                                    if (mvOk) {
+                                        // Actualizar estado del inventario a "prestado"
+                                        inventarioDAO.updateEstado(req.getInventarioId(), "prestado");
                                     }
                                 } catch (Exception ex) {
                                     // registrar fallo en movimiento individual
