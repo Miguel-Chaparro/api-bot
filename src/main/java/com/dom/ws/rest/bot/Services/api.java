@@ -1875,7 +1875,7 @@ public class api {
     @GET
     @Path("/devices")
     @Produces(MediaType.APPLICATION_JSON)
-    @Operation(summary = "Consultar todas las Raspberrys simple", description = "Devuelve todas las Raspberrys solo con los campos de la tabla dommapi.raspberry. Solo permitido para Administrador global.", responses = {
+    @Operation(summary = "Consultar todas las Raspberrys simple", description = "Devuelve todas las Raspberrys solo con los campos de la tabla dommapi.raspberry. Permitido para Administrador global, Administrador de empresa, Técnico y Operator.", responses = {
             @ApiResponse(responseCode = "200", description = "Lista de Raspberrys", content = @Content(schema = @Schema(implementation = RaspberryDTO.class))),
             @ApiResponse(responseCode = "403", description = "No autorizado"),
             @ApiResponse(responseCode = "500", description = "Error interno del servidor")
@@ -1896,15 +1896,20 @@ public class api {
                                 && "Administrador".equalsIgnoreCase(p.getDescription()));
                 boolean isAdmin = profiles.stream().anyMatch(
                         p -> "Administrador".equalsIgnoreCase(p.getName()));
+                boolean isTecnico = profiles.stream().anyMatch(
+                        p -> "Tecnico".equalsIgnoreCase(p.getName()));
+                boolean isOperator = profiles.stream().anyMatch(
+                        p -> "Operator".equalsIgnoreCase(p.getName()));
+                
                 RaspberryNewDAO dao = new RaspberryNewDAO();
                 List<RaspberryDTO> raspberrys;
                 if (isAdminGlobal) {
                     raspberrys = dao.getAllRaspberrysSimple();
-                } else if (isAdmin) {
+                } else if (isAdmin || isTecnico || isOperator) {
                     raspberrys = dao.getRaspberrysSimpleByUserId(user.getUid());
                 } else {
                     asyncResponse.resume(Response.status(Response.Status.FORBIDDEN)
-                            .entity("Solo permitido para Administrador").build());
+                            .entity("No tiene permisos para consultar dispositivos").build());
                     return;
                 }
                 asyncResponse.resume(Response.ok(raspberrys).build());
