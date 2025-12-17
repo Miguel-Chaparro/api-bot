@@ -32,6 +32,7 @@ public class ContratoDTO {
     private String tipoId; // Tipo de identificación (Cedula de Ciudadania, Pasaporte, etc.)
     private String numId; // Número de identificación
     private String contratoNombre; // Nombre completo de quien toma el contrato
+    private String phoneNumber; // Número de teléfono del cliente
 
     public ContratoDTO() {}
 
@@ -103,4 +104,7 @@ public class ContratoDTO {
 
     public String getContratoNombre() { return contratoNombre; }
     public void setContratoNombre(String contratoNombre) { this.contratoNombre = contratoNombre; }
+
+    public String getPhoneNumber() { return phoneNumber; }
+    public void setPhoneNumber(String phoneNumber) { this.phoneNumber = phoneNumber; }
 }
