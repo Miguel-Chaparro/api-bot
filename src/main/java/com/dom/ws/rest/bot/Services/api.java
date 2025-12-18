@@ -20,12 +20,16 @@ import com.dom.ws.rest.bot.DAO.ContratoDAO;
 import com.dom.ws.rest.bot.DAO.InventoryMovementDAO;
 import com.dom.ws.rest.bot.DAO.InventarioDAO;
 import com.dom.ws.rest.bot.DAO.ContratoServicioDetalleDAO;
+import com.dom.ws.rest.bot.DAO.InventarioStockDAO;
+import com.dom.ws.rest.bot.DAO.MovimientosStockDAO;
 import com.dom.ws.rest.bot.DTO.ProfileDTO;
 import com.dom.ws.rest.bot.DTO.UserDTO;
 import com.dom.ws.rest.bot.DTO.ContratoDTO;
 import com.dom.ws.rest.bot.DTO.InventoryMovementDTO;
 import com.dom.ws.rest.bot.DTO.InventoryRequestDTO;
 import com.dom.ws.rest.bot.DTO.ContratoServicioDetalleDTO;
+import com.dom.ws.rest.bot.DTO.InventarioStockDTO;
+import com.dom.ws.rest.bot.DTO.MovimientosStockDTO;
 import com.dom.ws.rest.bot.DTO.answerDTO;
 import com.dom.ws.rest.bot.DTO.projectDTO;
 import com.dom.ws.rest.bot.DTO.questionsDTO;
@@ -1099,6 +1103,10 @@ public class api {
      * - "evento": Requiere eventoTipo (tipo de evento)
      * - "otro": Sin campos específicos obligatorios
      * 
+     * Tipos de inventario en InventoryRequest:
+     * - "serializado": Controla inventario individual, crea movimiento en movimientos_inventario con tipo "prestamo"
+     * - "stock": Controla cantidad en inventario_stock, crea movimiento en movimientos_stock con tipo "asignacion_cliente"
+     * 
      * Validaciones:
      * - El teléfono debe estar en formato E.164 internacional (ej: +573001234567)
      * - Tipo y número de identificación son obligatorios
@@ -1110,18 +1118,25 @@ public class api {
     @Consumes({ MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN })
     @Operation(
         summary = "Crear usuario individual con contrato",
-        description = "Crea un nuevo usuario con perfil y empresa. Si el perfil es 'Customer', automáticamente se genera un contrato con campos de servicio (internet, energía solar, eventos) y movimientos de inventario según los datos proporcionados. Para importaciones masivas sin contratos, use /createUsersBatch.",
+        description = "Crea un nuevo usuario con perfil y empresa. Si el perfil es 'Customer', automáticamente se genera un contrato con campos de servicio (internet, energía solar, eventos) y movimientos de inventario (serializado o stock) según los datos proporcionados. Para importaciones masivas sin contratos, use /createUsersBatch.",
         tags = {"Usuarios"},
         requestBody = @RequestBody(
             required = true,
             description = "Datos del usuario a crear",
             content = @Content(
                 schema = @Schema(implementation = UserDTO.class),
-                examples = @ExampleObject(
-                    name = "Usuario Cliente Internet",
-                    summary = "Crear usuario cliente con servicio de internet y equipos",
-                    value = "{\"email\":\"cliente@empresa.com\",\"displayName\":\"Juan Pérez\",\"tipoIdentificacion\":\"CC\",\"numeroIdentificacion\":\"123456789\",\"phoneNumber\":\"+573001234567\",\"empresaId\":1,\"direccion\":\"Calle 10 #20-30, Apt 401\",\"planInternetId\":5,\"precioMensual\":49.99,\"ppoe\":\"usuario_pppoe\",\"ppoEPassword\":\"password_pppoe123\",\"tipoServicio\":\"internet\",\"idRaspi\":\"RASPI-001\",\"inventoryRequests\":[{\"inventarioId\":10,\"precioAsignacion\":150.00,\"notas\":\"Router TP-Link Archer C7\"},{\"inventarioId\":11,\"precioAsignacion\":25.00,\"notas\":\"Cable Ethernet Cat5e 20m\"}]}"
-                )
+                examples = {
+                    @ExampleObject(
+                        name = "Usuario Cliente con Inventario Serializado",
+                        summary = "Crear usuario cliente con servicio de internet y equipos serializados",
+                        value = "{\"email\":\"cliente@empresa.com\",\"displayName\":\"Juan Pérez\",\"tipoIdentificacion\":\"CC\",\"numeroIdentificacion\":\"123456789\",\"phoneNumber\":\"+573001234567\",\"empresaId\":1,\"direccion\":\"Calle 10 #20-30, Apt 401\",\"planInternetId\":5,\"precioMensual\":49.99,\"ppoe\":\"usuario_pppoe\",\"ppoEPassword\":\"password_pppoe123\",\"tipoServicio\":\"internet\",\"idRaspi\":\"RASPI-001\",\"inventoryRequests\":[{\"inventarioId\":10,\"precioAsignacion\":150.00,\"notas\":\"Router TP-Link Archer C7\",\"tipoInventario\":\"serializado\"},{\"inventarioId\":11,\"precioAsignacion\":25.00,\"notas\":\"Cable Ethernet Cat5e 20m\",\"tipoInventario\":\"serializado\"}]}"
+                    ),
+                    @ExampleObject(
+                        name = "Usuario Cliente con Inventario Stock",
+                        summary = "Crear usuario cliente con servicio de internet y productos de stock",
+                        value = "{\"email\":\"cliente2@empresa.com\",\"displayName\":\"María López\",\"tipoIdentificacion\":\"CC\",\"numeroIdentificacion\":\"987654321\",\"phoneNumber\":\"+573002345678\",\"empresaId\":1,\"direccion\":\"Calle 20 #30-40, Apt 501\",\"planInternetId\":5,\"precioMensual\":49.99,\"ppoe\":\"usuario_pppoe2\",\"ppoEPassword\":\"password_pppoe456\",\"tipoServicio\":\"internet\",\"idRaspi\":\"RASPI-002\",\"inventoryRequests\":[{\"productoId\":5,\"cantidad\":2.00,\"notas\":\"2 unidades de cable RJ45\",\"tipoInventario\":\"stock\"},{\"productoId\":8,\"cantidad\":1.00,\"notas\":\"1 unidad de adaptador POE\",\"tipoInventario\":\"stock\"}]}"
+                    )
+                }
             )
         ),
         responses = {
@@ -1274,7 +1289,8 @@ public class api {
         // Crear o actualizar registro en la base de datos
         created = userDAO.create(newUser);
         if (!created) {
-            userDAO.update(newUser);
+            created = userDAO.update(newUser);
+
         }
 
         // if (firebaseUserExists) {
@@ -1410,24 +1426,57 @@ public class api {
                     try {
                         InventoryMovementDAO imDao = new InventoryMovementDAO();
                         InventarioDAO inventarioDAO = new InventarioDAO();
+                        InventarioStockDAO stockDAO = new InventarioStockDAO();
+                        MovimientosStockDAO movStockDAO = new MovimientosStockDAO();
+                        
                         // Crear movimientos a partir del arreglo enviado en la petición
                         java.util.List<InventoryRequestDTO> invReqs = newUser.getInventoryRequests();
                         if (invReqs != null && !invReqs.isEmpty()) {
                             for (InventoryRequestDTO req : invReqs) {
                                 try {
-                                    InventoryMovementDTO mv = new InventoryMovementDTO();
-                                    mv.setEmpresaId(newUser.getEmpresaId());
-                                    mv.setInventarioId(req.getInventarioId());
-                                    mv.setEmpleadoId(userId); // quien realiza la accion
-                                    mv.setClienteId(newUser.getId());
-                                    mv.setTipoMovimiento("prestamo"); // default en creación
-                                    mv.setFechaMovimiento(new Timestamp(System.currentTimeMillis()));
-                                    mv.setNotas(req.getNotas());
-                                    mv.setMovimientoRelacionadoId(null);
-                                    boolean mvOk = imDao.create(mv);
-                                    if (mvOk) {
-                                        // Actualizar estado del inventario a "prestado"
-                                        inventarioDAO.updateEstado(req.getInventarioId(), "prestado");
+                                    // Verificar el tipo de inventario
+                                    String tipoInv = req.getTipoInventario() != null ? req.getTipoInventario() : "serializado";
+                                    
+                                    if ("stock".equalsIgnoreCase(tipoInv)) {
+                                        // Manejar inventario tipo "stock"
+                                        if (req.getProductoId() != null && req.getCantidad() != null) {
+                                            // Restar cantidad del inventario_stock
+                                            boolean stockOk = stockDAO.decrementarCantidad(req.getProductoId(), newUser.getEmpresaId(), req.getCantidad());
+                                            if (stockOk) {
+                                                // Obtener costo unitario del registro de stock
+                                                InventarioStockDTO stock = stockDAO.readOne(req.getProductoId(), newUser.getEmpresaId());
+                                                java.math.BigDecimal costoUnitario = (stock != null) ? stock.getCostoPromedio() : null;
+                                                
+                                                // Crear movimiento en movimientos_stock
+                                                MovimientosStockDTO mvStock = new MovimientosStockDTO();
+                                                mvStock.setProductoId(req.getProductoId());
+                                                mvStock.setEmpresaId(newUser.getEmpresaId());
+                                                mvStock.setEmpleadoId(userId);
+                                                mvStock.setClienteId(newUser.getId());
+                                                mvStock.setTipoMovimiento("asignacion_cliente");
+                                                mvStock.setCantidad(req.getCantidad());
+                                                mvStock.setCostoUnitario(costoUnitario);
+                                                mvStock.setFechaMovimiento(new Timestamp(System.currentTimeMillis()));
+                                                mvStock.setNotas(req.getNotas());
+                                                movStockDAO.create(mvStock);
+                                            }
+                                        }
+                                    } else {
+                                        // Manejar inventario tipo "serializado" (comportamiento original)
+                                        InventoryMovementDTO mv = new InventoryMovementDTO();
+                                        mv.setEmpresaId(newUser.getEmpresaId());
+                                        mv.setInventarioId(req.getInventarioId());
+                                        mv.setEmpleadoId(userId); // quien realiza la accion
+                                        mv.setClienteId(newUser.getId());
+                                        mv.setTipoMovimiento("prestamo"); // default en creación
+                                        mv.setFechaMovimiento(new Timestamp(System.currentTimeMillis()));
+                                        mv.setNotas(req.getNotas());
+                                        mv.setMovimientoRelacionadoId(null);
+                                        boolean mvOk = imDao.create(mv);
+                                        if (mvOk) {
+                                            // Actualizar estado del inventario a "prestado"
+                                            inventarioDAO.updateEstado(req.getInventarioId(), "prestado");
+                                        }
                                     }
                                 } catch (Exception ex) {
                                     // registrar fallo en movimiento individual
@@ -2188,8 +2237,12 @@ public class api {
      * Comportamiento:
      * - Crea usuarios y asigna perfiles
      * - Si el perfil es "Customer", crea el contrato automáticamente
-     * - NO crea detalles de contratos ni movimientos de inventario
+     * - NO crea detalles de contratos ni movimientos de inventario (a diferencia de /createUser)
      * - Ideal para importaciones masivas con contratos básicos
+     * 
+     * Tipos de inventario en InventoryRequest (si se incluyen):
+     * - "serializado": Controla inventario individual
+     * - "stock": Controla cantidad en inventario_stock
      * 
      * Validaciones:
      * - Máximo 100 usuarios por solicitud
@@ -2202,7 +2255,7 @@ public class api {
     @Consumes({ MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN })
     @Operation(
         summary = "Crear usuarios en lote (con contratos básicos)",
-        description = "Crea múltiples usuarios (hasta 100) con contratos básicos en una sola solicitud. Crea usuarios, asigna perfiles y si el perfil es 'Customer' crea el contrato automáticamente. NO crea detalles de contratos ni movimientos de inventario.",
+        description = "Crea múltiples usuarios (hasta 100) con contratos básicos en una sola solicitud. Crea usuarios, asigna perfiles y si el perfil es 'Customer' crea el contrato automáticamente. A diferencia de /createUser, NO crea detalles de contratos ni movimientos de inventario.",
         tags = {"Usuarios"},
         requestBody = @RequestBody(
             required = true,

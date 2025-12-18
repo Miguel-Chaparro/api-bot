@@ -12,6 +12,15 @@ public class InventoryRequestDTO {
     
     @SerializedName("precioAsignacion")
     private BigDecimal precioAsignacion;
+    
+    @SerializedName("tipoInventario")
+    private String tipoInventario; // "serializado" o "stock"
+    
+    @SerializedName("cantidad")
+    private BigDecimal cantidad; // para inventario tipo "stock"
+    
+    @SerializedName("productoId")
+    private Integer productoId; // para inventario tipo "stock"
 
     public InventoryRequestDTO() {}
 
@@ -23,6 +32,15 @@ public class InventoryRequestDTO {
 
     public BigDecimal getPrecioAsignacion() { return precioAsignacion; }
     public void setPrecioAsignacion(BigDecimal precioAsignacion) { this.precioAsignacion = precioAsignacion; }
+    
+    public String getTipoInventario() { return tipoInventario; }
+    public void setTipoInventario(String tipoInventario) { this.tipoInventario = tipoInventario; }
+    
+    public BigDecimal getCantidad() { return cantidad; }
+    public void setCantidad(BigDecimal cantidad) { this.cantidad = cantidad; }
+    
+    public Integer getProductoId() { return productoId; }
+    public void setProductoId(Integer productoId) { this.productoId = productoId; }
     
     // Método auxiliar para parsear strings numéricos de forma segura
     public void setPrecioAsignacionStr(String valor) {
