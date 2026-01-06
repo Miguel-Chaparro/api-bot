@@ -1395,6 +1395,7 @@ public class api {
                 contrato.setNumId(newUser.getNumeroIdentificacion());
                 contrato.setContratoNombre(newUser.getDisplayName());
                 contrato.setPhoneNumber(newUser.getPhoneNumber());
+                contrato.setCreatedBy(userId);
                 
                 boolean contratoOk = contratoDAO.create(contrato);
                 if (contratoOk) {
@@ -2502,6 +2503,7 @@ public class api {
                 contrato.setNumId(newUser.getNumeroIdentificacion());
                 contrato.setContratoNombre(newUser.getDisplayName());
                 contrato.setPhoneNumber(newUser.getPhoneNumber());
+                contrato.setCreatedBy(userId);
                 
                 boolean contratoOk = contratoDAO.create(contrato);
                 if (!contratoOk) {

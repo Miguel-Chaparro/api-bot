@@ -33,6 +33,7 @@ public class ContratoDTO {
     private String numId; // Número de identificación
     private String contratoNombre; // Nombre completo de quien toma el contrato
     private String phoneNumber; // Número de teléfono del cliente
+    private String createdBy; // Usuario Firebase que creó el contrato
 
     public ContratoDTO() {}
 
@@ -107,4 +108,7 @@ public class ContratoDTO {
 
     public String getPhoneNumber() { return phoneNumber; }
     public void setPhoneNumber(String phoneNumber) { this.phoneNumber = phoneNumber; }
+
+    public String getCreatedBy() { return createdBy; }
+    public void setCreatedBy(String createdBy) { this.createdBy = createdBy; }
 }
