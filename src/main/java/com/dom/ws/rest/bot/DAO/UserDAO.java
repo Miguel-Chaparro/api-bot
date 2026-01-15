@@ -13,7 +13,7 @@ import java.util.logging.Logger;
 
 public class UserDAO implements interfaces<UserDTO> {
     private static final String SQL_INSERT = "INSERT INTO dommapi.users (id, email, display_name, photo_url, phone_number, provider_id, creation_time, last_sign_in_time, email_verified, custom_claims, disabled, empresa_id, id_raspi, created_by, plan_internet, plan_paneles, ppoe, ciudad, departamento, direccion, tipo_identificacion, numero_identificacion) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-    private static final String SQL_UPDATE = "UPDATE dommapi.users SET email=?, display_name=?, photo_url=?, phone_number=?, provider_id=?, creation_time=?, last_sign_in_time=?, email_verified=?, custom_claims=?, disabled=?, empresa_id=?, id_raspi=?, created_by=?, plan_internet=?, plan_paneles=?, ppoe=?, ciudad=?, departamento=?, direccion=?, tipo_identificacion=?, numero_identificacion=? WHERE id=?";
+    private static final String SQL_UPDATE = "UPDATE dommapi.users SET email=?, display_name=?, photo_url=?, phone_number=?, provider_id=?, update_time=?, last_sign_in_time=?, email_verified=?, custom_claims=?, disabled=?, empresa_id=?, id_raspi=?, created_by=?, plan_internet=?, plan_paneles=?, ppoe=?, ciudad=?, departamento=?, direccion=?, tipo_identificacion=?, numero_identificacion=? WHERE id=?";
     private static final String SQL_EXISTS = "SELECT COUNT(*) FROM dommapi.users WHERE id = ?";
     private static final String SQL_GET_ALL = "SELECT * FROM dommapi.users";
     
@@ -245,7 +245,7 @@ public class UserDAO implements interfaces<UserDTO> {
         PreparedStatement ps = null;
         ResultSet rs = null;
         try {
-            ps = con.getCnn().prepareStatement("SELECT * FROM dommapi.users WHERE empresa_id = ?");
+            ps = con.getCnn().prepareStatement("SELECT * FROM dommapi.users WHERE empresa_id = ? ORDER BY creation_time DESC");
             ps.setObject(1, empresaId);
             rs = ps.executeQuery();
             while (rs.next()) {

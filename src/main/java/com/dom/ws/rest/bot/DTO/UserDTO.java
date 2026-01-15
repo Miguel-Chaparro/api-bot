@@ -40,6 +40,12 @@ public class UserDTO {
     private String ppoEPassword; // Contraseña PPoE para internet (ppoe es el usuario)
     private String energiaTipoPanel; // Tipo de panel solar
     private String eventoTipo; // Tipo de evento
+    
+    // Nuevos campos para internet en contrato
+    private String tipoInternet; // ENUM: 'sin_servicio', 'fibra', 'antena'
+    private String puerto; // Puerto de fibra (requerido si tipoInternet es 'fibra')
+    private String caja; // Caja de instalación de fibra (requerido si tipoInternet es 'fibra')
+    private String nodo; // Antena (requerido si tipoInternet es 'antena')
 
     public UserDTO() {
     }
@@ -159,4 +165,16 @@ public class UserDTO {
 
     public String getEventoTipo() { return eventoTipo; }
     public void setEventoTipo(String eventoTipo) { this.eventoTipo = eventoTipo; }
+
+    public String getTipoInternet() { return tipoInternet; }
+    public void setTipoInternet(String tipoInternet) { this.tipoInternet = tipoInternet; }
+
+    public String getPuerto() { return puerto; }
+    public void setPuerto(String puerto) { this.puerto = puerto; }
+
+    public String getCaja() { return caja; }
+    public void setCaja(String caja) { this.caja = caja; }
+
+    public String getNodo() { return nodo; }
+    public void setNodo(String nodo) { this.nodo = nodo; }
 }

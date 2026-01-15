@@ -1285,6 +1285,10 @@ public class api {
                     .entity(new msgError(-1, "Error creando/consultando usuario en Firebase: " + e.getMessage()))
                     .build();
         }
+        
+        // Establecer la fecha de creación actual
+        newUser.setCreationTime(new java.sql.Timestamp(System.currentTimeMillis()));
+        
         boolean created;
         // Crear o actualizar registro en la base de datos
         created = userDAO.create(newUser);
@@ -1396,6 +1400,12 @@ public class api {
                 contrato.setContratoNombre(newUser.getDisplayName());
                 contrato.setPhoneNumber(newUser.getPhoneNumber());
                 contrato.setCreatedBy(userId);
+                
+                // Nuevos campos de internet
+                contrato.setTipoInternet(newUser.getTipoInternet());
+                contrato.setPuerto(newUser.getPuerto());
+                contrato.setCaja(newUser.getCaja());
+                contrato.setNodo(newUser.getNodo());
                 
                 boolean contratoOk = contratoDAO.create(contrato);
                 if (contratoOk) {
@@ -2418,6 +2428,10 @@ public class api {
                     .entity(new msgError(-1, "Error creando/consultando usuario en Firebase: " + e.getMessage()))
                     .build();
         }
+        
+        // Establecer la fecha de creación actual (para batch)
+        newUser.setCreationTime(new java.sql.Timestamp(System.currentTimeMillis()));
+        
         boolean created;
         created = userDAO.create(newUser);
         if (!created) {
@@ -2504,6 +2518,12 @@ public class api {
                 contrato.setContratoNombre(newUser.getDisplayName());
                 contrato.setPhoneNumber(newUser.getPhoneNumber());
                 contrato.setCreatedBy(userId);
+                
+                // Nuevos campos de internet
+                contrato.setTipoInternet(newUser.getTipoInternet());
+                contrato.setPuerto(newUser.getPuerto());
+                contrato.setCaja(newUser.getCaja());
+                contrato.setNodo(newUser.getNodo());
                 
                 boolean contratoOk = contratoDAO.create(contrato);
                 if (!contratoOk) {

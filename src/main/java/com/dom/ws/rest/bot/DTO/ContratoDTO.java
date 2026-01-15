@@ -34,6 +34,12 @@ public class ContratoDTO {
     private String contratoNombre; // Nombre completo de quien toma el contrato
     private String phoneNumber; // Número de teléfono del cliente
     private String createdBy; // Usuario Firebase que creó el contrato
+    
+    // Nuevos campos para internet
+    private String tipoInternet; // ENUM: 'sin_servicio', 'fibra', 'antena'
+    private String puerto; // Puerto de fibra (requerido si tipoInternet es 'fibra')
+    private String caja; // Caja de instalación de fibra (requerido si tipoInternet es 'fibra')
+    private String nodo; // Antena (requerido si tipoInternet es 'antena')
 
     public ContratoDTO() {}
 
@@ -111,4 +117,16 @@ public class ContratoDTO {
 
     public String getCreatedBy() { return createdBy; }
     public void setCreatedBy(String createdBy) { this.createdBy = createdBy; }
+
+    public String getTipoInternet() { return tipoInternet; }
+    public void setTipoInternet(String tipoInternet) { this.tipoInternet = tipoInternet; }
+
+    public String getPuerto() { return puerto; }
+    public void setPuerto(String puerto) { this.puerto = puerto; }
+
+    public String getCaja() { return caja; }
+    public void setCaja(String caja) { this.caja = caja; }
+
+    public String getNodo() { return nodo; }
+    public void setNodo(String nodo) { this.nodo = nodo; }
 }
