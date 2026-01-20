@@ -790,7 +790,7 @@ public class api {
             return getCustomersForOperator(profileDAO, userDAO, empresaDesc, page, pageSize);
         }
         
-        // Admin puede ver todos o solo su empresa
+        // Admin puede ver solo usuarios con perfil Customer
         if (empresaDesc != null && !"Administrador".equalsIgnoreCase(empresaDesc)) {
             // Buscar la empresa por nombre (descripción) y obtener su id
             // Suponiendo que el nombre de la empresa es único y está en la tabla empresa
@@ -809,10 +809,22 @@ public class api {
                         .build();
             }
             List<UserDTO> allUsers = userDAO.readAllByEmpresaId(empresaId);
-            long total = allUsers.size();
+            // Filtrar solo usuarios con perfil Customer
+            List<UserDTO> customersOnly = new ArrayList<>();
+            for (UserDTO user : allUsers) {
+                List<ProfileDTO> userProfiles = profileDAO.getUserProfiles(user.getId());
+                for (ProfileDTO profile : userProfiles) {
+                    if ("Customer".equalsIgnoreCase(profile.getName())) {
+                        customersOnly.add(user);
+                        break;
+                    }
+                }
+            }
+            
+            long total = customersOnly.size();
             int fromIndex = (page - 1) * pageSize;
-            int toIndex = Math.min(fromIndex + pageSize, allUsers.size());
-            if (fromIndex >= allUsers.size()) {
+            int toIndex = Math.min(fromIndex + pageSize, customersOnly.size());
+            if (fromIndex >= customersOnly.size()) {
                 UsersPageDTO pageResp = new UsersPageDTO();
                 pageResp.users = new ArrayList<>();
                 pageResp.page = page;
@@ -821,7 +833,7 @@ public class api {
                 pageResp.hasMore = false;
                 return Response.ok(pageResp).build();
             }
-            List<UserDTO> users = allUsers.subList(fromIndex, toIndex);
+            List<UserDTO> users = customersOnly.subList(fromIndex, toIndex);
             // Populate tipoPerfil for each user
             for (UserDTO u : users) {
                 try {
@@ -849,12 +861,24 @@ public class api {
             pageResp.hasMore = toIndex < total;
             return Response.ok(pageResp).build();
         } else {
-            // Admin global
+            // Admin global - retorna solo usuarios con perfil Customer
             List<UserDTO> allUsers = userDAO.readAll();
-            long total = allUsers.size();
+            // Filtrar solo usuarios con perfil Customer
+            List<UserDTO> customersOnly = new ArrayList<>();
+            for (UserDTO user : allUsers) {
+                List<ProfileDTO> userProfiles = profileDAO.getUserProfiles(user.getId());
+                for (ProfileDTO profile : userProfiles) {
+                    if ("Customer".equalsIgnoreCase(profile.getName())) {
+                        customersOnly.add(user);
+                        break;
+                    }
+                }
+            }
+            
+            long total = customersOnly.size();
             int fromIndex = (page - 1) * pageSize;
-            int toIndex = Math.min(fromIndex + pageSize, allUsers.size());
-            if (fromIndex >= allUsers.size()) {
+            int toIndex = Math.min(fromIndex + pageSize, customersOnly.size());
+            if (fromIndex >= customersOnly.size()) {
                 UsersPageDTO pageResp = new UsersPageDTO();
                 pageResp.users = new ArrayList<>();
                 pageResp.page = page;
@@ -863,7 +887,7 @@ public class api {
                 pageResp.hasMore = false;
                 return Response.ok(pageResp).build();
             }
-            List<UserDTO> users = allUsers.subList(fromIndex, toIndex);
+            List<UserDTO> users = customersOnly.subList(fromIndex, toIndex);
             // Populate tipoPerfil for each user
             for (UserDTO u : users) {
                 try {
