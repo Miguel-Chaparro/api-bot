@@ -57,6 +57,7 @@ import com.dom.ws.rest.bot.vo.msgError;
 import com.google.firebase.auth.FirebaseToken;
 import com.google.firebase.auth.UserRecord;
 import com.google.firebase.auth.UserRecord.CreateRequest;
+import com.google.cloud.storage.Acl.User;
 import com.google.firebase.auth.FirebaseAuth;
 
 import java.util.ArrayList;
@@ -990,6 +991,302 @@ public class api {
             }
         }
         
+        UsersPageDTO pageResp = new UsersPageDTO();
+        pageResp.users = users;
+        pageResp.page = page;
+        pageResp.pageSize = pageSize;
+        pageResp.total = total;
+        pageResp.hasMore = toIndex < total;
+        return Response.ok(pageResp).build();
+    }
+
+
+    /**
+     * Endpoint para consultar usuarios registrados (solo administradores)
+     */
+    @GET
+    @Path(value = "/employees")
+    @Produces({ MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN })
+    @Operation(summary = "Obtener usuarios registrados", description = "Permite a un administrador consultar todos los usuarios registrados.", parameters = {
+        @Parameter(name = "page", description = "Página (1-based)", in = ParameterIn.QUERY),
+        @Parameter(name = "pageSize", description = "Tamaño de página (máximo 100)", in = ParameterIn.QUERY)
+    }, responses = {
+        @ApiResponse(responseCode = "200", description = "Página de usuarios", content = @Content(mediaType = "application/json", schema = @Schema(implementation = com.dom.ws.rest.bot.DTO.UsersPageDTO.class))),
+        @ApiResponse(responseCode = "401", description = "No autorizado"),
+        @ApiResponse(responseCode = "403", description = "Acceso denegado")
+    })
+    public void getEmployees(@Suspended final AsyncResponse asyncResponse,
+        @Context ContainerRequestContext requestContext,
+        @javax.ws.rs.QueryParam("page") Integer page,
+        @javax.ws.rs.QueryParam("pageSize") Integer pageSize) {
+        FirebaseToken decodedToken = (FirebaseToken) requestContext.getProperty("user");
+
+        if (decodedToken == null) {
+            asyncResponse.resume(Response.status(Response.Status.UNAUTHORIZED)
+                    .entity("No autorizado")
+                    .build());
+            return;
+        }
+
+        executorService.submit(() -> {
+            try {
+                asyncResponse.resume(doGetEmployees(decodedToken.getUid(), page, pageSize));
+            } catch (Exception e) {
+                asyncResponse.resume(Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                        .entity(new msgError(-1, e.getMessage()))
+                        .build());
+            }
+        });
+    }
+
+
+
+    private Response doGetEmployees(String userId, Integer page, Integer pageSize) {
+        ProfileDAO profileDAO = new ProfileDAO();
+        UserDAO userDAO = new UserDAO();
+        if (page == null || page < 1) page = 1;
+        if (pageSize == null || pageSize < 1) pageSize = 100;
+        // enforce maximum page size 100
+        if (pageSize > 100) pageSize = 100;
+        List<ProfileDTO> profiles = profileDAO.getUserProfiles(userId);
+        boolean isAdmin = false;
+        boolean isOperator = false;
+        String empresaDesc = null;
+        
+        for (ProfileDTO profile : profiles) {
+            if ("Administrador".equalsIgnoreCase(profile.getName())) {
+                if ("Administrador".equalsIgnoreCase(profile.getDescription())) {
+                    // Admin global: puede ver todos los usuarios
+                    isAdmin = true;
+                    break;
+                } else {
+                    // Admin de empresa: solo usuarios de su empresa
+                    empresaDesc = profile.getDescription();
+                    isAdmin = true;
+                    break;
+                }
+            } else if ("Operator".equalsIgnoreCase(profile.getName())) {
+                // Operator: solo puede ver usuarios con perfil Customer
+                isOperator = true;
+                if (!"Administrador".equalsIgnoreCase(profile.getDescription())) {
+                    empresaDesc = profile.getDescription();
+                }
+            }
+        }
+        
+        // Restricciones de acceso
+        if (!isAdmin && !isOperator) {
+            // Técnico, Customer o cualquier otro perfil no puede consultar usuarios
+            return Response.status(Response.Status.FORBIDDEN)
+                    .entity(new msgError(-1, "No tiene permisos para consultar usuarios"))
+                    .build();
+        }
+        
+        // Si es Operator, solo puede ver usuarios con perfil diferente aCustomer
+        if (isOperator && !isAdmin) {
+            return getEmployeesForOperator(profileDAO, userDAO, empresaDesc, page, pageSize);
+        }
+        
+        // Admin puede ver solo usuarios con perfil Customer
+        if (empresaDesc != null && !"Administrador".equalsIgnoreCase(empresaDesc)) {
+            // Buscar la empresa por nombre (descripción) y obtener su id
+            // Suponiendo que el nombre de la empresa es único y está en la tabla empresa
+            EmpresaDAO empresaDAO = new EmpresaDAO();
+            List<EmpresaDTO> empresas = empresaDAO.readAll();
+            Integer empresaId = null;
+            for (EmpresaDTO empresa : empresas) {
+                if (Integer.valueOf(empresaDesc).equals(empresa.getId())) {
+                    empresaId = empresa.getId();
+                    break;
+                }
+            }
+            if (empresaId == null) {
+                return Response.status(Response.Status.NOT_FOUND)
+                        .entity(new msgError(-1, "No se encontró la empresa asociada al perfil"))
+                        .build();
+            }
+            List<UserDTO> allUsers = userDAO.readAllByEmpresaId(empresaId);
+            // Filtrar solo usuarios con perfil Customer
+            List<UserDTO> customersOnly = new ArrayList<>();
+            for (UserDTO user : allUsers) {
+                List<ProfileDTO> userProfiles = profileDAO.getUserProfiles(user.getId());
+                for (ProfileDTO profile : userProfiles) {
+                    if (!"Customer".equalsIgnoreCase(profile.getName())) {
+                        customersOnly.add(user);
+                        break;
+                    }
+                }
+            }
+            
+            long total = customersOnly.size();
+            int fromIndex = (page - 1) * pageSize;
+            int toIndex = Math.min(fromIndex + pageSize, customersOnly.size());
+            if (fromIndex >= customersOnly.size()) {
+                UsersPageDTO pageResp = new UsersPageDTO();
+                pageResp.users = new ArrayList<>();
+                pageResp.page = page;
+                pageResp.pageSize = pageSize;
+                pageResp.total = total;
+                pageResp.hasMore = false;
+                return Response.ok(pageResp).build();
+            }
+            List<UserDTO> users = customersOnly.subList(fromIndex, toIndex);
+            // Populate tipoPerfil for each user
+            for (UserDTO u : users) {
+                try {
+                    List<ProfileDTO> ups = profileDAO.getUserProfiles(u.getId());
+                    if (ups != null && !ups.isEmpty()) {
+                        // join profile names by comma
+                        StringBuilder sb = new StringBuilder();
+                        for (int i = 0; i < ups.size(); i++) {
+                            if (i > 0) sb.append(",");
+                            sb.append(ups.get(i).getName());
+                        }
+                        u.setTipoPerfil(sb.toString());
+                    } else {
+                        u.setTipoPerfil(null);
+                    }
+                } catch (Exception ex) {
+                    u.setTipoPerfil(null);
+                }
+            }
+            UsersPageDTO pageResp = new UsersPageDTO();
+            pageResp.users = users;
+            pageResp.page = page;
+            pageResp.pageSize = pageSize;
+            pageResp.total = total;
+            pageResp.hasMore = toIndex < total;
+            return Response.ok(pageResp).build();
+        } else {
+            // Admin global - retorna solo usuarios con perfil Customer
+            List<UserDTO> allUsers = userDAO.readAll();
+            // Filtrar solo usuarios con perfil Customer
+            List<UserDTO> customersOnly = new ArrayList<>();
+            for (UserDTO user : allUsers) {
+                List<ProfileDTO> userProfiles = profileDAO.getUserProfiles(user.getId());
+                for (ProfileDTO profile : userProfiles) {
+                    if ("Customer".equalsIgnoreCase(profile.getName())) {
+                        customersOnly.add(user);
+                        break;
+                    }
+                }
+            }
+            
+            long total = customersOnly.size();
+            int fromIndex = (page - 1) * pageSize;
+            int toIndex = Math.min(fromIndex + pageSize, customersOnly.size());
+            if (fromIndex >= customersOnly.size()) {
+                UsersPageDTO pageResp = new UsersPageDTO();
+                pageResp.users = new ArrayList<>();
+                pageResp.page = page;
+                pageResp.pageSize = pageSize;
+                pageResp.total = total;
+                pageResp.hasMore = false;
+                return Response.ok(pageResp).build();
+            }
+            List<UserDTO> users = customersOnly.subList(fromIndex, toIndex);
+            // Populate tipoPerfil for each user
+            for (UserDTO u : users) {
+                try {
+                    List<ProfileDTO> ups = profileDAO.getUserProfiles(u.getId());
+                    if (ups != null && !ups.isEmpty()) {
+                        StringBuilder sb = new StringBuilder();
+                        for (int i = 0; i < ups.size(); i++) {
+                            if (i > 0) sb.append(",");
+                            sb.append(ups.get(i).getName());
+                        }
+                        u.setTipoPerfil(sb.toString());
+                    } else {
+                        u.setTipoPerfil(null);
+                    }
+                } catch (Exception ex) {
+                    u.setTipoPerfil(null);
+                }
+            }
+            UsersPageDTO pageResp = new UsersPageDTO();
+            pageResp.users = users;
+            pageResp.page = page;
+            pageResp.pageSize = pageSize;
+            pageResp.total = total;
+            pageResp.hasMore = toIndex < total;
+            return Response.ok(pageResp).build();
+        }
+    }
+    
+    /**
+     * Obtiene empleados con perfil Customer para un Operator
+     */
+    private Response getEmployeesForOperator(ProfileDAO profileDAO, UserDAO userDAO, String empresaDesc, Integer page, Integer pageSize) {
+        EmpresaDAO empresaDAO = new EmpresaDAO();
+        List<EmpresaDTO> empresas = empresaDAO.readAll();
+        Integer empresaId = null;
+        
+        if (empresaDesc != null) {
+            for (EmpresaDTO empresa : empresas) {
+                if (Integer.valueOf(empresaDesc).equals(empresa.getId())) {
+                    empresaId = empresa.getId();
+                    break;
+                }
+            }
+        }
+        
+        if (empresaId == null) {
+            return Response.status(Response.Status.NOT_FOUND)
+                    .entity(new msgError(-1, "No se encontró la empresa asociada al perfil"))
+                    .build();
+        }
+        
+        // Obtener todos los usuarios de la empresa
+        List<UserDTO> allUsers = userDAO.readAllByEmpresaId(empresaId);
+        
+        // Filtrar solo usuarios con perfil Customer
+        List<UserDTO> customerUsers = new ArrayList<>();
+        for (UserDTO u : allUsers) {
+            List<ProfileDTO> ups = profileDAO.getUserProfiles(u.getId());
+            if (ups != null) {
+                for (ProfileDTO p : ups) {
+                    if (!"Customer".equalsIgnoreCase(p.getName())) {
+                        customerUsers.add(u);
+                        break;
+                    }
+                }
+            }
+        }
+        
+        long total = customerUsers.size();
+        int fromIndex = (page - 1) * pageSize;
+        int toIndex = Math.min(fromIndex + pageSize, customerUsers.size());
+        
+        if (fromIndex >= customerUsers.size()) {
+            UsersPageDTO pageResp = new UsersPageDTO();
+            pageResp.users = new ArrayList<>();
+            pageResp.page = page;
+            pageResp.pageSize = pageSize;
+            pageResp.total = total;
+            pageResp.hasMore = false;
+            return Response.ok(pageResp).build();
+        }
+        
+        List<UserDTO> users = customerUsers.subList(fromIndex, toIndex);
+        // Populate tipoPerfil for each user
+        for (UserDTO u : users) {
+            try {
+                List<ProfileDTO> ups = profileDAO.getUserProfiles(u.getId());
+                if (ups != null && !ups.isEmpty()) {
+                    StringBuilder sb = new StringBuilder();
+                    for (int i = 0; i < ups.size(); i++) {
+                        if (i > 0) sb.append(",");
+                        sb.append(ups.get(i).getName());
+                    }
+                    u.setTipoPerfil(sb.toString());
+                } else {
+                    u.setTipoPerfil(null);
+                }
+            } catch (Exception ex) {
+                u.setTipoPerfil(null);
+            }
+        }
+
         UsersPageDTO pageResp = new UsersPageDTO();
         pageResp.users = users;
         pageResp.page = page;
