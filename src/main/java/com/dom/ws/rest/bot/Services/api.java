@@ -57,7 +57,6 @@ import com.dom.ws.rest.bot.vo.msgError;
 import com.google.firebase.auth.FirebaseToken;
 import com.google.firebase.auth.UserRecord;
 import com.google.firebase.auth.UserRecord.CreateRequest;
-import com.google.cloud.storage.Acl.User;
 import com.google.firebase.auth.FirebaseAuth;
 
 import java.util.ArrayList;
@@ -1050,6 +1049,7 @@ public class api {
         if (pageSize > 100) pageSize = 100;
         List<ProfileDTO> profiles = profileDAO.getUserProfiles(userId);
         boolean isAdmin = false;
+        boolean isSuperAdmin = false;
         boolean isOperator = false;
         String empresaDesc = null;
         
@@ -1057,7 +1057,7 @@ public class api {
             if ("Administrador".equalsIgnoreCase(profile.getName())) {
                 if ("Administrador".equalsIgnoreCase(profile.getDescription())) {
                     // Admin global: puede ver todos los usuarios
-                    isAdmin = true;
+                    isSuperAdmin = true;
                     break;
                 } else {
                     // Admin de empresa: solo usuarios de su empresa
@@ -1083,7 +1083,7 @@ public class api {
         }
         
         // Si es Operator, solo puede ver usuarios con perfil diferente aCustomer
-        if (isOperator && !isAdmin) {
+        if (isOperator && !isAdmin && !isSuperAdmin) {
             return getEmployeesForOperator(profileDAO, userDAO, empresaDesc, page, pageSize);
         }
         
@@ -1157,7 +1157,7 @@ public class api {
             pageResp.total = total;
             pageResp.hasMore = toIndex < total;
             return Response.ok(pageResp).build();
-        } else {
+        } if (!isAdmin && isSuperAdmin) {
             // Admin global - retorna solo usuarios con perfil Customer
             List<UserDTO> allUsers = userDAO.readAll();
             // Filtrar solo usuarios con perfil Customer
@@ -1211,6 +1211,49 @@ public class api {
             pageResp.hasMore = toIndex < total;
             return Response.ok(pageResp).build();
         }
+        else {
+            // Admin global - retorna todos los usuarios
+            List<UserDTO> allUsers = userDAO.readAll();
+            long total = allUsers.size();
+            int fromIndex = (page - 1) * pageSize;
+            int toIndex = Math.min(fromIndex + pageSize, allUsers.size());
+            if (fromIndex >= allUsers.size()) {
+                UsersPageDTO pageResp = new UsersPageDTO();
+                pageResp.users = new ArrayList<>();
+                pageResp.page = page;
+                pageResp.pageSize = pageSize;
+                pageResp.total = total;
+                pageResp.hasMore = false;
+                return Response.ok(pageResp).build();
+            }
+            List<UserDTO> users = allUsers.subList(fromIndex, toIndex);
+            // Populate tipoPerfil for each user
+            for (UserDTO u : users) {
+                try {
+                    List<ProfileDTO> ups = profileDAO.getUserProfiles(u.getId());
+                    if (ups != null && !ups.isEmpty()) {
+                        StringBuilder sb = new StringBuilder();
+                        for (int i = 0; i < ups.size(); i++) {
+                            if (i > 0) sb.append(",");
+                            sb.append(ups.get(i).getName());
+                        }
+                        u.setTipoPerfil(sb.toString());
+                    } else {
+                        u.setTipoPerfil(null);
+                    }
+                } catch (Exception ex) {
+                    u.setTipoPerfil(null);
+                }
+            }
+            UsersPageDTO pageResp = new UsersPageDTO();
+            pageResp.users = users;
+            pageResp.page = page;
+            pageResp.pageSize = pageSize;
+            pageResp.total = total;
+            pageResp.hasMore = toIndex < total;
+            return Response.ok(pageResp).build();
+        }
+
     }
     
     /**
@@ -2415,9 +2458,13 @@ public class api {
                 List<ProfileDTO> profiles = profileDAO.getUserProfiles(user.getUid());
                 boolean isAdmin = profiles.stream().anyMatch(
                         p -> "Administrador".equalsIgnoreCase(p.getName()));
-                if (!isAdmin) {
+                boolean isOperator = profiles.stream().anyMatch(
+                        p -> "Operator".equalsIgnoreCase(p.getName()));
+                boolean isTecnico = profiles.stream().anyMatch(
+                        p -> "Tecnico".equalsIgnoreCase(p.getName()));
+                if (!isAdmin && !isOperator && !isTecnico) {
                     asyncResponse.resume(Response.status(Response.Status.FORBIDDEN)
-                            .entity("Solo permitido para Administrador").build());
+                            .entity("Solo permitido para Administrador, Operador o Técnico").build());
                     return;
                 }
                 RaspberryNewDAO dao = new RaspberryNewDAO();
