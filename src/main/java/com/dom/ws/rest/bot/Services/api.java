@@ -1346,10 +1346,23 @@ public class api {
     @Path(value = "/createEmpresa")
     @Produces({ MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN })
     @Consumes({ MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN })
-    @Operation(summary = "Crear empresa", description = "Crea una nueva empresa.", requestBody = @RequestBody(required = true, content = @Content(schema = @Schema(implementation = EmpresaDTO.class))), responses = {
-            @ApiResponse(responseCode = "200", description = "Empresa creada", content = @Content(schema = @Schema(implementation = Boolean.class))),
+    @Operation(summary = "Crear empresa", 
+        description = "Crea una nueva empresa con información básica y configuración de pasarela de pago.", 
+        requestBody = @RequestBody(
+            required = true, 
+            content = @Content(
+                schema = @Schema(implementation = EmpresaDTO.class),
+                examples = @ExampleObject(
+                    value = "{\"nombre\":\"Empresa ABC\",\"nit\":\"123456789\",\"direccion\":\"Calle 10 #20-30\",\"telefono\":\"+573001234567\",\"email\":\"contacto@empresaabc.com\",\"estado\":1,\"numeroChatbot\":\"591234567890\",\"precio\":49.99,\"usaPasarela\":true,\"tarifaFijaPasarela\":500.00,\"porcentajePasarela\":2.9,\"cobrarPasarela\":true,\"host\":\"empresaabc.com\"}"
+                )
+            )
+        ), 
+        responses = {
+            @ApiResponse(responseCode = "200", description = "Empresa creada exitosamente", content = @Content(schema = @Schema(implementation = Boolean.class))),
+            @ApiResponse(responseCode = "400", description = "Error en la creación de proyectos por defecto"),
             @ApiResponse(responseCode = "500", description = "Error interno del servidor")
-    })
+        }
+    )
     public void createEmpresa(@Suspended final AsyncResponse asyncResponse, final EmpresaDTO request) {
         executorService.submit(() -> {
             EmpresaDAO dao = new EmpresaDAO();
@@ -1401,10 +1414,22 @@ public class api {
     @Path(value = "/updateEmpresa")
     @Produces({ MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN })
     @Consumes({ MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN })
-    @Operation(summary = "Actualizar empresa", description = "Actualiza una empresa existente.", requestBody = @RequestBody(required = true, content = @Content(schema = @Schema(implementation = EmpresaDTO.class))), responses = {
-            @ApiResponse(responseCode = "200", description = "Empresa actualizada", content = @Content(schema = @Schema(implementation = Boolean.class))),
+    @Operation(summary = "Actualizar empresa", 
+        description = "Actualiza los datos de una empresa existente, incluyendo configuración de pasarela de pago y precio base.",
+        requestBody = @RequestBody(
+            required = true,
+            content = @Content(
+                schema = @Schema(implementation = EmpresaDTO.class),
+                examples = @ExampleObject(
+                    value = "{\"id\":1,\"nombre\":\"Empresa ABC Actualizada\",\"nit\":\"123456789\",\"direccion\":\"Calle 20 #30-40\",\"telefono\":\"+573001234567\",\"email\":\"nuevocontacto@empresaabc.com\",\"estado\":1,\"numeroChatbot\":\"591234567890\",\"precio\":59.99,\"usaPasarela\":true,\"tarifaFijaPasarela\":500.00,\"porcentajePasarela\":2.9,\"cobrarPasarela\":false,\"host\":\"empresaabc.com\"}"
+                )
+            )
+        ),
+        responses = {
+            @ApiResponse(responseCode = "200", description = "Empresa actualizada exitosamente", content = @Content(schema = @Schema(implementation = Boolean.class))),
             @ApiResponse(responseCode = "500", description = "Error interno del servidor")
-    })
+        }
+    )
     public void updateEmpresa(@Suspended final AsyncResponse asyncResponse, final EmpresaDTO request) {
         executorService.submit(() -> {
             EmpresaDAO dao = new EmpresaDAO();
