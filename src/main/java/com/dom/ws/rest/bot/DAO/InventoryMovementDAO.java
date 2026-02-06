@@ -16,15 +16,14 @@ public class InventoryMovementDAO {
        /**
      * Helper method to get fresh connection for each operation
      */
-    private conexionBD getConnection() {
+
+    static final Logger log = Logger.getLogger(InventoryMovementDAO.class.getName());
+     private conexionBD getConnection() {
         return conexionBD.saberEstado();
     }
-
-    conexionBD con = getConnection();
-    static final Logger log = Logger.getLogger(InventoryMovementDAO.class.getName());
-
     public boolean create(InventoryMovementDTO dto) {
         log.info("*** Start InventoryMovementDAO create ***");
+        conexionBD con = getConnection();
         PreparedStatement ps = null;
         boolean ok = false;
         try {

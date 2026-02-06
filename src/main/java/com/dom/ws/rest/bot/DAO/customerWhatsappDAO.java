@@ -43,16 +43,15 @@ public class customerWhatsappDAO implements interfaces<customerWhatsappDTO> {
        /**
      * Helper method to get fresh connection for each operation
      */
-    private conexionBD getConnection() {
+   
+    static final Logger log = Logger.getLogger(customerWhatsappDAO.class.getName());
+     private conexionBD getConnection() {
         return conexionBD.saberEstado();
     }
-
-    conexionBD con = getConnection();
-    static final Logger log = Logger.getLogger(customerWhatsappDAO.class.getName());
-
     @Override
     public boolean create(customerWhatsappDTO dto) {
         log.info("*** Start customerWhatsappDAO create ***");
+        conexionBD con = getConnection();
         PreparedStatement ps;
         boolean valida = false;
         try {
@@ -85,6 +84,7 @@ public class customerWhatsappDAO implements interfaces<customerWhatsappDTO> {
     @Override
     public boolean update(customerWhatsappDTO dto) {
         log.info("*** Start customerWhatsappDAO update ***");
+        conexionBD con = getConnection();
         PreparedStatement ps;
         boolean valida = false;
         try {
@@ -119,6 +119,7 @@ public class customerWhatsappDAO implements interfaces<customerWhatsappDTO> {
     @Override
     public boolean delete(customerWhatsappDTO dto) {
         log.info("*** start customerWhatsappDAO delete ***");
+        conexionBD con = getConnection();
         PreparedStatement ps;
         boolean valida = false;
         try {
@@ -143,6 +144,7 @@ public class customerWhatsappDAO implements interfaces<customerWhatsappDTO> {
     @Override
     public customerWhatsappDTO readOne(customerWhatsappDTO dto) {
         log.info("*** Start customerWhatsappDAO update ***");
+        conexionBD con = getConnection();
         PreparedStatement ps;
         ResultSet res;
         msgError error = new msgError();

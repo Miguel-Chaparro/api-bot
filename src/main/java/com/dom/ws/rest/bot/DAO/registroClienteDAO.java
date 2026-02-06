@@ -38,16 +38,14 @@ public class registroClienteDAO implements interfaces<customerDTO> {
        /**
      * Helper method to get fresh connection for each operation
      */
+    static final Logger log = Logger.getLogger(registroClienteDAO.class.getName());
     private conexionBD getConnection() {
         return conexionBD.saberEstado();
-    }
-
-    conexionBD con = getConnection();
-    static final Logger log = Logger.getLogger(registroClienteDAO.class.getName());
-
+    } 
     @Override
     public boolean create(customerDTO dto){
         log.info("***Start registroClienteDAO create***");
+        conexionBD con = getConnection();
         PreparedStatement ps;
         boolean valida= false;
         try {
@@ -92,6 +90,7 @@ public class registroClienteDAO implements interfaces<customerDTO> {
     @Override
     public boolean update(customerDTO dto) {
         log.info("*** Start registroClienteDAO uptade ***");
+        conexionBD con = getConnection();
         PreparedStatement ps;
         boolean valida= false;
         try{
@@ -120,6 +119,7 @@ public class registroClienteDAO implements interfaces<customerDTO> {
     @Override
     public boolean delete(customerDTO dto) {
         log.info("*** Start registroClienteDAO delete ***");
+        conexionBD con = getConnection();
         PreparedStatement ps;
         boolean valida = false;
         try {
@@ -163,6 +163,7 @@ public class registroClienteDAO implements interfaces<customerDTO> {
     @Override
     public customerDTO readOne(customerDTO dto) {
         log.info("*** Start registroclienteDAO readOne ***");
+        conexionBD con = getConnection();
         PreparedStatement ps;
         ResultSet res;
         //msgError Error = new msgError();
@@ -214,6 +215,7 @@ public class registroClienteDAO implements interfaces<customerDTO> {
     public List<customerDTO> readAll() {
             log.info("*** Start customerDAO delete");
         
+        conexionBD con = getConnection();
         PreparedStatement ps;
         ResultSet res;
         

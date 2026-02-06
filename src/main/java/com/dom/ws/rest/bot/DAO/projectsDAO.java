@@ -34,16 +34,16 @@ public class projectsDAO implements interfaces<projectDTO> {
        /**
      * Helper method to get fresh connection for each operation
      */
-    private conexionBD getConnection() {
+
+       
+    static final Logger log = Logger.getLogger(projectsDAO.class.getName());
+     private conexionBD getConnection() {
         return conexionBD.saberEstado();
     }
-
-    conexionBD con = getConnection();
-    static final Logger log = Logger.getLogger(projectsDAO.class.getName());
-
     @Override
     public boolean create(projectDTO dto) {
         log.info("*** Start projectsDAO create ***");
+        conexionBD con = getConnection();
         boolean status = false;
         PreparedStatement ps;
         try {
@@ -74,6 +74,7 @@ public class projectsDAO implements interfaces<projectDTO> {
     @Override
     public boolean update(projectDTO dto) {
         log.info("*** Start projectsDAO Update ***");
+        conexionBD con = getConnection();
         boolean status = false;
         PreparedStatement ps;
         try {
@@ -110,6 +111,7 @@ public class projectsDAO implements interfaces<projectDTO> {
     @Override
     public projectDTO readOne(projectDTO dto) {
         log.info("*** Start projectsDAO readOne ***");
+        conexionBD con = getConnection();
         projectDTO resp = new projectDTO();
         PreparedStatement ps;
         ResultSet res;
@@ -162,6 +164,7 @@ public class projectsDAO implements interfaces<projectDTO> {
     @Override
     public List<projectDTO> readMany(projectDTO dto) {
         log.info("***start projectDAO readMany***");
+        conexionBD con = getConnection();
         PreparedStatement ps;
         ResultSet res;
         ArrayList<projectDTO> resp = new ArrayList<>();
@@ -210,6 +213,7 @@ public class projectsDAO implements interfaces<projectDTO> {
     @Override
     public List<projectDTO> readAll() {
         log.info("***start projectsDAO readAll***");
+        conexionBD con = getConnection();
         PreparedStatement ps;
         ResultSet res;
         ArrayList<projectDTO> resp = new ArrayList<>();

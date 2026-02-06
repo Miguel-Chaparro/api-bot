@@ -14,15 +14,15 @@ public class ContratoServicioDetalleDAO {
        /**
      * Helper method to get fresh connection for each operation
      */
-    private conexionBD getConnection() {
+   
+    static final Logger log = Logger.getLogger(ContratoServicioDetalleDAO.class.getName());
+     private conexionBD getConnection() {
         return conexionBD.saberEstado();
     }
 
-    conexionBD con = getConnection();
-    static final Logger log = Logger.getLogger(ContratoServicioDetalleDAO.class.getName());
-
     public boolean create(ContratoServicioDetalleDTO dto) {
         log.info("*** Start ContratoServicioDetalleDAO create ***");
+        conexionBD con = getConnection();
         PreparedStatement ps = null;
         boolean ok = false;
         try {

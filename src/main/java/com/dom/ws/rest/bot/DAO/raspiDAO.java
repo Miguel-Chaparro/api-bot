@@ -41,16 +41,15 @@ public class raspiDAO implements interfaces<raspiDTO> {
        /**
      * Helper method to get fresh connection for each operation
      */
-    private conexionBD getConnection() {
+   
+    static final Logger log = Logger.getLogger(raspiDAO.class.getName());
+     private conexionBD getConnection() {
         return conexionBD.saberEstado();
     }
-
-    conexionBD con = getConnection();
-    static final Logger log = Logger.getLogger(raspiDAO.class.getName());
-
     @Override
     public boolean create(raspiDTO dto) {
         log.info("*** Start raspiDAO create ***");
+        conexionBD con = getConnection();
         PreparedStatement ps;
         boolean valida = false;
         try {
@@ -83,6 +82,7 @@ public class raspiDAO implements interfaces<raspiDTO> {
     @Override
     public boolean update(raspiDTO dto) {
         log.info("*** Start raspiDAO update ***");
+        conexionBD con = getConnection();
         PreparedStatement ps;
         boolean valida = false;
         try {
@@ -126,6 +126,7 @@ public class raspiDAO implements interfaces<raspiDTO> {
     @Override
     public List<raspiDTO> readMany(raspiDTO dto) {
         log.info("*** end raspiDAO readMany ***");
+        conexionBD con = getConnection();
         PreparedStatement ps;
         ResultSet res;
         ArrayList<raspiDTO> raspiList = new ArrayList<>();

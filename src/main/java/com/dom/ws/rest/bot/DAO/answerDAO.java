@@ -35,17 +35,18 @@ public class answerDAO implements interfaces<answerDTO> {
        /**
      * Helper method to get fresh connection for each operation
      */
+   
+
+    static final Logger log = Logger.getLogger(answerDAO.class.getName());
+    
     private conexionBD getConnection() {
         return conexionBD.saberEstado();
     }
-
-    conexionBD con = getConnection();
-    static final Logger log = Logger.getLogger(answerDAO.class.getName());
-
     @Override
     public boolean create(answerDTO dto) {
         log.info("*** Start answerDAO create ***");
         PreparedStatement ps;
+        conexionBD con = getConnection();
         boolean valida = false;
         try {
             ps = con.getCnn().prepareStatement(SQL_INSERT);
@@ -77,8 +78,10 @@ public class answerDAO implements interfaces<answerDTO> {
     public boolean update(answerDTO dto) {
         log.info("*** Start answerDAO update ***");
         PreparedStatement ps;
+        conexionBD con = getConnection();
         boolean valida = false;
         try {
+            
             ps = con.getCnn().prepareStatement(SQL_UPDATE);
             ps.setString(1, dto.getAnswerDesc());
             ps.setString(2, dto.getCommand());
@@ -107,6 +110,7 @@ public class answerDAO implements interfaces<answerDTO> {
     @Override
     public boolean delete(answerDTO dto) {
         log.info("*** Start answerDAO delete ***");
+        conexionBD con = getConnection();
         PreparedStatement ps;
         boolean valida = false;
         try {
@@ -140,6 +144,7 @@ public class answerDAO implements interfaces<answerDTO> {
     @Override
     public List<answerDTO> readMany(answerDTO dto) {
         log.info("*** Start answerDAO readMany ***");
+        conexionBD con = getConnection();
         PreparedStatement ps;
         ResultSet res;
         ArrayList<answerDTO> answerList = new ArrayList<>();
@@ -198,7 +203,7 @@ public class answerDAO implements interfaces<answerDTO> {
     @Override
     public List<answerDTO> readAll() {
         log.info("*** Start answerDAO readAll ***");
-
+        conexionBD con = getConnection();
         PreparedStatement ps;
         ResultSet res;
         ArrayList<answerDTO> answerList = new ArrayList<>();

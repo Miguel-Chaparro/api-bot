@@ -36,16 +36,16 @@ public class questionsDAO implements interfaces<questionsDTO> {
        /**
      * Helper method to get fresh connection for each operation
      */
-    private conexionBD getConnection() {
+    static final Logger log = Logger.getLogger(questionsDAO.class.getName());
+
+     private conexionBD getConnection() {
         return conexionBD.saberEstado();
     }
-
-    conexionBD con = getConnection();
-    static final Logger log = Logger.getLogger(questionsDAO.class.getName());
 
     @Override
     public boolean create(questionsDTO dto) {
         log.info("*** Start questionsDAO create ***");
+        conexionBD con = getConnection();
         PreparedStatement ps;
         boolean valida = false;
         try {
@@ -77,6 +77,7 @@ public class questionsDAO implements interfaces<questionsDTO> {
     @Override
     public boolean update(questionsDTO dto) {
         log.info("*** Start questionsDAO update ***");
+        conexionBD con = getConnection();
         PreparedStatement ps;
         boolean valida = false;
         try {
@@ -113,6 +114,7 @@ public class questionsDAO implements interfaces<questionsDTO> {
     @Override
     public questionsDTO readOne(questionsDTO dto) {
         log.info("*** Start questionsDAO readOne ***");
+        conexionBD con = getConnection();
         PreparedStatement ps;
         ResultSet res;
         msgError errorRead = new msgError();
@@ -152,6 +154,7 @@ public class questionsDAO implements interfaces<questionsDTO> {
     @Override
     public List<questionsDTO> readMany(questionsDTO dto) {
         log.info("***start questionsDAO readMany***");
+        conexionBD con = getConnection();
         PreparedStatement ps;
         ResultSet res;
         List<questionsDTO> resp = new ArrayList<>();

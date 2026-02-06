@@ -19,11 +19,11 @@ public class ContratoDAO {
         return conexionBD.saberEstado();
     }
 
-    conexionBD con = getConnection();
     static final Logger log = Logger.getLogger(ContratoDAO.class.getName());
 
     public boolean create(ContratoDTO dto) {
         log.info("*** Start ContratoDAO create ***");
+        conexionBD con = getConnection();
         PreparedStatement ps = null;
         boolean ok = false;
         try {
@@ -81,6 +81,7 @@ public class ContratoDAO {
 
     public int getNextSeqForEmpresa(Integer empresaId) {
         log.info("*** Start ContratoDAO getNextSeqForEmpresa ***");
+        conexionBD con = getConnection();
         PreparedStatement ps = null;
         ResultSet rs = null;
         int next = 1;

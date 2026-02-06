@@ -38,12 +38,12 @@ public class chatDAO implements interfaces<chatDTO> {
         return conexionBD.saberEstado();
     }
 
-    conexionBD con = getConnection();
     static final Logger log = Logger.getLogger(chatDAO.class.getName());
 
     @Override
     public boolean create(chatDTO dto) {
         log.info("*** Start chatDAO create ***");
+        conexionBD con = getConnection();
         PreparedStatement ps;
         boolean valida = false;
         try {
@@ -68,6 +68,7 @@ public class chatDAO implements interfaces<chatDTO> {
     @Override
     public boolean update(chatDTO dto) {
         log.info("*** Start chatDAO update ***");
+        conexionBD con = getConnection();
         PreparedStatement ps;
         boolean valida = false;
         try {
@@ -96,6 +97,7 @@ public class chatDAO implements interfaces<chatDTO> {
     @Override
     public boolean delete(chatDTO dto) {
         log.info("*** Start chatDAO update ***");
+        conexionBD con = getConnection();
         PreparedStatement ps;
         boolean valida = false;
         try {
@@ -128,6 +130,7 @@ public class chatDAO implements interfaces<chatDTO> {
     @Override
     public List<chatDTO> readMany(chatDTO dto) {
         log.info("***start chatDAO readMany***");
+        conexionBD con = getConnection();
         PreparedStatement ps;
         ResultSet res;
         ArrayList<chatDTO> answerList = new ArrayList<>();
@@ -164,6 +167,7 @@ public class chatDAO implements interfaces<chatDTO> {
     @Override
     public List<chatDTO> readAll() {
         log.info("*** end answerDAO readMany ***");
+        conexionBD con = getConnection();
         PreparedStatement ps;
         ResultSet res;
         @SuppressWarnings("MismatchedQueryAndUpdateOfCollection")

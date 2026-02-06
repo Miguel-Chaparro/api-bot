@@ -24,11 +24,14 @@ public class recordSurveyDAO implements interfaces<recordSurveyDTO> {
     private static final String SQL_READ = "SELECT idRecordSurvey ,idWhatsapp ,idFrom ,idProject ,idQuestion ,openAnswer ,answer ,multiAnswer, fecha FROM dommapi.recordsurvey WHERE  idrecordsurvey = ?  ";
     
     msgError error = new msgError();
-    private final conexionBD con = conexionBD.saberEstado();
     static final Logger log = Logger.getLogger(answerDAO.class.getName());
+     private conexionBD getConnection() {
+        return conexionBD.saberEstado();
+    }
     @Override
     public boolean create(recordSurveyDTO dto) {
        log.info("*** Start recordSurveyDAO create ***");
+        conexionBD con = getConnection();
         PreparedStatement ps;
         boolean valida = false;
         try {
@@ -58,6 +61,7 @@ public class recordSurveyDAO implements interfaces<recordSurveyDTO> {
     @Override
     public boolean update(recordSurveyDTO dto) {
         log.info("*** Start recordSurveyDAO update ***");
+        conexionBD con = getConnection();
         PreparedStatement ps;
         boolean valida = false;
         try {
@@ -90,6 +94,7 @@ public class recordSurveyDAO implements interfaces<recordSurveyDTO> {
     @Override
     public boolean delete(recordSurveyDTO dto) {
         log.info("*** Start recordSurveyDAO delete ***");
+        conexionBD con = getConnection();
         PreparedStatement ps;
         boolean valida = false;
         try {
@@ -113,6 +118,7 @@ public class recordSurveyDAO implements interfaces<recordSurveyDTO> {
     @Override
     public recordSurveyDTO readOne(recordSurveyDTO dto) {
         log.info("*** Start recordSurveyDAO readOne ***");
+        conexionBD con = getConnection();
         PreparedStatement ps;
         ResultSet rs;
         recordSurveyDTO dtoRead = null;
@@ -145,6 +151,7 @@ public class recordSurveyDAO implements interfaces<recordSurveyDTO> {
     public List<recordSurveyDTO> readMany(recordSurveyDTO dto) {
 
         log.info("*** Start recordSurveyDAO readMany ***");
+        conexionBD con = getConnection();
         PreparedStatement ps;
         ResultSet rs;
         List<recordSurveyDTO> list = new ArrayList<>();
@@ -183,6 +190,7 @@ public class recordSurveyDAO implements interfaces<recordSurveyDTO> {
     public List<recordSurveyDTO> readAll() {
         
         log.info("*** Start recordSurveyDAO readAll ***");
+        conexionBD con = getConnection();
         PreparedStatement ps;
         ResultSet rs;
         List<recordSurveyDTO> list = new ArrayList<>();

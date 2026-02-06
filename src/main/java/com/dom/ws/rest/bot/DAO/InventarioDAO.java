@@ -15,13 +15,11 @@ public class InventarioDAO {
        /**
      * Helper method to get fresh connection for each operation
      */
-    private conexionBD getConnection() {
+   
+    static final Logger log = Logger.getLogger(InventarioDAO.class.getName());
+     private conexionBD getConnection() {
         return conexionBD.saberEstado();
     }
-
-    conexionBD con = getConnection();
-    static final Logger log = Logger.getLogger(InventarioDAO.class.getName());
-
     /**
      * Actualiza el estado de un item del inventario
      * 
@@ -31,6 +29,7 @@ public class InventarioDAO {
      */
     public boolean updateEstado(Integer inventarioId, String nuevoEstado) {
         log.info("*** Start InventarioDAO updateEstado ***");
+        conexionBD con = getConnection();
         PreparedStatement ps = null;
         boolean ok = false;
         try {
@@ -55,6 +54,7 @@ public class InventarioDAO {
      */
     public InventarioDTO readOne(Integer inventarioId) {
         log.info("*** Start InventarioDAO readOne ***");
+        conexionBD con = getConnection();
         PreparedStatement ps = null;
         ResultSet rs = null;
         InventarioDTO dto = null;

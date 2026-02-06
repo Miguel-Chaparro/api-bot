@@ -15,15 +15,14 @@ public class InventarioStockDAO {
        /**
      * Helper method to get fresh connection for each operation
      */
-    private conexionBD getConnection() {
+    
+    static final Logger log = Logger.getLogger(InventarioStockDAO.class.getName());
+     private conexionBD getConnection() {
         return conexionBD.saberEstado();
     }
-
-    conexionBD con = getConnection();
-    static final Logger log = Logger.getLogger(InventarioStockDAO.class.getName());
-
     public boolean decrementarCantidad(Integer productoId, Integer empresaId, java.math.BigDecimal cantidad) {
         log.info("*** Start InventarioStockDAO decrementarCantidad ***");
+        conexionBD con = getConnection();
         PreparedStatement ps = null;
         boolean ok = false;
         try {
@@ -45,6 +44,7 @@ public class InventarioStockDAO {
 
     public InventarioStockDTO readOne(Integer productoId, Integer empresaId) {
         log.info("*** Start InventarioStockDAO readOne ***");
+        conexionBD con = getConnection();
         PreparedStatement ps = null;
         ResultSet rs = null;
         InventarioStockDTO dto = null;

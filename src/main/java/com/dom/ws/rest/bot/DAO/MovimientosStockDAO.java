@@ -14,15 +14,14 @@ public class MovimientosStockDAO {
        /**
      * Helper method to get fresh connection for each operation
      */
-    private conexionBD getConnection() {
+    
+    static final Logger log = Logger.getLogger(MovimientosStockDAO.class.getName());
+     private conexionBD getConnection() {
         return conexionBD.saberEstado();
     }
-
-    conexionBD con = getConnection();
-    static final Logger log = Logger.getLogger(MovimientosStockDAO.class.getName());
-
     public boolean create(MovimientosStockDTO dto) {
         log.info("*** Start MovimientosStockDAO create ***");
+        conexionBD con = getConnection();
         PreparedStatement ps = null;
         boolean ok = false;
         try {
