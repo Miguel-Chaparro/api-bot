@@ -11,22 +11,33 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * Wrapper for getting database connections from HikariCP Connection Pool
- * This class maintains backward compatibility while using connection pooling
+ * Helper class for database operations using HikariCP Connection Pool
+ * Each operation gets a fresh connection from the pool and closes it after use
  * 
  * @author MIGUEL
  */
 public class conexionBD {
 
     private Connection cnn;
-    private static conexionBD instance;
     private static final Logger logg = Logger.getLogger(conexionBD.class.getName());
+    private boolean isFromPool = false;
 
+    /**
+     * Constructor - gets a fresh connection from the pool
+     */
     private conexionBD() {
         logg.log(Level.INFO, "*** Inicio conexionBD ***");
+        obtenerConexion();
+        logg.log(Level.INFO, "*** Fin conexionBD ***");
+    }
+
+    /**
+     * Internal method to get connection from pool
+     */
+    private void obtenerConexion() {
         try {
-            // Get connection from HikariCP pool instead of creating a new one
             cnn = ConnectionPool.getInstance().getConnection();
+            isFromPool = true;
             if (cnn != null) {
                 logg.info("Conexion a base de datos obtenida del pool ... Ok");
                 logg.info("Pool Status: " + ConnectionPool.getInstance().getPoolStats());
@@ -34,8 +45,8 @@ public class conexionBD {
         } catch (SQLException ex) {
             logg.log(Level.SEVERE, "Error getting connection from pool: ", ex);
             cnn = null;
+            isFromPool = false;
         }
-        logg.log(Level.INFO, "*** Fin conexionBD ***");
     }
 
     /**
@@ -46,32 +57,33 @@ public class conexionBD {
     }
 
     /**
-     * Get or create singleton instance of conexionBD
+     * Create a NEW connection instance for each operation
+     * This ensures fresh connections and prevents connection reuse issues
      */
     public synchronized static conexionBD saberEstado() {
         logg.info("*** Inicio saberEstado ***");
-        if (instance == null) {
-            instance = new conexionBD();
-        }
+        conexionBD conexion = new conexionBD();
         logg.info("*** Fin saberEstado ***");
-        return instance;
+        return conexion;
     }
 
     /**
-     * Close the connection (returns it to the pool instead of closing it)
-     * HikariCP will manage the actual connection lifecycle
+     * Close the connection and return it to the pool
+     * Should be called after each database operation completes
      */
     public void cerrarConexion() {
         logg.info("*** Inicio cerrarConexion ***");
         try {
             if (cnn != null && !cnn.isClosed()) {
-                cnn.close(); // Returns connection to pool, doesn't actually close it
+                cnn.close(); // Returns connection to pool (HikariCP intercepts this)
                 logg.info("Conexion retornada al pool");
             }
         } catch (SQLException ex) {
             logg.log(Level.WARNING, "Error closing connection: ", ex);
+        } finally {
+            cnn = null;
+            isFromPool = false;
         }
-        instance = null;
         logg.info("*** Fin cerrarConexion ***");
     }
 }
