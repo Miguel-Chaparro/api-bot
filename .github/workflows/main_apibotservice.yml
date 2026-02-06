@@ -8,6 +8,7 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+
     steps:
       - uses: actions/checkout@v3
 
@@ -21,7 +22,8 @@ jobs:
       - name: Build with Maven
         run: mvn -B clean package
 
-      - uses: actions/upload-artifact@v4
+      - name: Upload WAR artifact
+        uses: actions/upload-artifact@v4
         with:
           name: war
           path: target/*.war
@@ -31,7 +33,8 @@ jobs:
     needs: build
 
     steps:
-      - uses: actions/download-artifact@v4
+      - name: Download WAR artifact
+        uses: actions/download-artifact@v4
         with:
           name: war
 
@@ -42,10 +45,13 @@ jobs:
           chmod 600 ~/.ssh/id_rsa
           ssh-keyscan -H ${{ secrets.VM_HOST }} >> ~/.ssh/known_hosts
 
-      - name: Deploy WAR to Tomcat
+      - name: Upload WAR to /tmp
         run: |
-          scp *.war ${{ secrets.VM_USER }}@${{ secrets.VM_HOST }}:${{ secrets.TOMCAT_WEBAPPS }}/ROOT.war
+          scp *.war ${{ secrets.VM_USER }}@${{ secrets.VM_HOST }}:/tmp/app.war
 
-      - name: Restart Tomcat
+      - name: Deploy WAR with sudo and restart Tomcat
         run: |
-          ssh ${{ secrets.VM_USER }}@${{ secrets.VM_HOST }} "sudo systemctl restart tomcat"
+          ssh ${{ secrets.VM_USER }}@${{ secrets.VM_HOST }} "
+            sudo mv /tmp/app.war /opt/tomcat/webapps/ROOT.war &&
+            sudo systemctl restart tomcat
+          "
