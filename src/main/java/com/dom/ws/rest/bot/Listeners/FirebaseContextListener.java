@@ -1,6 +1,7 @@
 package com.dom.ws.rest.bot.Listeners;
 
 import com.dom.ws.rest.bot.Conexion.FirebaseInitializer;
+import com.google.firebase.FirebaseApp;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 import javax.servlet.annotation.WebListener;
@@ -25,6 +26,17 @@ public class FirebaseContextListener implements ServletContextListener {
     
     @Override
     public void contextDestroyed(ServletContextEvent sce) {
-        log.info("Contexto destruido");
+        log.info("Destruyendo contexto de Firebase...");
+        try {
+            // Cerrar todas las instancias de FirebaseApp
+            for (FirebaseApp app : FirebaseApp.getApps()) {
+                app.delete();
+                log.info("FirebaseApp deletado: " + app.getName());
+            }
+            log.info("Recursos de Firebase limpiados correctamente");
+        } catch (Exception e) {
+            log.severe("Error al limpiar recursos de Firebase: " + e.getMessage());
+            e.printStackTrace();
+        }
     }
 }
