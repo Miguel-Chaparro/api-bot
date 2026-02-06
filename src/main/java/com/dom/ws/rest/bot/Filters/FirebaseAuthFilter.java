@@ -23,6 +23,8 @@ public class FirebaseAuthFilter implements ContainerRequestFilter {
     public void filter(ContainerRequestContext requestContext) throws IOException {
         // Primero verificar si hay una API Key
         String apiKey = requestContext.getHeaderString(API_KEY_HEADER);
+        log.info("obtener variables de entorno api = " + System.getenv("API_KEY"));
+        log.info("Verificando API Key: " + apiKey + " vs " + ENV_API_KEY);
         if (apiKey != null && ENV_API_KEY != null && ENV_API_KEY.equals(apiKey)) {
             log.info("Autenticación exitosa usando API Key");
             return;
