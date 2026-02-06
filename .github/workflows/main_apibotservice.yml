@@ -18,6 +18,11 @@ jobs:
           java-version: '11'
           distribution: 'temurin'
           cache: 'maven'
+      
+      - name: Create Firebase Credentials
+        run: |
+            mkdir -p src/main/resources
+            echo "${{ secrets.FIREBASE_CREDENTIALS_BASE64 }}" | base64 -d > src/main/resources/firebase-credentials.json
 
       - name: Build with Maven
         run: mvn -B clean package
