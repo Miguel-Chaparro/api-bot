@@ -20,14 +20,14 @@ public class CORSFilter implements ContainerResponseFilter {
 
     @Override
     public void filter(ContainerRequestContext crc, ContainerResponseContext crc1) throws IOException {
-        String origin = crc.getHeaderString("Origin");
+        //String origin = crc.getHeaderString("Origin");
         // Permitir solo dashboard.dommatos.com y localhost para pruebas
-        if ("https://dashboard.dommatos.com".equals(origin) || "http://localhost:3040".equals(origin)) {
-            crc1.getHeaders().add("Access-Control-Allow-Origin", origin);
-        }
+        // if ("https://dashboard.dommatos.com".equals(origin) || "http://localhost:3040".equals(origin) || "http://localhost:3039".equals(origin) || "http://customer.dommatos.com".equals(origin)) {
+        //     crc1.getHeaders().add("Access-Control-Allow-Origin", origin);
+        // }
         // Permitir credenciales si usas cookies/autenticación
-        crc1.getHeaders().add("Access-Control-Allow-Credentials", "true");
-        crc1.getHeaders().add("Access-Control-Allow-Headers", "origin, content-type, accept, authorization, x-api-key");
-        crc1.getHeaders().add("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS, HEAD");
+        // crc1.getHeaders().add("Access-Control-Allow-Credentials", "true");
+        // crc1.getHeaders().add("Access-Control-Allow-Headers", "origin, content-type, accept, authorization, x-api-key");
+        // crc1.getHeaders().add("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS, HEAD");
     }
 }
