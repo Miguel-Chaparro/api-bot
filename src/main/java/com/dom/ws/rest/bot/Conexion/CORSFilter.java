@@ -34,21 +34,27 @@ public class CORSFilter implements ContainerResponseFilter {
         };
         
         boolean isOriginAllowed = false;
-        if (origin != null) {
+        if (origin != null && !origin.isEmpty()) {
             for (String allowedOrigin : allowedOrigins) {
-                if (allowedOrigin.equals(origin)) {
+                if (allowedOrigin.equalsIgnoreCase(origin)) {
                     isOriginAllowed = true;
                     break;
                 }
             }
         }
         
+        // Siempre agregar headers CORS básicos
         if (isOriginAllowed) {
             crc1.getHeaders().add("Access-Control-Allow-Origin", origin);
-            crc1.getHeaders().add("Access-Control-Allow-Credentials", "true");
-            crc1.getHeaders().add("Access-Control-Allow-Headers", "Origin, Content-Type, Accept, Authorization, X-Api-Key, X-Requested-With");
-            crc1.getHeaders().add("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS, HEAD, PATCH");
-            crc1.getHeaders().add("Access-Control-Max-Age", "3600");
+        } else if (origin != null && !origin.isEmpty()) {
+            // Log para debugging
+            System.out.println("CORS: Origin no permitido: " + origin);
         }
+        
+        crc1.getHeaders().add("Access-Control-Allow-Credentials", "true");
+        crc1.getHeaders().add("Access-Control-Allow-Headers", "Origin, Content-Type, Accept, Authorization, X-Api-Key, X-Requested-With");
+        crc1.getHeaders().add("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS, HEAD, PATCH");
+        crc1.getHeaders().add("Access-Control-Max-Age", "3600");
+        crc1.getHeaders().add("Vary", "Origin");
     }
 }
