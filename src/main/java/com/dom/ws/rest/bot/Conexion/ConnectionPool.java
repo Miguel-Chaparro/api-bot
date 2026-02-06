@@ -52,6 +52,7 @@ public class ConnectionPool {
             config.setJdbcUrl(servidor);
             config.setUsername(user);
             config.setPassword(password);
+            config.setDriverClassName("com.mysql.cj.jdbc.Driver");  // Explicitly set MySQL driver
             
             // Pool configuration
             config.setMaximumPoolSize(20);              // Max 20 connections
