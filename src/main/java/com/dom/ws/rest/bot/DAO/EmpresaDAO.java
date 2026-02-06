@@ -18,13 +18,20 @@ public class EmpresaDAO implements interfaces<EmpresaDTO> {
     private static final String SQL_GET_ALL = "SELECT * FROM dommapi.empresa";
     private static final String SQL_GET_ONE = "SELECT * FROM dommapi.empresa WHERE id=?";
 
-    private final conexionBD con = conexionBD.saberEstado();
     static final Logger log = Logger.getLogger(EmpresaDAO.class.getName());
+
+    /**
+     * Helper method to get fresh connection for each operation
+     */
+    private conexionBD getConnection() {
+        return conexionBD.saberEstado();
+    }
 
     @Override
     public boolean create(EmpresaDTO dto) {
         log.info("*** Start EmpresaDAO create ***");
         PreparedStatement ps;
+        conexionBD con = getConnection();
         boolean success = false;
         try {
             ps = con.getCnn().prepareStatement(SQL_INSERT);
@@ -56,6 +63,7 @@ public class EmpresaDAO implements interfaces<EmpresaDTO> {
     public boolean update(EmpresaDTO dto) {
         log.info("*** Start EmpresaDAO update ***");
         PreparedStatement ps;
+        conexionBD con = getConnection();
         boolean success = false;
         try {
             ps = con.getCnn().prepareStatement(SQL_UPDATE);
@@ -88,6 +96,7 @@ public class EmpresaDAO implements interfaces<EmpresaDTO> {
     public boolean delete(EmpresaDTO dto) {
         log.info("*** Start EmpresaDAO delete ***");
         PreparedStatement ps;
+        conexionBD con = getConnection();
         boolean success = false;
         try {
             ps = con.getCnn().prepareStatement(SQL_DELETE);
@@ -108,6 +117,7 @@ public class EmpresaDAO implements interfaces<EmpresaDTO> {
         log.info("*** Start EmpresaDAO readOne ***");
         EmpresaDTO empresa = null;
         PreparedStatement ps;
+        conexionBD con = getConnection();
         ResultSet rs;
         try {
             ps = con.getCnn().prepareStatement(SQL_GET_ONE);
@@ -149,6 +159,7 @@ public class EmpresaDAO implements interfaces<EmpresaDTO> {
     public List<EmpresaDTO> readAll() {
         log.info("*** Start EmpresaDAO readAll ***");
         List<EmpresaDTO> empresas = new ArrayList<>();
+        conexionBD con = getConnection();
         PreparedStatement ps;
         ResultSet rs;
         try {

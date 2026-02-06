@@ -17,11 +17,18 @@ public class UserDAO implements interfaces<UserDTO> {
     private static final String SQL_EXISTS = "SELECT COUNT(*) FROM dommapi.users WHERE id = ?";
     private static final String SQL_GET_ALL = "SELECT * FROM dommapi.users ORDER BY creation_time DESC";
     
-    private final conexionBD con = conexionBD.saberEstado();
     static final Logger log = Logger.getLogger(UserDAO.class.getName());
+
+    /**
+     * Helper method to get fresh connection for each operation
+     */
+    private conexionBD getConnection() {
+        return conexionBD.saberEstado();
+    }
 
     public boolean exists(String id) {
         log.info("*** Start UserDAO exists ***");
+        conexionBD con = getConnection();
         PreparedStatement ps;
         ResultSet res;
         boolean exists = false;
@@ -47,6 +54,7 @@ public class UserDAO implements interfaces<UserDTO> {
     @Override
     public boolean create(UserDTO dto) {
         log.info("*** Start UserDAO create ***");
+        conexionBD con = getConnection();
         PreparedStatement ps;
         boolean success = false;
         
@@ -91,6 +99,7 @@ public class UserDAO implements interfaces<UserDTO> {
     @Override
     public boolean update(UserDTO dto) {
         log.info("*** Start UserDAO update ***");
+        conexionBD con = getConnection();
         PreparedStatement ps;
         boolean success = false;
         
@@ -151,6 +160,7 @@ public class UserDAO implements interfaces<UserDTO> {
     public List<UserDTO> readAll() {
         log.info("*** Start UserDAO readAll ***");
         List<UserDTO> users = new ArrayList<>();
+        conexionBD con = getConnection();
         PreparedStatement ps = null;
         ResultSet rs = null;
 
@@ -197,6 +207,7 @@ public class UserDAO implements interfaces<UserDTO> {
     public UserDTO readOneById(String id) {
         log.info("*** Start UserDAO readOneById ***");
         UserDTO user = null;
+        conexionBD con = getConnection();
         PreparedStatement ps = null;
         ResultSet rs = null;
         try {
@@ -242,6 +253,7 @@ public class UserDAO implements interfaces<UserDTO> {
     public List<UserDTO> readAllByEmpresaId(Integer empresaId) {
         log.info("*** Start UserDAO readAllByEmpresaId ***");
         List<UserDTO> users = new ArrayList<>();
+        conexionBD con = getConnection();
         PreparedStatement ps = null;
         ResultSet rs = null;
         try {
