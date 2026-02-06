@@ -67,13 +67,13 @@ public class conexionBD {
         // AZURE SQL = jdbc:sqlserver://dommatos.database.windows.net:1433;database=botdb;user=botdb@dommatos;password=Kelimporta0;encrypt=true;trustServerCertificate=false;hostNameInCertificate=*.database.windows.net;loginTimeout=30;
         // "jdbc:sqlserver://apibot-database.database.windows.net:1433;database=apibot-database;user=apibot-database@apibot-database;password=Kelimporta0;encrypt=true;trustServerCertificate=false;hostNameInCertificate=*.database.windows.net;loginTimeout=30;";
         // obtener servidor, usuario y contrase�a de variables de entorno de azure
-        servidor = System.getenv("APPSETTING_DB_SERVER");
-        user = System.getenv("APPSETTING_DB_USER");
-        password = System.getenv("APPSETTING_DB_PASSWORD");
+        servidor = System.getenv("DB_SERVER");
+        user = System.getenv("DB_USER");
+        password = System.getenv("DB_PASSWORD");
 
         //String servertest = "jdbc:mysql://localhost:3306/dommapi?autoReconnect=true";
         // mostrar en el log la info recibida
-        logg.log(Level.INFO, "APPSETTING_DB_SERVER: {0}", servidor);
+        logg.log(Level.INFO, "DB_SERVER: {0}", servidor);
 
         if (servidor == null) {
             logg.warning("Connection string environment variables not found. Using default connection string.");
