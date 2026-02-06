@@ -31,7 +31,14 @@ public class chatDAO implements interfaces<chatDTO> {
     private static final String SQL_READMANY = "SELECT * FROM dommapi.chat WHERE idWhatssap = ? ";
     private static final String SQL_READALL = "SELECT * FROM customerWhatsapp ";
     msgError error = new msgError();
-    private final conexionBD con = conexionBD.saberEstado();
+       /**
+     * Helper method to get fresh connection for each operation
+     */
+    private conexionBD getConnection() {
+        return conexionBD.saberEstado();
+    }
+
+    conexionBD con = getConnection();
     static final Logger log = Logger.getLogger(chatDAO.class.getName());
 
     @Override

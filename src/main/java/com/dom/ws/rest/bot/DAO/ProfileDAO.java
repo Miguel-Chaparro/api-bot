@@ -15,7 +15,14 @@ public class ProfileDAO {
     private static final String SQL_INSERT_USER_PROFILE = "INSERT INTO dommapi.user_profiles (user_id, profile_id) VALUES (?, ?)";
     private static final String SQL_IS_ADMIN = "SELECT COUNT(*) FROM dommapi.profiles p INNER JOIN dommapi.user_profiles up ON p.id = up.profile_id WHERE up.user_id = ? AND p.name = 'Administrador' AND p.active = true";
     
-    private final conexionBD con = conexionBD.saberEstado();
+       /**
+     * Helper method to get fresh connection for each operation
+     */
+    private conexionBD getConnection() {
+        return conexionBD.saberEstado();
+    }  
+
+    conexionBD con = getConnection();
     static final Logger log = Logger.getLogger(ProfileDAO.class.getName());
     
     public List<ProfileDTO> getUserProfiles(String userId) {

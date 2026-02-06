@@ -11,7 +11,14 @@ import java.util.logging.Logger;
 public class ContratoServicioDetalleDAO {
     private static final String SQL_INSERT = "INSERT INTO dommapi.contratos_servicio_detalle (contrato_servicio_id, inventario_id, fecha_asignacion, precio_asignacion) VALUES (?, ?, ?, ?)";
 
-    private final conexionBD con = conexionBD.saberEstado();
+       /**
+     * Helper method to get fresh connection for each operation
+     */
+    private conexionBD getConnection() {
+        return conexionBD.saberEstado();
+    }
+
+    conexionBD con = getConnection();
     static final Logger log = Logger.getLogger(ContratoServicioDetalleDAO.class.getName());
 
     public boolean create(ContratoServicioDetalleDTO dto) {

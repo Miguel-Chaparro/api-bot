@@ -32,7 +32,14 @@ public class answerDAO implements interfaces<answerDTO> {
     private static final String SQL_READMANY = "SELECT idQuestion, answerCode, answerdes, idfrom, idProject, command, flg_End, flg_Command FROM dommapi.answer WHERE idQuestion = ? AND idproject = ? AND idfrom = ? ";
     private static final String SQL_READMANYPROJECT = "SELECT * FROM dommapi.answer WHERE  idproject = ? ";
     msgError error = new msgError();
-    private final conexionBD con = conexionBD.saberEstado();
+       /**
+     * Helper method to get fresh connection for each operation
+     */
+    private conexionBD getConnection() {
+        return conexionBD.saberEstado();
+    }
+
+    conexionBD con = getConnection();
     static final Logger log = Logger.getLogger(answerDAO.class.getName());
 
     @Override

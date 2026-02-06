@@ -31,7 +31,14 @@ public class projectsDAO implements interfaces<projectDTO> {
             + "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
     private static final String SQL_UPDATE = "UPDATE dommapi.project SET idUser = ?,projectDesc  = ?,dateProject  = ?,openProject  = ?,endProject  = ?,statusProject  = ?,flgEndProject = ? "
             + "WHERE idproject = ? AND idFrom = ?";
-    private final conexionBD con = conexionBD.saberEstado();
+       /**
+     * Helper method to get fresh connection for each operation
+     */
+    private conexionBD getConnection() {
+        return conexionBD.saberEstado();
+    }
+
+    conexionBD con = getConnection();
     static final Logger log = Logger.getLogger(projectsDAO.class.getName());
 
     @Override

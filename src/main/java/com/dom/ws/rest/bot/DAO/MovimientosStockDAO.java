@@ -11,7 +11,14 @@ import java.util.logging.Logger;
 public class MovimientosStockDAO {
     private static final String SQL_INSERT = "INSERT INTO dommapi.movimientos_stock (producto_id, empresa_id, empleado_id, cliente_id, tipo_movimiento, cantidad, costo_unitario, fecha_movimiento, notas) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
-    private final conexionBD con = conexionBD.saberEstado();
+       /**
+     * Helper method to get fresh connection for each operation
+     */
+    private conexionBD getConnection() {
+        return conexionBD.saberEstado();
+    }
+
+    conexionBD con = getConnection();
     static final Logger log = Logger.getLogger(MovimientosStockDAO.class.getName());
 
     public boolean create(MovimientosStockDTO dto) {

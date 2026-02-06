@@ -12,7 +12,14 @@ public class InventarioDAO {
     private static final String SQL_UPDATE_ESTADO = "UPDATE dommapi.inventario SET estado = ? WHERE id = ?";
     private static final String SQL_GET_ONE = "SELECT id, producto_id, empresa_id, proveedor_id, numero_serie, mac_address, estado, ubicacion_bodega, fecha_compra, costo_adquisicion, notas, created_at, updated_at FROM dommapi.inventario WHERE id = ?";
 
-    private final conexionBD con = conexionBD.saberEstado();
+       /**
+     * Helper method to get fresh connection for each operation
+     */
+    private conexionBD getConnection() {
+        return conexionBD.saberEstado();
+    }
+
+    conexionBD con = getConnection();
     static final Logger log = Logger.getLogger(InventarioDAO.class.getName());
 
     /**

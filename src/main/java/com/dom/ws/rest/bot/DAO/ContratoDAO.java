@@ -12,7 +12,14 @@ public class ContratoDAO {
     private static final String SQL_INSERT = "INSERT INTO dommapi.contratos_servicio (usuario_id, plan_internet_id, numero_contrato, fecha_inicio, fecha_fin, direccion_instalacion, estado, precio_mensual, dia_corte, observaciones, empresa_id, tipo_servicio, internet_ppoe_usuario, internet_ppoe_password, energia_tipo_panel, evento_tipo, device, tipo_id, num_id, contrato_nombre, phone_number, created_by, tipo_internet, puerto, caja, nodo) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
     private static final String SQL_MAX_SEQ = "SELECT COALESCE(MAX(id),0) as maxid FROM dommapi.contratos_servicio WHERE empresa_id = ?";
 
-    private final conexionBD con = conexionBD.saberEstado();
+       /**
+     * Helper method to get fresh connection for each operation
+     */
+    private conexionBD getConnection() {
+        return conexionBD.saberEstado();
+    }
+
+    conexionBD con = getConnection();
     static final Logger log = Logger.getLogger(ContratoDAO.class.getName());
 
     public boolean create(ContratoDTO dto) {

@@ -38,7 +38,14 @@ public class raspiDAO implements interfaces<raspiDTO> {
      * private static final String SQL_READALL = "SELECT * FROM customerWhatsapp";
      */
     msgError error = new msgError();
-    private final conexionBD con = conexionBD.saberEstado();
+       /**
+     * Helper method to get fresh connection for each operation
+     */
+    private conexionBD getConnection() {
+        return conexionBD.saberEstado();
+    }
+
+    conexionBD con = getConnection();
     static final Logger log = Logger.getLogger(raspiDAO.class.getName());
 
     @Override

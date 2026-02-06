@@ -12,7 +12,14 @@ public class InventarioStockDAO {
     private static final String SQL_UPDATE_CANTIDAD = "UPDATE dommapi.inventario_stock SET cantidad_en_bodega = cantidad_en_bodega - ? WHERE producto_id = ? AND empresa_id = ?";
     private static final String SQL_READ_ONE = "SELECT id, producto_id, empresa_id, cantidad_en_bodega, costo_promedio, ubicacion_bodega, updated_at FROM dommapi.inventario_stock WHERE producto_id = ? AND empresa_id = ?";
 
-    private final conexionBD con = conexionBD.saberEstado();
+       /**
+     * Helper method to get fresh connection for each operation
+     */
+    private conexionBD getConnection() {
+        return conexionBD.saberEstado();
+    }
+
+    conexionBD con = getConnection();
     static final Logger log = Logger.getLogger(InventarioStockDAO.class.getName());
 
     public boolean decrementarCantidad(Integer productoId, Integer empresaId, java.math.BigDecimal cantidad) {

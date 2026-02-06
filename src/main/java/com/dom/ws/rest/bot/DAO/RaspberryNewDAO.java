@@ -8,7 +8,15 @@ import java.sql.*;
 import java.util.*;
 
 public class RaspberryNewDAO {
-    private final conexionBD conn = conexionBD.saberEstado();
+       /**
+     * Helper method to get fresh connection for each operation
+     */
+    private conexionBD getConnection() {
+        return conexionBD.saberEstado();
+    }
+
+    conexionBD conn = getConnection();
+
     
 
     public RaspberryNewDTO getRaspberryByUserId(String userId) throws SQLException {
