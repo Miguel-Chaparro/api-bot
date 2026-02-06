@@ -15,18 +15,18 @@ public class ProfileDAO {
     private static final String SQL_INSERT_USER_PROFILE = "INSERT INTO dommapi.user_profiles (user_id, profile_id) VALUES (?, ?)";
     private static final String SQL_IS_ADMIN = "SELECT COUNT(*) FROM dommapi.profiles p INNER JOIN dommapi.user_profiles up ON p.id = up.profile_id WHERE up.user_id = ? AND p.name = 'Administrador' AND p.active = true";
     
-       /**
+    static final Logger log = Logger.getLogger(ProfileDAO.class.getName());
+
+    /**
      * Helper method to get fresh connection for each operation
      */
     private conexionBD getConnection() {
         return conexionBD.saberEstado();
-    }  
-
-    conexionBD con = getConnection();
-    static final Logger log = Logger.getLogger(ProfileDAO.class.getName());
+    }
     
     public List<ProfileDTO> getUserProfiles(String userId) {
         List<ProfileDTO> profiles = new ArrayList<>();
+        conexionBD con = getConnection();
         PreparedStatement ps = null;
         ResultSet rs = null;
         
@@ -53,6 +53,7 @@ public class ProfileDAO {
     }
     
     public boolean assignProfileToUser(String userId, int profileId) {
+        conexionBD con = getConnection();
         PreparedStatement ps = null;
         boolean success = false;
         
@@ -72,6 +73,7 @@ public class ProfileDAO {
     }
 
     public boolean isUserAdmin(String userId) {
+        conexionBD con = getConnection();
         PreparedStatement ps = null;
         ResultSet rs = null;
         boolean isAdmin = false;
@@ -95,6 +97,7 @@ public class ProfileDAO {
 
     public List<ProfileDTO> getAllActiveProfiles() {
         List<ProfileDTO> profiles = new ArrayList<>();
+        conexionBD con = getConnection();
         PreparedStatement ps = null;
         ResultSet rs = null;
         try {
@@ -118,6 +121,7 @@ public class ProfileDAO {
 
     public List<ProfileDTO> getActiveProfilesByDescription(String description) {
         List<ProfileDTO> profiles = new ArrayList<>();
+        conexionBD con = getConnection();
         PreparedStatement ps = null;
         ResultSet rs = null;
         try {
@@ -141,6 +145,7 @@ public class ProfileDAO {
     }
 
     public boolean deleteAllProfilesForUser(String userId) {
+        conexionBD con = getConnection();
         PreparedStatement ps = null;
         boolean success = false;
         try {
