@@ -20,14 +20,35 @@ public class CORSFilter implements ContainerResponseFilter {
 
     @Override
     public void filter(ContainerRequestContext crc, ContainerResponseContext crc1) throws IOException {
-        //String origin = crc.getHeaderString("Origin");
-        // Permitir solo dashboard.dommatos.com y localhost para pruebas
-        // if ("https://dashboard.dommatos.com".equals(origin) || "http://localhost:3040".equals(origin) || "http://localhost:3039".equals(origin) || "http://customer.dommatos.com".equals(origin)) {
-        //     crc1.getHeaders().add("Access-Control-Allow-Origin", origin);
-        // }
-        // Permitir credenciales si usas cookies/autenticación
-        // crc1.getHeaders().add("Access-Control-Allow-Credentials", "true");
-        // crc1.getHeaders().add("Access-Control-Allow-Headers", "origin, content-type, accept, authorization, x-api-key");
-        // crc1.getHeaders().add("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS, HEAD");
+        String origin = crc.getHeaderString("Origin");
+        
+        // Orígenes permitidos
+        String[] allowedOrigins = {
+            "https://dashboard.dommatos.com",
+            "http://dashboard.dommatos.com",
+            "https://customer.dommatos.com",
+            "http://customer.dommatos.com",
+            "http://localhost:3040",
+            "http://localhost:3039",
+            "http://localhost:3000"
+        };
+        
+        boolean isOriginAllowed = false;
+        if (origin != null) {
+            for (String allowedOrigin : allowedOrigins) {
+                if (allowedOrigin.equals(origin)) {
+                    isOriginAllowed = true;
+                    break;
+                }
+            }
+        }
+        
+        if (isOriginAllowed) {
+            crc1.getHeaders().add("Access-Control-Allow-Origin", origin);
+            crc1.getHeaders().add("Access-Control-Allow-Credentials", "true");
+            crc1.getHeaders().add("Access-Control-Allow-Headers", "Origin, Content-Type, Accept, Authorization, X-Api-Key, X-Requested-With");
+            crc1.getHeaders().add("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS, HEAD, PATCH");
+            crc1.getHeaders().add("Access-Control-Max-Age", "3600");
+        }
     }
 }
