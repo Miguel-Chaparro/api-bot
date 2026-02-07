@@ -47,11 +47,15 @@ public class MqttHelper {
         
         MqttClient client = null;
         try {
-            // Generar clientId único
-            String clientId = "apiBot_" + System.currentTimeMillis();
+            // Forzar MemoryPersistence a nivel de propiedad del sistema
+            System.setProperty("org.eclipse.paho.client.mqttv3.persistence.type", "memory");
             
-            // Crear cliente MQTT con MemoryPersistence para evitar errores de creación de directorio
-            client = new MqttClient(BROKER_URL, clientId, new MemoryPersistence());
+            // Generar clientId único que incluye timestamp para evitar duplicados
+            String clientId = "apiBot_" + System.currentTimeMillis() + "_" + Thread.currentThread().getId();
+            
+            // Crear cliente MQTT con MemoryPersistence explícitamente
+            MemoryPersistence persistence = new MemoryPersistence();
+            client = new MqttClient(BROKER_URL, clientId, persistence);
             
             // Configurar opciones de conexión
             MqttConnectOptions options = new MqttConnectOptions();
@@ -82,16 +86,27 @@ public class MqttHelper {
             return true;
             
         } catch (MqttException e) {
-            log.log(Level.SEVERE, "Error en comunicación MQTT: " + e.getMessage(), e);
+            log.log(Level.SEVERE, "Error en comunicación MQTT: MqttException - " + e.getReasonCode() + ": " + e.getMessage());
+            // Log más detallado de la causa raíz
+            if (e.getCause() != null) {
+                log.log(Level.SEVERE, "Causa raíz: " + e.getCause().getMessage(), e.getCause());
+            }
+            return false;
+        } catch (Exception e) {
+            log.log(Level.SEVERE, "Error inesperado en comunicación MQTT: " + e.getMessage(), e);
             return false;
         } finally {
             // Desconectar cliente
             if (client != null) {
                 try {
-                    client.disconnect();
+                    if (client.isConnected()) {
+                        client.disconnect();
+                    }
                     client.close();
                 } catch (MqttException e) {
-                    log.log(Level.WARNING, "Error desconectando cliente MQTT: " + e.getMessage(), e);
+                    log.log(Level.WARNING, "Error desconectando cliente MQTT: " + e.getMessage());
+                } catch (Exception e) {
+                    log.log(Level.WARNING, "Error cerrando cliente MQTT: " + e.getMessage());
                 }
             }
         }

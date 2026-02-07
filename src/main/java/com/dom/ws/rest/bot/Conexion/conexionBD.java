@@ -20,7 +20,7 @@ public class conexionBD {
 
     private Connection cnn;
     private static final Logger logg = Logger.getLogger(conexionBD.class.getName());
-    //private boolean isFromPool = false;
+    private boolean isFromPool = false;
 
     /**
      * Constructor - gets a fresh connection from the pool
