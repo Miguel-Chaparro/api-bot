@@ -11,8 +11,18 @@ public class RaspberryNewDAO {
     /**
      * Helper method to get fresh connection for each operation
      */
+    /**
+     * Helper method to get fresh connection for each operation
+     * Returns null if connection pool timeout - caller must check for null
+     */
     private conexionBD getConnection() {
-        return conexionBD.saberEstado();
+        try {
+            return conexionBD.saberEstado();
+        } catch (Exception ex) {
+            java.util.logging.Logger.getLogger(RaspberryNewDAO.class.getName())
+                .log(java.util.logging.Level.SEVERE, "Connection pool timeout: {0}", ex.getMessage());
+            return null;
+        }
     }
 
     public RaspberryNewDTO getRaspberryByUserId(String userId) throws SQLException {
@@ -32,6 +42,11 @@ public class RaspberryNewDAO {
     private Integer getRaspberryIdByUserId(String userId) throws SQLException {
         String sql = "SELECT raspberry_id FROM dommapi.raspberry_user WHERE user_id = ? LIMIT 1";
         conexionBD conn = getConnection();
+        if (conn == null) {
+            java.util.logging.Logger.getLogger(RaspberryNewDAO.class.getName())
+                .log(java.util.logging.Level.SEVERE, "Connection pool timeout: Unable to get raspberry ID by user ID");
+            return null;
+        }
         try (PreparedStatement ps = conn.getCnn().prepareStatement(sql)) {
             ps.setString(1, userId);
             ResultSet rs = ps.executeQuery();
@@ -44,6 +59,11 @@ public class RaspberryNewDAO {
     private Integer getRaspberryIdByUserNumber(String number) throws SQLException {
         String sql = "SELECT raspberry_id FROM dommapi.raspberry_user WHERE user_number = ? LIMIT 1";
         conexionBD conn = getConnection();
+        if (conn == null) {
+            java.util.logging.Logger.getLogger(RaspberryNewDAO.class.getName())
+                .log(java.util.logging.Level.SEVERE, "Connection pool timeout: Unable to get raspberry ID by user number");
+            return null;
+        }
         try (PreparedStatement ps = conn.getCnn().prepareStatement(sql)) {
             ps.setString(1, number);
             ResultSet rs = ps.executeQuery();
@@ -69,6 +89,11 @@ public class RaspberryNewDAO {
         String sql = "SELECT user_number, topic, name, device FROM dommapi.raspberry_user WHERE raspberry_id = ? AND role = ?";
         List<RaspberryNewDTO.RaspiUserDTO> list = new ArrayList<>();
         conexionBD conn = getConnection();
+        if (conn == null) {
+            java.util.logging.Logger.getLogger(RaspberryNewDAO.class.getName())
+                .log(java.util.logging.Level.SEVERE, "Connection pool timeout: Unable to get users by role");
+            return list;
+        }
         try (PreparedStatement ps = conn.getCnn().prepareStatement(sql)) {
             ps.setInt(1, raspberryId);
             ps.setString(2, role);
@@ -89,6 +114,11 @@ public class RaspberryNewDAO {
         String sql = "SELECT id, ip, nodo, grupo FROM dommapi.raspberry_ip WHERE raspberry_id = ?";
         List<RaspberryNewDTO.RaspiIpDTO> list = new ArrayList<>();
         conexionBD conn = getConnection();
+        if (conn == null) {
+            java.util.logging.Logger.getLogger(RaspberryNewDAO.class.getName())
+                .log(java.util.logging.Level.SEVERE, "Connection pool timeout: Unable to get IPs");
+            return list;
+        }
         try (PreparedStatement ps = conn.getCnn().prepareStatement(sql)) {
             ps.setInt(1, raspberryId);
             ResultSet rs = ps.executeQuery();
@@ -108,6 +138,11 @@ public class RaspberryNewDAO {
         String sql = "SELECT device, ip, port, username, password, service, type_mikrotik FROM dommapi.raspberry_device WHERE raspberry_id = ?";
         List<RaspberryNewDTO.RaspiDeviceDTO> list = new ArrayList<>();
         conexionBD conn = getConnection();
+        if (conn == null) {
+            java.util.logging.Logger.getLogger(RaspberryNewDAO.class.getName())
+                .log(java.util.logging.Level.SEVERE, "Connection pool timeout: Unable to get devices");
+            return list;
+        }
         try (PreparedStatement ps = conn.getCnn().prepareStatement(sql)) {
             ps.setInt(1, raspberryId);
             ResultSet rs = ps.executeQuery();
@@ -129,6 +164,11 @@ public class RaspberryNewDAO {
     private boolean isMikrotik(int raspberryId) throws SQLException {
         String sql = "SELECT mikrotik FROM dommapi.raspberry WHERE id = ?";
         conexionBD conn = getConnection();
+        if (conn == null) {
+            java.util.logging.Logger.getLogger(RaspberryNewDAO.class.getName())
+                .log(java.util.logging.Level.SEVERE, "Connection pool timeout: Unable to check if mikrotik");
+            return false;
+        }
         try (PreparedStatement ps = conn.getCnn().prepareStatement(sql)) {
             ps.setInt(1, raspberryId);
             ResultSet rs = ps.executeQuery();
@@ -142,6 +182,11 @@ public class RaspberryNewDAO {
         String sql = admin ? "SELECT name_admin FROM dommapi.raspberry WHERE id = ?"
                 : "SELECT name_tec FROM dommapi.raspberry WHERE id = ?";
         conexionBD conn = getConnection();
+        if (conn == null) {
+            java.util.logging.Logger.getLogger(RaspberryNewDAO.class.getName())
+                .log(java.util.logging.Level.SEVERE, "Connection pool timeout: Unable to get device name");
+            return null;
+        }
         try (PreparedStatement ps = conn.getCnn().prepareStatement(sql)) {
             ps.setInt(1, raspberryId);
             ResultSet rs = ps.executeQuery();
@@ -153,6 +198,11 @@ public class RaspberryNewDAO {
 
     public boolean createOrUpdateRaspberryWithUsers(RaspberryNewDTO dto) throws SQLException {
         conexionBD conn = getConnection();
+        if (conn == null) {
+            java.util.logging.Logger.getLogger(RaspberryNewDAO.class.getName())
+                .log(java.util.logging.Level.SEVERE, "Connection pool timeout: Unable to create or update raspberry");
+            return false;
+        }
         conn.getCnn().setAutoCommit(false);
         try {
             // 1. Insertar o actualizar raspberry principal (por nameDeviceAdmin como clave
@@ -282,6 +332,11 @@ public class RaspberryNewDAO {
     public List<RaspberryNewDTO> getAllRaspberrys() throws SQLException {
         conexionBD conn = getConnection();
         List<RaspberryNewDTO> raspberryList = new ArrayList<>();
+        if (conn == null) {
+            java.util.logging.Logger.getLogger(RaspberryNewDAO.class.getName())
+                .log(java.util.logging.Level.SEVERE, "Connection pool timeout: Unable to get all raspberrys");
+            return raspberryList;
+        }
         String sql = "SELECT id FROM dommapi.raspberry";
         try (PreparedStatement ps = conn.getCnn().prepareStatement(sql)) {
             ResultSet rs = ps.executeQuery();
@@ -298,6 +353,11 @@ public class RaspberryNewDAO {
     public boolean createUserRaspberryRelation(String userId, RaspberryNewDTO dto) throws SQLException {
         String sql = "INSERT INTO dommapi.raspberry_user (user_id, raspberry_id, role, name, device) VALUES (?, ?, ?, ?, ?)";
         conexionBD conn = getConnection();
+        if (conn == null) {
+            java.util.logging.Logger.getLogger(RaspberryNewDAO.class.getName())
+                .log(java.util.logging.Level.SEVERE, "Connection pool timeout: Unable to create user raspberry relation");
+            return false;
+        }
         try (PreparedStatement ps = conn.getCnn().prepareStatement(sql)) {
             for (RaspberryNewDTO.RaspiUserDTO admin : dto.getAdmin()) {
                 ps.setString(1, userId);
@@ -325,6 +385,11 @@ public class RaspberryNewDAO {
     public boolean createRaspberry(RaspberryDTO dto) throws SQLException {
         String insertRaspberry = "INSERT INTO dommapi.raspberry (name_admin, name_tec, topic, mikrotik) VALUES (?, ?, ?, ?)";
         conexionBD conn = getConnection();
+        if (conn == null) {
+            java.util.logging.Logger.getLogger(RaspberryNewDAO.class.getName())
+                .log(java.util.logging.Level.SEVERE, "Connection pool timeout: Unable to create raspberry");
+            return false;
+        }
         try (PreparedStatement ps = conn.getCnn().prepareStatement(insertRaspberry)) {
             ps.setString(1, dto.getNameDeviceAdmin());
             ps.setString(2, dto.getNameDeviceTec());
@@ -340,6 +405,11 @@ public class RaspberryNewDAO {
         List<RaspberryDTO> raspberryList = new ArrayList<>();
         String sql = "SELECT id, name_admin, name_tec, topic, mikrotik FROM dommapi.raspberry";
         conexionBD conn = getConnection();
+        if (conn == null) {
+            java.util.logging.Logger.getLogger(RaspberryNewDAO.class.getName())
+                .log(java.util.logging.Level.SEVERE, "Connection pool timeout: Unable to get all raspberrys simple");
+            return raspberryList;
+        }
         try (PreparedStatement ps = conn.getCnn().prepareStatement(sql)) {
             ResultSet rs = ps.executeQuery();
             while (rs.next()) {
@@ -360,6 +430,11 @@ public class RaspberryNewDAO {
     public boolean createRaspberryUserRelation(RaspberryUserRelationDTO dto) throws SQLException {
         String sql = "INSERT INTO dommapi.raspberry_user (raspberry_id, user_number, user_id, role, name, topic, device) VALUES (?, ?, ?, ?, ?, ?, ?)";
         conexionBD conn = getConnection();
+        if (conn == null) {
+            java.util.logging.Logger.getLogger(RaspberryNewDAO.class.getName())
+                .log(java.util.logging.Level.SEVERE, "Connection pool timeout: Unable to create raspberry user relation");
+            return false;
+        }
         try (PreparedStatement ps = conn.getCnn().prepareStatement(sql)) {
             ps.setInt(1, dto.getRaspberryId());
             ps.setString(2, dto.getUserNumber());
@@ -377,6 +452,11 @@ public class RaspberryNewDAO {
     public boolean updateRaspberry(RaspberryDTO dto) throws SQLException {
         String updateRaspberry = "UPDATE dommapi.raspberry SET name_admin = ?, name_tec = ?, topic = ?, mikrotik = ? WHERE id = ?";
         conexionBD conn = getConnection();
+        if (conn == null) {
+            java.util.logging.Logger.getLogger(RaspberryNewDAO.class.getName())
+                .log(java.util.logging.Level.SEVERE, "Connection pool timeout: Unable to update raspberry");
+            return false;
+        }
         try (PreparedStatement ps = conn.getCnn().prepareStatement(updateRaspberry)) {
             ps.setString(1, dto.getNameDeviceAdmin());
             ps.setString(2, dto.getNameDeviceTec());
@@ -392,6 +472,11 @@ public class RaspberryNewDAO {
     public List<RaspberryUserRelationDTO> getRaspberryUserRelationsByRaspberryId(int raspberryId) throws SQLException {
         List<RaspberryUserRelationDTO> relations = new ArrayList<>();
         conexionBD conn = getConnection();
+        if (conn == null) {
+            java.util.logging.Logger.getLogger(RaspberryNewDAO.class.getName())
+                .log(java.util.logging.Level.SEVERE, "Connection pool timeout: Unable to get raspberry user relations");
+            return relations;
+        }
         String sql = "SELECT id, raspberry_id, user_number, user_id, role, name, topic, device FROM dommapi.raspberry_user WHERE raspberry_id = ?";
         try (PreparedStatement ps = conn.getCnn().prepareStatement(sql)) {
             ps.setInt(1, raspberryId);
@@ -418,6 +503,11 @@ public class RaspberryNewDAO {
         List<RaspberryDTO> raspberryList = new ArrayList<>();
         String sql = "SELECT DISTINCT r.id, r.name_admin, r.name_tec, r.topic, r.mikrotik FROM dommapi.raspberry r INNER JOIN dommapi.raspberry_user ru ON r.id = ru.raspberry_id WHERE ru.user_id = ?";
         conexionBD conn = getConnection();
+        if (conn == null) {
+            java.util.logging.Logger.getLogger(RaspberryNewDAO.class.getName())
+                .log(java.util.logging.Level.SEVERE, "Connection pool timeout: Unable to get raspberrys simple by user ID");
+            return raspberryList;
+        }
         try (PreparedStatement ps = conn.getCnn().prepareStatement(sql)) {
             ps.setString(1, userId);
             try (ResultSet rs = ps.executeQuery()) {
@@ -441,6 +531,11 @@ public class RaspberryNewDAO {
         List<RaspberryNewDTO.RaspiIpDTO> list = new ArrayList<>();
         String sql = "SELECT id, ip, nodo, grupo FROM dommapi.raspberry_ip WHERE raspberry_id = ?";
         conexionBD conn = getConnection();
+        if (conn == null) {
+            java.util.logging.Logger.getLogger(RaspberryNewDAO.class.getName())
+                .log(java.util.logging.Level.SEVERE, "Connection pool timeout: Unable to get IPs by raspberry ID");
+            return list;
+        }
         try (PreparedStatement ps = conn.getCnn().prepareStatement(sql)) {
             ps.setInt(1, raspberryId);
             try (ResultSet rs = ps.executeQuery()) {
@@ -463,6 +558,11 @@ public class RaspberryNewDAO {
         if (ipDTO.getId() > 0) {
             // Actualizar
             conexionBD conn = getConnection();
+            if (conn == null) {
+                java.util.logging.Logger.getLogger(RaspberryNewDAO.class.getName())
+                    .log(java.util.logging.Level.SEVERE, "Connection pool timeout: Unable to create or update IP");
+                return false;
+            }
             String update = "UPDATE dommapi.raspberry_ip SET ip = ?, nodo = ?, grupo = ? WHERE id = ? AND raspberry_id = ?";
             try (PreparedStatement ps = conn.getCnn().prepareStatement(update)) {
                 ps.setString(1, ipDTO.getIp());
@@ -475,6 +575,11 @@ public class RaspberryNewDAO {
         } else {
             // Crear
             conexionBD conn = getConnection();
+            if (conn == null) {
+                java.util.logging.Logger.getLogger(RaspberryNewDAO.class.getName())
+                    .log(java.util.logging.Level.SEVERE, "Connection pool timeout: Unable to create or update IP");
+                return false;
+            }
             String insert = "INSERT INTO dommapi.raspberry_ip (raspberry_id, ip, nodo, grupo) VALUES (?, ?, ?, ?)";
             try (PreparedStatement ps = conn.getCnn().prepareStatement(insert)) {
                 ps.setInt(1, raspberryId);
@@ -491,6 +596,11 @@ public class RaspberryNewDAO {
         List<RaspberryNewDTO.RaspiDeviceDTO> list = new ArrayList<>();
         String sql = "SELECT id, device, ip, port, username, password, service, type_mikrotik FROM dommapi.raspberry_device WHERE raspberry_id = ?";
         conexionBD conn = getConnection();
+        if (conn == null) {
+            java.util.logging.Logger.getLogger(RaspberryNewDAO.class.getName())
+                .log(java.util.logging.Level.SEVERE, "Connection pool timeout: Unable to get devices by raspberry ID");
+            return list;
+        }
         try (PreparedStatement ps = conn.getCnn().prepareStatement(sql)) {
             ps.setInt(1, raspberryId);
             try (ResultSet rs = ps.executeQuery()) {
@@ -516,6 +626,11 @@ public class RaspberryNewDAO {
         if (deviceDTO.getId() != null && !deviceDTO.getId().isEmpty()) {
             // Actualizar
             conexionBD conn = getConnection();
+            if (conn == null) {
+                java.util.logging.Logger.getLogger(RaspberryNewDAO.class.getName())
+                    .log(java.util.logging.Level.SEVERE, "Connection pool timeout: Unable to create or update device");
+                return false;
+            }
             String update = "UPDATE dommapi.raspberry_device SET device = ?, ip = ?, port = ?, username = ?, password = ?, service = ?, type_mikrotik = ? WHERE id = ? AND raspberry_id = ?";
             try (PreparedStatement ps = conn.getCnn().prepareStatement(update)) {
                 ps.setString(1, deviceDTO.getDevice());
@@ -532,6 +647,11 @@ public class RaspberryNewDAO {
         } else {
             // Crear
             conexionBD conn = getConnection();
+            if (conn == null) {
+                java.util.logging.Logger.getLogger(RaspberryNewDAO.class.getName())
+                    .log(java.util.logging.Level.SEVERE, "Connection pool timeout: Unable to create or update device");
+                return false;
+            }
             String insert = "INSERT INTO dommapi.raspberry_device (raspberry_id, device, ip, port, username, password, service, type_mikrotik) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
             try (PreparedStatement ps = conn.getCnn().prepareStatement(insert)) {
                 ps.setInt(1, raspberryId);

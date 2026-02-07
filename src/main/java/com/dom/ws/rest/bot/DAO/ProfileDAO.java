@@ -33,6 +33,11 @@ public class ProfileDAO {
     public List<ProfileDTO> getUserProfiles(String userId) {
         List<ProfileDTO> profiles = new ArrayList<>();
         conexionBD con = getConnection();
+        if (con == null) {
+            log.severe("Cannot access database - connection pool exhausted");
+            return profiles;  // Return empty list if no connection
+        }
+        
         PreparedStatement ps = null;
         ResultSet rs = null;
         
@@ -60,6 +65,10 @@ public class ProfileDAO {
     
     public boolean assignProfileToUser(String userId, int profileId) {
         conexionBD con = getConnection();
+        if (con == null) {
+            log.severe("Connection pool timeout: Unable to assign profile to user");
+            return false;
+        }
         PreparedStatement ps = null;
         boolean success = false;
         
@@ -80,6 +89,10 @@ public class ProfileDAO {
 
     public boolean isUserAdmin(String userId) {
         conexionBD con = getConnection();
+        if (con == null) {
+            log.severe("Connection pool timeout: Unable to check admin status");
+            return false;
+        }
         PreparedStatement ps = null;
         ResultSet rs = null;
         boolean isAdmin = false;
@@ -104,6 +117,10 @@ public class ProfileDAO {
     public List<ProfileDTO> getAllActiveProfiles() {
         List<ProfileDTO> profiles = new ArrayList<>();
         conexionBD con = getConnection();
+        if (con == null) {
+            log.severe("Connection pool timeout: Unable to retrieve all active profiles");
+            return profiles;
+        }
         PreparedStatement ps = null;
         ResultSet rs = null;
         try {
@@ -128,6 +145,10 @@ public class ProfileDAO {
     public List<ProfileDTO> getActiveProfilesByDescription(String description) {
         List<ProfileDTO> profiles = new ArrayList<>();
         conexionBD con = getConnection();
+        if (con == null) {
+            log.severe("Connection pool timeout: Unable to retrieve active profiles by description");
+            return profiles;
+        }
         PreparedStatement ps = null;
         ResultSet rs = null;
         try {
@@ -152,6 +173,10 @@ public class ProfileDAO {
 
     public boolean deleteAllProfilesForUser(String userId) {
         conexionBD con = getConnection();
+        if (con == null) {
+            log.severe("Connection pool timeout: Unable to delete profiles for user");
+            return false;
+        }
         PreparedStatement ps = null;
         boolean success = false;
         try {
