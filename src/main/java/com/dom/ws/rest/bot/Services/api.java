@@ -1590,6 +1590,9 @@ public class api {
         EmpresaDAO empresaDAO = new EmpresaDAO();
         UserDAO userDAO = new UserDAO();
         List<ProfileDTO> profiles = profileDAO.getUserProfiles(userId);
+        if (profiles == null) {
+            profiles = new ArrayList<>();
+        }
         boolean isAdmin = false;
         boolean isTecnico = false;
         String empresaDesc = null;
@@ -1625,6 +1628,11 @@ public class api {
         } else {
             if (newUser.getEmpresaId() == null) {
                 List<EmpresaDTO> empresas = empresaDAO.readAll();
+                if (empresas == null || empresas.isEmpty()) {
+                    return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                            .entity(new msgError(-1, "No se pudieron obtener las empresas disponibles"))
+                            .build();
+                }
                 for (EmpresaDTO empresa : empresas) {
                     if (empresa.getId() == Integer.valueOf(empresaDesc)) {
                         empresaId = empresa.getId();

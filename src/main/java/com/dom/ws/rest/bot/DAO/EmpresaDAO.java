@@ -39,6 +39,10 @@ public class EmpresaDAO implements interfaces<EmpresaDTO> {
         log.info("*** Start EmpresaDAO create ***");
         PreparedStatement ps;
         conexionBD con = getConnection();
+        if (con == null) {
+            log.severe("Connection pool timeout: Unable to create empresa");
+            return false;
+        }
         boolean success = false;
         try {
             ps = con.getCnn().prepareStatement(SQL_INSERT);
@@ -71,6 +75,10 @@ public class EmpresaDAO implements interfaces<EmpresaDTO> {
         log.info("*** Start EmpresaDAO update ***");
         PreparedStatement ps;
         conexionBD con = getConnection();
+        if (con == null) {
+            log.severe("Connection pool timeout: Unable to update empresa");
+            return false;
+        }
         boolean success = false;
         try {
             ps = con.getCnn().prepareStatement(SQL_UPDATE);
@@ -104,6 +112,10 @@ public class EmpresaDAO implements interfaces<EmpresaDTO> {
         log.info("*** Start EmpresaDAO delete ***");
         PreparedStatement ps;
         conexionBD con = getConnection();
+        if (con == null) {
+            log.severe("Connection pool timeout: Unable to delete empresa");
+            return false;
+        }
         boolean success = false;
         try {
             ps = con.getCnn().prepareStatement(SQL_DELETE);
@@ -125,6 +137,10 @@ public class EmpresaDAO implements interfaces<EmpresaDTO> {
         EmpresaDTO empresa = null;
         PreparedStatement ps;
         conexionBD con = getConnection();
+        if (con == null) {
+            log.severe("Connection pool timeout: Unable to read empresa");
+            return empresa;
+        }
         ResultSet rs;
         try {
             ps = con.getCnn().prepareStatement(SQL_GET_ONE);
@@ -167,6 +183,10 @@ public class EmpresaDAO implements interfaces<EmpresaDTO> {
         log.info("*** Start EmpresaDAO readAll ***");
         List<EmpresaDTO> empresas = new ArrayList<>();
         conexionBD con = getConnection();
+        if (con == null) {
+            log.severe("Connection pool timeout: Unable to read all empresas");
+            return empresas;
+        }
         PreparedStatement ps;
         ResultSet rs;
         try {
