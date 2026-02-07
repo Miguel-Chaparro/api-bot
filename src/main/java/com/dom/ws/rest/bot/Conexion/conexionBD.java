@@ -43,9 +43,11 @@ public class conexionBD {
                 logg.info("Pool Status: " + ConnectionPool.getInstance().getPoolStats());
             }
         } catch (SQLException ex) {
-            logg.log(Level.SEVERE, "Error getting connection from pool: ", ex);
+            logg.log(Level.SEVERE, "ERROR - CRITICAL: Connection pool EXHAUSTED! All 20 connections busy or timeout. Database unreachable. Error: {0}", ex.getMessage());
+            logg.log(Level.SEVERE, "This usually means connections are not being properly closed. Check for connection leaks in DAO methods.", ex);
             cnn = null;
             isFromPool = false;
+            // DO NOT throw - let caller deal with null connection
         }
     }
 

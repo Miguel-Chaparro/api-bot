@@ -39,99 +39,113 @@ public class answerDAO implements interfaces<answerDTO> {
 
     static final Logger log = Logger.getLogger(answerDAO.class.getName());
     
-    private conexionBD getConnection() {
+    private conexionBD getConnection() throws SQLException {
         return conexionBD.saberEstado();
     }
     @Override
     public boolean create(answerDTO dto) {
         log.info("*** Start answerDAO create ***");
-        PreparedStatement ps;
-        conexionBD con = getConnection();
-        boolean valida = false;
         try {
-            ps = con.getCnn().prepareStatement(SQL_INSERT);
-            ps.setString(1, dto.getIdQuestion());
-            ps.setInt(2, dto.getAnswerId());
-            ps.setString(3, dto.getAnswerDesc());
-            ps.setInt(4, dto.getIdProject());
-            ps.setString(5, dto.getCommand());
-            ps.setInt(6, dto.getFlgEnd());
-            ps.setInt(7, dto.getFlgCommand());
-            ps.setString(8, dto.getIdFrom());
-            int i = 0;
-            i = ps.executeUpdate();
+            PreparedStatement ps;
+            conexionBD con = getConnection();
+            boolean valida = false;
+            try {
+                ps = con.getCnn().prepareStatement(SQL_INSERT);
+                ps.setString(1, dto.getIdQuestion());
+                ps.setInt(2, dto.getAnswerId());
+                ps.setString(3, dto.getAnswerDesc());
+                ps.setInt(4, dto.getIdProject());
+                ps.setString(5, dto.getCommand());
+                ps.setInt(6, dto.getFlgEnd());
+                ps.setInt(7, dto.getFlgCommand());
+                ps.setString(8, dto.getIdFrom());
+                int i = 0;
+                i = ps.executeUpdate();
 
-            if (i > 0) {
-                valida = true;
+                if (i > 0) {
+                    valida = true;
+                }
+            } catch (SQLException ex) {
+                log.log(Level.SEVERE, "Error create customerWhatsappDTO {0}", ex);
+
+            } finally {
+                con.cerrarConexion();
             }
+            log.info("*** end answerDAO create ***");
+            return valida;
         } catch (SQLException ex) {
-            log.log(Level.SEVERE, "Error create customerWhatsappDTO {0}", ex);
-
-        } finally {
-            con.cerrarConexion();
+            log.log(Level.SEVERE, "Connection pool timeout or error in answerDAO create: {0}", ex);
+            return false;
         }
-        log.info("*** end answerDAO create ***");
-        return valida;
     }
 
     @Override
     public boolean update(answerDTO dto) {
         log.info("*** Start answerDAO update ***");
-        PreparedStatement ps;
-        conexionBD con = getConnection();
-        boolean valida = false;
         try {
-            
-            ps = con.getCnn().prepareStatement(SQL_UPDATE);
-            ps.setString(1, dto.getAnswerDesc());
-            ps.setString(2, dto.getCommand());
-            ps.setInt(3, dto.getFlgEnd());
-            ps.setInt(4, dto.getFlgCommand());
-            ps.setString(5, dto.getIdQuestion());
-            ps.setInt(6, dto.getAnswerId());
-            ps.setInt(7, dto.getIdProject());
-            ps.setString(8, dto.getIdFrom());
-            int i = 0;
-            i = ps.executeUpdate();
+            PreparedStatement ps;
+            conexionBD con = getConnection();
+            boolean valida = false;
+            try {
+                ps = con.getCnn().prepareStatement(SQL_UPDATE);
+                ps.setString(1, dto.getAnswerDesc());
+                ps.setString(2, dto.getCommand());
+                ps.setInt(3, dto.getFlgEnd());
+                ps.setInt(4, dto.getFlgCommand());
+                ps.setString(5, dto.getIdQuestion());
+                ps.setInt(6, dto.getAnswerId());
+                ps.setInt(7, dto.getIdProject());
+                ps.setString(8, dto.getIdFrom());
+                int i = 0;
+                i = ps.executeUpdate();
 
-            if (i > 0) {
-                valida = true;
+                if (i > 0) {
+                    valida = true;
+                }
+            } catch (SQLException ex) {
+                log.log(Level.SEVERE, "Error Update answerDAO {0}", ex);
+
+            } finally {
+                con.cerrarConexion();
             }
+            log.info("*** end answerDAO update ***");
+            return valida;
         } catch (SQLException ex) {
-            log.log(Level.SEVERE, "Error Update answerDAO {0}", ex);
-
-        } finally {
-            con.cerrarConexion();
+            log.log(Level.SEVERE, "Connection pool timeout or error in answerDAO update: {0}", ex);
+            return false;
         }
-        log.info("*** end answerDAO update ***");
-        return valida;
     }
 
     @Override
     public boolean delete(answerDTO dto) {
         log.info("*** Start answerDAO delete ***");
-        conexionBD con = getConnection();
-        PreparedStatement ps;
-        boolean valida = false;
         try {
-            ps = con.getCnn().prepareStatement(SQL_DELETE);
-            ps.setString(1, dto.getIdQuestion());
-            ps.setInt(3, dto.getIdProject());
-            ps.setInt(2, dto.getAnswerId());
-            ps.setString(4, dto.getIdFrom());
-            int i = 0;
-            i = ps.executeUpdate();
+            conexionBD con = getConnection();
+            PreparedStatement ps;
+            boolean valida = false;
+            try {
+                ps = con.getCnn().prepareStatement(SQL_DELETE);
+                ps.setString(1, dto.getIdQuestion());
+                ps.setInt(3, dto.getIdProject());
+                ps.setInt(2, dto.getAnswerId());
+                ps.setString(4, dto.getIdFrom());
+                int i = 0;
+                i = ps.executeUpdate();
 
-            if (i > 0) {
-                valida = true;
+                if (i > 0) {
+                    valida = true;
+                }
+            } catch (SQLException ex) {
+                log.log(Level.SEVERE, "Error create customer answerDAO {0}", ex);
+            } finally {
+                con.cerrarConexion();
             }
+            log.info("*** end answerDAO delete ***");
+            return valida;
         } catch (SQLException ex) {
-            log.log(Level.SEVERE, "Error create customer answerDAO {0}", ex);
-        } finally {
-            con.cerrarConexion();
+            log.log(Level.SEVERE, "Connection pool timeout or error in answerDAO delete: {0}", ex);
+            return false;
         }
-        log.info("*** end answerDAO delete ***");
-        return valida;
     }
 
     @Override
@@ -144,57 +158,67 @@ public class answerDAO implements interfaces<answerDTO> {
     @Override
     public List<answerDTO> readMany(answerDTO dto) {
         log.info("*** Start answerDAO readMany ***");
-        conexionBD con = getConnection();
-        PreparedStatement ps;
-        ResultSet res;
         ArrayList<answerDTO> answerList = new ArrayList<>();
-        answerDTO answerVal = new answerDTO();
-        int i = 0;
         try {
+            conexionBD con = getConnection();
+            PreparedStatement ps;
+            ResultSet res;
+            answerDTO answerVal = new answerDTO();
+            int i = 0;
+            try {
 
-            if (dto.getAnswerId() == 100) {
-                ps = con.getCnn().prepareStatement(SQL_READMANYPROJECT);
-                ps.setInt(1, dto.getIdProject());
-            } else {
-                log.info("**** readMany****** " + dto.getIdQuestion() + " " + dto.getIdProject() + " " + dto.getIdFrom());
-                ps = con.getCnn().prepareStatement(SQL_READMANY);
-                ps.setString(1, dto.getIdQuestion());
-                ps.setInt(2, dto.getIdProject());
-                ps.setString(3, dto.getIdFrom());
+                if (dto.getAnswerId() == 100) {
+                    ps = con.getCnn().prepareStatement(SQL_READMANYPROJECT);
+                    ps.setInt(1, dto.getIdProject());
+                } else {
+                    log.info("**** readMany****** " + dto.getIdQuestion() + " " + dto.getIdProject() + " " + dto.getIdFrom());
+                    ps = con.getCnn().prepareStatement(SQL_READMANY);
+                    ps.setString(1, dto.getIdQuestion());
+                    ps.setInt(2, dto.getIdProject());
+                    ps.setString(3, dto.getIdFrom());
+                }
+
+                res = ps.executeQuery();
+
+                while (res.next()) {
+                    answerList.add(new answerDTO(res.getString(1), res.getInt(2),
+                            res.getString(3), res.getInt(5), res.getString(6), res.getInt(7), res.getInt(8),
+                            res.getString(4)));
+                    i++;
+
+                }
+                if (i > 0) {
+                    error.setCode(0);
+                    error.setMessage("");
+                } else {
+                    error.setCode(11);
+                    error.setMessage("Error no data found");
+                }
+            } catch (SQLException ex) {
+                log.log(Level.SEVERE, "Error create customerWhatsappDTO {0}", ex);
+                error.setCode(-1);
+                error.setMessage("Error: " + ex);
+
+            } finally {
+                con.cerrarConexion();
             }
 
-            res = ps.executeQuery();
-
-            while (res.next()) {
-                answerList.add(new answerDTO(res.getString(1), res.getInt(2),
-                        res.getString(3), res.getInt(5), res.getString(6), res.getInt(7), res.getInt(8),
-                        res.getString(4)));
-                i++;
-
-            }
-            if (i > 0) {
-                error.setCode(0);
-                error.setMessage("");
+            if (i == 0) {
+                answerVal.setError(error);
+                answerList.add(answerVal);
             } else {
-                error.setCode(11);
-                error.setMessage("Error no data found");
+                answerVal = answerList.get(0);
+                answerVal.setError(error);
+                answerList.set(0, answerVal);
             }
         } catch (SQLException ex) {
-            log.log(Level.SEVERE, "Error create customerWhatsappDTO {0}", ex);
-            error.setCode(-1);
-            error.setMessage("Error: " + ex);
-
-        } finally {
-            con.cerrarConexion();
-        }
-
-        if (i == 0) {
-            answerVal.setError(error);
-            answerList.add(answerVal);
-        } else {
-            answerVal = answerList.get(0);
-            answerVal.setError(error);
-            answerList.set(0, answerVal);
+            log.log(Level.SEVERE, "Connection pool timeout or error in answerDAO readMany: {0}", ex);
+            answerDTO errorDto = new answerDTO();
+            msgError errorMsg = new msgError();
+            errorMsg.setCode(-1);
+            errorMsg.setMessage("Connection pool timeout: " + ex.getMessage());
+            errorDto.setError(errorMsg);
+            answerList.add(errorDto);
         }
         log.info("*** End answerDAO readMany ***");
         return answerList;
@@ -203,38 +227,48 @@ public class answerDAO implements interfaces<answerDTO> {
     @Override
     public List<answerDTO> readAll() {
         log.info("*** Start answerDAO readAll ***");
-        conexionBD con = getConnection();
-        PreparedStatement ps;
-        ResultSet res;
         ArrayList<answerDTO> answerList = new ArrayList<>();
-        answerDTO answerVal = new answerDTO();
         try {
-            ps = con.getCnn().prepareStatement(SQL_READALL);
+            conexionBD con = getConnection();
+            PreparedStatement ps;
+            ResultSet res;
+            answerDTO answerVal = new answerDTO();
+            try {
+                ps = con.getCnn().prepareStatement(SQL_READALL);
 
-            res = ps.executeQuery();
-            int i = 0;
-            while (res.next()) {
-                answerList.add(new answerDTO(res.getString(1), res.getInt(2), res.getString(3), res.getInt(5),
-                        res.getString(6), res.getInt(7), res.getInt(8), res.getString(4)));
-                i++;
+                res = ps.executeQuery();
+                int i = 0;
+                while (res.next()) {
+                    answerList.add(new answerDTO(res.getString(1), res.getInt(2), res.getString(3), res.getInt(5),
+                            res.getString(6), res.getInt(7), res.getInt(8), res.getString(4)));
+                    i++;
 
+                }
+                if (i > 0) {
+                    error.setCode(0);
+                    error.setMessage("");
+                } else {
+                    error.setCode(11);
+                    error.setMessage("Error no data found");
+                }
+            } catch (SQLException ex) {
+                log.log(Level.SEVERE, "Error create customerWhatsappDTO {0}", ex);
+                error.setCode(-1);
+                error.setMessage("Error: " + ex);
+            } finally {
+                con.cerrarConexion();
             }
-            if (i > 0) {
-                error.setCode(0);
-                error.setMessage("");
-            } else {
-                error.setCode(11);
-                error.setMessage("Error no data found");
-            }
+            answerVal.setError(error);
+            answerList.add(answerVal);
         } catch (SQLException ex) {
-            log.log(Level.SEVERE, "Error create customerWhatsappDTO {0}", ex);
-            error.setCode(-1);
-            error.setMessage("Error: " + ex);
-        } finally {
-            con.cerrarConexion();
+            log.log(Level.SEVERE, "Connection pool timeout or error in answerDAO readAll: {0}", ex);
+            answerDTO errorDto = new answerDTO();
+            msgError errorMsg = new msgError();
+            errorMsg.setCode(-1);
+            errorMsg.setMessage("Connection pool timeout: " + ex.getMessage());
+            errorDto.setError(errorMsg);
+            answerList.add(errorDto);
         }
-        answerVal.setError(error);
-        answerList.add(answerVal);
         log.info("*** end answerDAO readAll ***");
         return answerList;
     }

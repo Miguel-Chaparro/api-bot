@@ -37,8 +37,18 @@ public class projectsDAO implements interfaces<projectDTO> {
 
        
     static final Logger log = Logger.getLogger(projectsDAO.class.getName());
-     private conexionBD getConnection() {
-        return conexionBD.saberEstado();
+    
+    /**
+     * Helper method to get fresh connection for each operation
+     * Returns null if connection pool timeout - caller must check for null
+     */
+    private conexionBD getConnection() {
+        try {
+            return conexionBD.saberEstado();
+        } catch (Exception ex) {
+            log.log(Level.SEVERE, "Connection pool timeout - all connections busy: {0}", ex.getMessage());
+            return null;
+        }
     }
     @Override
     public boolean create(projectDTO dto) {

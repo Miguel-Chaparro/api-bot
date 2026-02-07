@@ -15,6 +15,7 @@ public class DatabaseHelper {
     /**
      * Execute a database operation with automatic connection management
      * Ensures the connection is always closed/returned to the pool
+     * Handles connection pool timeouts gracefully
      * 
      * Usage example:
      * DatabaseHelper.withConnection(connection -> {
@@ -26,9 +27,9 @@ public class DatabaseHelper {
     public static <T> T withConnection(ConnectionOperation<T> operation) {
         conexionBD conn = null;
         try {
-            conn = conexionBD.saberEstado();
+            conn = conexionBD.saberEstado();  // May return instance with null cnn if pool exhausted
             if (conn == null || conn.getCnn() == null) {
-                throw new RuntimeException("Could not obtain database connection");
+                throw new RuntimeException("Connection pool exhausted - all 20 connections busy or database unreachable");
             }
             return operation.execute(conn.getCnn());
         } catch (Exception e) {
@@ -36,20 +37,25 @@ public class DatabaseHelper {
             throw new RuntimeException("Database operation failed", e);
         } finally {
             if (conn != null) {
-                conn.cerrarConexion();
+                try {
+                    conn.cerrarConexion();
+                } catch (Exception e) {
+                    logg.log(Level.SEVERE, "Error closing connection: {0}", e.getMessage());
+                }
             }
         }
     }
 
     /**
      * Execute a database operation without return value
+     * Handles connection pool timeouts gracefully
      */
     public static void withConnectionVoid(VoidConnectionOperation operation) {
         conexionBD conn = null;
         try {
-            conn = conexionBD.saberEstado();
+            conn = conexionBD.saberEstado();  // May return instance with null cnn if pool exhausted
             if (conn == null || conn.getCnn() == null) {
-                throw new RuntimeException("Could not obtain database connection");
+                throw new RuntimeException("Connection pool exhausted - all 20 connections busy or database unreachable");
             }
             operation.execute(conn.getCnn());
         } catch (Exception e) {
@@ -57,7 +63,11 @@ public class DatabaseHelper {
             throw new RuntimeException("Database operation failed", e);
         } finally {
             if (conn != null) {
-                conn.cerrarConexion();
+                try {
+                    conn.cerrarConexion();
+                } catch (Exception e) {
+                    logg.log(Level.SEVERE, "Error closing connection: {0}", e.getMessage());
+                }
             }
         }
     }

@@ -21,14 +21,25 @@ public class UserDAO implements interfaces<UserDTO> {
 
     /**
      * Helper method to get fresh connection for each operation
+     * Returns null if connection pool timeout - caller must check for null
      */
     private conexionBD getConnection() {
-        return conexionBD.saberEstado();
+        try {
+            return conexionBD.saberEstado();
+        } catch (Exception ex) {
+            log.log(Level.SEVERE, "Connection pool timeout - all connections busy: {0}", ex.getMessage());
+            return null;  // Signal that connection couldn't be obtained
+        }
     }
 
     public boolean exists(String id) {
         log.info("*** Start UserDAO exists ***");
         conexionBD con = getConnection();
+        if (con == null) {
+            log.severe("Cannot connect to database - pool exhausted");
+            return false;
+        }
+        
         PreparedStatement ps;
         ResultSet res;
         boolean exists = false;
@@ -41,7 +52,7 @@ public class UserDAO implements interfaces<UserDTO> {
             if (res.next()) {
                 exists = res.getInt(1) > 0;
             }
-        } catch (SQLException ex) {
+        } catch (Exception ex) {
             log.log(Level.SEVERE, "Error checking if user exists {0}", ex);
         } finally {
             con.cerrarConexion();
@@ -86,7 +97,7 @@ public class UserDAO implements interfaces<UserDTO> {
             int result = ps.executeUpdate();
             success = result > 0;
             
-        } catch (SQLException ex) {
+        } catch (Exception ex) {
             log.log(Level.SEVERE, "Error creating user {0}", ex);
         } finally {
             con.cerrarConexion();
@@ -131,7 +142,7 @@ public class UserDAO implements interfaces<UserDTO> {
             int result = ps.executeUpdate();
             success = result > 0;
             
-        } catch (SQLException ex) {
+        } catch (Exception ex) {
             log.log(Level.SEVERE, "Error updating user {0}", ex);
         } finally {
             con.cerrarConexion();
@@ -194,7 +205,7 @@ public class UserDAO implements interfaces<UserDTO> {
                 user.setNumeroIdentificacion(rs.getString("numero_identificacion"));
                 users.add(user);
             }
-        } catch (SQLException ex) {
+        } catch (Exception ex) {
             log.log(Level.SEVERE, "Error getting all users", ex);
         } finally {
             con.cerrarConexion();
@@ -241,7 +252,7 @@ public class UserDAO implements interfaces<UserDTO> {
                 // salir del while
                 return user;
             }
-        } catch (SQLException ex) {
+        } catch (Exception ex) {
             log.log(Level.SEVERE, "Error reading user by id", ex);
         } finally {
             con.cerrarConexion();
@@ -286,7 +297,7 @@ public class UserDAO implements interfaces<UserDTO> {
                 user.setNumeroIdentificacion(rs.getString("numero_identificacion"));
                 users.add(user);
             }
-        } catch (SQLException ex) {
+        } catch (Exception ex) {
             log.log(Level.SEVERE, "Error getting users by empresa_id", ex);
         } finally {
             con.cerrarConexion();

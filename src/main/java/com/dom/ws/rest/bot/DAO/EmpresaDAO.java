@@ -22,9 +22,16 @@ public class EmpresaDAO implements interfaces<EmpresaDTO> {
 
     /**
      * Helper method to get fresh connection for each operation
+     * Returns null if connection pool timeout - caller must check for null
      */
     private conexionBD getConnection() {
-        return conexionBD.saberEstado();
+        try {
+            return conexionBD.saberEstado();
+        } catch (Exception ex) {
+            java.util.logging.Logger.getLogger(EmpresaDAO.class.getName())
+                .log(java.util.logging.Level.SEVERE, "Connection pool timeout: {0}", ex.getMessage());
+            return null;
+        }
     }
 
     @Override

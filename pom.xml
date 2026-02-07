@@ -210,6 +210,8 @@
                     <source>1.8</source>
                     <target>1.8</target>
                     <encoding>${project.build.sourceEncoding}</encoding>
+                    <!-- Suppress unnecessary catch warnings from connection pool refactoring -->
+                    <showWarnings>false</showWarnings>
                 </configuration>
             </plugin>
         </plugins>

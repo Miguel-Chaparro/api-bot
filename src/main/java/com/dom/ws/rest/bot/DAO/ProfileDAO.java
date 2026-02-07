@@ -19,9 +19,15 @@ public class ProfileDAO {
 
     /**
      * Helper method to get fresh connection for each operation
+     * Returns null if connection pool timeout - caller must check for null
      */
     private conexionBD getConnection() {
-        return conexionBD.saberEstado();
+        try {
+            return conexionBD.saberEstado();
+        } catch (Exception ex) {
+            log.log(Level.SEVERE, "Connection pool timeout - all connections busy: {0}", ex.getMessage());
+            return null;
+        }
     }
     
     public List<ProfileDTO> getUserProfiles(String userId) {

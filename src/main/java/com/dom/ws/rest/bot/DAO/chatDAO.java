@@ -34,8 +34,18 @@ public class chatDAO implements interfaces<chatDTO> {
        /**
      * Helper method to get fresh connection for each operation
      */
+    /**
+     * Helper method to get fresh connection for each operation
+     * Returns null if connection pool timeout - caller must check for null
+     */
     private conexionBD getConnection() {
-        return conexionBD.saberEstado();
+        try {
+            return conexionBD.saberEstado();
+        } catch (Exception ex) {
+            java.util.logging.Logger.getLogger(chatDAO.class.getName())
+                .log(java.util.logging.Level.SEVERE, "Connection pool timeout: {0}", ex.getMessage());
+            return null;
+        }
     }
 
     static final Logger log = Logger.getLogger(chatDAO.class.getName());
@@ -43,80 +53,94 @@ public class chatDAO implements interfaces<chatDTO> {
     @Override
     public boolean create(chatDTO dto) {
         log.info("*** Start chatDAO create ***");
-        conexionBD con = getConnection();
-        PreparedStatement ps;
-        boolean valida = false;
         try {
-            ps = con.getCnn().prepareStatement(SQL_INSERT);
-            ps.setString(1, dto.getIdWhatsapp());
-            int i = 0;
-            i = ps.executeUpdate();
+            conexionBD con = getConnection();
+            PreparedStatement ps;
+            boolean valida = false;
+            try {
+                ps = con.getCnn().prepareStatement(SQL_INSERT);
+                ps.setString(1, dto.getIdWhatsapp());
+                int i = 0;
+                i = ps.executeUpdate();
 
-            if (i > 0) {
-                valida = true;
+                if (i > 0) {
+                    valida = true;
+                }
+            } catch (SQLException ex) {
+                log.log(Level.SEVERE, "Error create customer chatDTO {0}", ex);
+
+            } finally {
+                con.cerrarConexion();
             }
-        } catch (SQLException ex) {
-            log.log(Level.SEVERE, "Error create customer chatDTO {0}", ex);
-
-        } finally {
-            con.cerrarConexion();
+            log.info("*** end chatDAO create ***");
+            return valida;
+        } catch (Exception ex) {
+            log.log(Level.SEVERE, "Connection pool timeout or error in chatDAO create: {0}", ex);
+            return false;
         }
-        log.info("*** end chatDAO create ***");
-        return valida;
     }
 
     @Override
     public boolean update(chatDTO dto) {
         log.info("*** Start chatDAO update ***");
-        conexionBD con = getConnection();
-        PreparedStatement ps;
-        boolean valida = false;
         try {
-            ps = con.getCnn().prepareStatement(SQL_UPDATE);
-            ps.setString(1, dto.getMessage());
-            ps.setString(2, dto.getIdCustomer());
-            ps.setTimestamp(3, dto.getTime());
-            ps.setString(4, dto.getIdWhatsapp());
-            int i = 0;
-            i = ps.executeUpdate();
+            conexionBD con = getConnection();
+            PreparedStatement ps;
+            boolean valida = false;
+            try {
+                ps = con.getCnn().prepareStatement(SQL_UPDATE);
+                ps.setString(1, dto.getMessage());
+                ps.setString(2, dto.getIdCustomer());
+                ps.setTimestamp(3, dto.getTime());
+                ps.setString(4, dto.getIdWhatsapp());
+                int i = 0;
+                i = ps.executeUpdate();
 
-            if (i > 0) {
-                valida = true;
+                if (i > 0) {
+                    valida = true;
+                }
+            } catch (SQLException ex) {
+                log.log(Level.SEVERE, "Error create customer chatDTO {0}", ex);
+
+            } finally {
+                con.cerrarConexion();
             }
-        } catch (SQLException ex) {
-            log.log(Level.SEVERE, "Error create customer chatDTO {0}", ex);
-
-        } finally {
-            con.cerrarConexion();
+            log.info("*** end questionsDAO update ***");
+            return valida;
+        } catch (Exception ex) {
+            log.log(Level.SEVERE, "Connection pool timeout or error in chatDAO update: {0}", ex);
+            return false;
         }
-        log.info("*** end questionsDAO update ***");
-        return valida;
-
     }
 
     @Override
     public boolean delete(chatDTO dto) {
         log.info("*** Start chatDAO update ***");
-        conexionBD con = getConnection();
-        PreparedStatement ps;
-        boolean valida = false;
         try {
-            ps = con.getCnn().prepareStatement(SQL_DELETE);
-            ps.setString(1, dto.getIdWhatsapp());
-            int i = 0;
-            i = ps.executeUpdate();
+            conexionBD con = getConnection();
+            PreparedStatement ps;
+            boolean valida = false;
+            try {
+                ps = con.getCnn().prepareStatement(SQL_DELETE);
+                ps.setString(1, dto.getIdWhatsapp());
+                int i = 0;
+                i = ps.executeUpdate();
 
-            if (i > 0) {
-                valida = true;
+                if (i > 0) {
+                    valida = true;
+                }
+            } catch (SQLException ex) {
+                log.log(Level.SEVERE, "Error create customer chatDTO {0}", ex);
+
+            } finally {
+                con.cerrarConexion();
             }
-        } catch (SQLException ex) {
-            log.log(Level.SEVERE, "Error create customer chatDTO {0}", ex);
-
-        } finally {
-            con.cerrarConexion();
+            log.info("*** end questionsDAO update ***");
+            return valida;
+        } catch (Exception ex) {
+            log.log(Level.SEVERE, "Connection pool timeout or error in chatDAO delete: {0}", ex);
+            return false;
         }
-        log.info("*** end questionsDAO update ***");
-        return valida;
     }
 
     @Override
@@ -130,75 +154,95 @@ public class chatDAO implements interfaces<chatDTO> {
     @Override
     public List<chatDTO> readMany(chatDTO dto) {
         log.info("***start chatDAO readMany***");
-        conexionBD con = getConnection();
-        PreparedStatement ps;
-        ResultSet res;
         ArrayList<chatDTO> answerList = new ArrayList<>();
-        chatDTO answerVal = new chatDTO();
         try {
-            ps = con.getCnn().prepareStatement(SQL_READMANY);
-            ps.setString(1, dto.getIdWhatsapp());
-            res = ps.executeQuery();
-            int i = 0;
-            while (res.next()) {
-                answerList.add(new chatDTO(res.getInt(1), res.getString(2), res.getString(3), res.getString(4), res.getTimestamp(5)));
-                i++;
-                if (i > 0) {
-                    error.setCode(0);
-                    error.setMessage("");
-                } else {
-                    error.setCode(11);
-                    error.setMessage("Error no data found");
+            conexionBD con = getConnection();
+            PreparedStatement ps;
+            ResultSet res;
+            chatDTO answerVal = new chatDTO();
+            try {
+                ps = con.getCnn().prepareStatement(SQL_READMANY);
+                ps.setString(1, dto.getIdWhatsapp());
+                res = ps.executeQuery();
+                int i = 0;
+                while (res.next()) {
+                    answerList.add(new chatDTO(res.getInt(1), res.getString(2), res.getString(3), res.getString(4), res.getTimestamp(5)));
+                    i++;
+                    if (i > 0) {
+                        error.setCode(0);
+                        error.setMessage("");
+                    } else {
+                        error.setCode(11);
+                        error.setMessage("Error no data found");
+                    }
                 }
-            }
-        } catch (SQLException ex) {
-            log.log(Level.SEVERE, "Error create customerWhatsappDTO {0}", ex);
-            error.setCode(-1);
-            error.setMessage("Error: " + ex);
+            } catch (SQLException ex) {
+                log.log(Level.SEVERE, "Error create customerWhatsappDTO {0}", ex);
+                error.setCode(-1);
+                error.setMessage("Error: " + ex);
 
-        } finally {
-            con.cerrarConexion();
+            } finally {
+                con.cerrarConexion();
+            }
+            answerVal.setError(error);
+            answerList.add(answerVal);
+        } catch (Exception ex) {
+            log.log(Level.SEVERE, "Connection pool timeout or error in chatDAO readMany: {0}", ex);
+            chatDTO errorDto = new chatDTO();
+            msgError errorMsg = new msgError();
+            errorMsg.setCode(-1);
+            errorMsg.setMessage("Connection pool timeout: " + ex.getMessage());
+            errorDto.setError(errorMsg);
+            answerList.add(errorDto);
         }
-        answerVal.setError(error);
-        answerList.add(answerVal);
         return answerList;
     }
 
     @Override
     public List<chatDTO> readAll() {
         log.info("*** end answerDAO readMany ***");
-        conexionBD con = getConnection();
-        PreparedStatement ps;
-        ResultSet res;
-        @SuppressWarnings("MismatchedQueryAndUpdateOfCollection")
         ArrayList<chatDTO> answerList = new ArrayList<>();
-        chatDTO answerVal = new chatDTO();
         try {
-            ps = con.getCnn().prepareStatement(SQL_READALL);
+            conexionBD con = getConnection();
+            PreparedStatement ps;
+            ResultSet res;
+            @SuppressWarnings("MismatchedQueryAndUpdateOfCollection")
+            chatDTO answerVal = new chatDTO();
+            try {
+                ps = con.getCnn().prepareStatement(SQL_READALL);
 
-            res = ps.executeQuery();
-            int i = 0;
-            while (res.next()) {
-                answerList.add(new chatDTO(res.getInt(1), res.getString(2), res.getString(3), res.getString(4), res.getTimestamp(5)));
-                i++;
-                if (i > 0) {
-                    error.setCode(0);
-                    error.setMessage("");
-                } else {
-                    error.setCode(11);
-                    error.setMessage("Error no data found");
+                res = ps.executeQuery();
+                int i = 0;
+                while (res.next()) {
+                    answerList.add(new chatDTO(res.getInt(1), res.getString(2), res.getString(3), res.getString(4), res.getTimestamp(5)));
+                    i++;
+                    if (i > 0) {
+                        error.setCode(0);
+                        error.setMessage("");
+                    } else {
+                        error.setCode(11);
+                        error.setMessage("Error no data found");
+                    }
                 }
-            }
-        } catch (SQLException ex) {
-            log.log(Level.SEVERE, "Error create customerWhatsappDTO {0}", ex);
-            error.setCode(-1);
-            error.setMessage("Error: " + ex);
+            } catch (SQLException ex) {
+                log.log(Level.SEVERE, "Error create customerWhatsappDTO {0}", ex);
+                error.setCode(-1);
+                error.setMessage("Error: " + ex);
 
-        } finally {
-            con.cerrarConexion();
+            } finally {
+                con.cerrarConexion();
+            }
+            answerVal.setError(error);
+            answerList.add(answerVal);
+        } catch (Exception ex) {
+            log.log(Level.SEVERE, "Connection pool timeout or error in chatDAO readAll: {0}", ex);
+            chatDTO errorDto = new chatDTO();
+            msgError errorMsg = new msgError();
+            errorMsg.setCode(-1);
+            errorMsg.setMessage("Connection pool timeout: " + ex.getMessage());
+            errorDto.setError(errorMsg);
+            answerList.add(errorDto);
         }
-        answerVal.setError(error);
-        answerList.add(answerVal);
         return answerList;
     }
 
