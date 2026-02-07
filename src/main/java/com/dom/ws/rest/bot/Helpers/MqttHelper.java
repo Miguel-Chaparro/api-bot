@@ -4,6 +4,7 @@ import org.eclipse.paho.client.mqttv3.MqttClient;
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
+import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
 import java.util.logging.Logger;
 import java.util.logging.Level;
 
@@ -16,7 +17,6 @@ public class MqttHelper {
     private static final int QOS = 2;
     private static final boolean RETAIN = true;
     private static final int KEEPALIVE = 60;
-    private static final int RECONNECT_PERIOD = 1000;
     
     /**
      * Envía un mensaje MQTT a un cliente notificándole sobre su nuevo contrato
@@ -50,8 +50,8 @@ public class MqttHelper {
             // Generar clientId único
             String clientId = "apiBot_" + System.currentTimeMillis();
             
-            // Crear cliente MQTT
-            client = new MqttClient(BROKER_URL, clientId);
+            // Crear cliente MQTT con MemoryPersistence para evitar errores de creación de directorio
+            client = new MqttClient(BROKER_URL, clientId, new MemoryPersistence());
             
             // Configurar opciones de conexión
             MqttConnectOptions options = new MqttConnectOptions();

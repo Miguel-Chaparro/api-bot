@@ -5,7 +5,6 @@ import com.dom.ws.rest.bot.Conexion.interfaces;
 import com.dom.ws.rest.bot.DTO.UserDTO;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
