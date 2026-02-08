@@ -97,7 +97,7 @@ import java.util.Calendar;
 @Provider
 public class api {
 
-    private final ExecutorService executorService = java.util.concurrent.Executors.newCachedThreadPool();
+    private static final ExecutorService executorService = java.util.concurrent.Executors.newCachedThreadPool();
 
     /**
      * agregar cookie para autenticacion

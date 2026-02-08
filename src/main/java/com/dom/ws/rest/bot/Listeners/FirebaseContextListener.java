@@ -3,6 +3,8 @@ package com.dom.ws.rest.bot.Listeners;
 import com.dom.ws.rest.bot.Conexion.FirebaseInitializer;
 import com.dom.ws.rest.bot.Conexion.ConnectionPool;
 import com.google.firebase.FirebaseApp;
+import com.mysql.cj.jdbc.AbandonedConnectionCleanupThread;
+
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 import javax.servlet.annotation.WebListener;
@@ -60,7 +62,14 @@ public class FirebaseContextListener implements ServletContextListener {
             log.severe("Error al limpiar recursos de Firebase: " + e.getMessage());
             e.printStackTrace();
         }
-        
+        // Detener hilo de limpieza de MySQL (AGREGAR ESTO)
+        try {
+            AbandonedConnectionCleanupThread.checkedShutdown();
+            log.info("MySQL AbandonedConnectionCleanupThread detenido correctamente");
+        } catch (Exception e) {
+            log.severe("Error al detener MySQL AbandonedConnectionCleanupThread: " + e.getMessage());
+        }
+
         // Limpiar JDBC Drivers
         try {
             log.info("Limpiando JDBC Drivers...");
