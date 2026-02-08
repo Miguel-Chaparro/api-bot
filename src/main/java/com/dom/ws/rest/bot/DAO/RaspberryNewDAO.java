@@ -52,6 +52,11 @@ public class RaspberryNewDAO {
             ResultSet rs = ps.executeQuery();
             if (rs.next())
                 return rs.getInt("raspberry_id");
+        }catch (Exception e) {
+            java.util.logging.Logger.getLogger(RaspberryNewDAO.class.getName())
+                .log(java.util.logging.Level.SEVERE, "Error getting raspberry ID by user ID: {0}", e.getMessage());
+        } finally {
+            conn.cerrarConexion();
         }
         return null;
     }
@@ -69,6 +74,11 @@ public class RaspberryNewDAO {
             ResultSet rs = ps.executeQuery();
             if (rs.next())
                 return rs.getInt("raspberry_id");
+        } catch (Exception e) {
+            java.util.logging.Logger.getLogger(RaspberryNewDAO.class.getName())
+                .log(java.util.logging.Level.SEVERE, "Error getting raspberry ID by user number: {0}", e.getMessage());
+        } finally {
+            conn.cerrarConexion();
         }
         return null;
     }
@@ -106,6 +116,11 @@ public class RaspberryNewDAO {
                 u.setDevice(rs.getString("device"));
                 list.add(u);
             }
+        } catch (Exception e) {
+            java.util.logging.Logger.getLogger(RaspberryNewDAO.class.getName())
+                .log(java.util.logging.Level.SEVERE, "Error getting users by role: {0}", e.getMessage());
+        } finally {
+            conn.cerrarConexion();
         }
         return list;
     }
@@ -130,6 +145,11 @@ public class RaspberryNewDAO {
                 ip.setGroup(rs.getString("grupo"));
                 list.add(ip);
             }
+        } catch (Exception e) {
+            java.util.logging.Logger.getLogger(RaspberryNewDAO.class.getName())
+                .log(java.util.logging.Level.SEVERE, "Error getting IPs: {0}", e.getMessage());
+        } finally {
+            conn.cerrarConexion();
         }
         return list;
     }
@@ -157,6 +177,11 @@ public class RaspberryNewDAO {
                 d.setTypeMicrotik(rs.getBoolean("type_mikrotik"));
                 list.add(d);
             }
+        } catch (Exception e) {
+            java.util.logging.Logger.getLogger(RaspberryNewDAO.class.getName())
+                .log(java.util.logging.Level.SEVERE, "Error getting devices: {0}", e.getMessage());
+        } finally {
+            conn.cerrarConexion();
         }
         return list;
     }
@@ -174,6 +199,11 @@ public class RaspberryNewDAO {
             ResultSet rs = ps.executeQuery();
             if (rs.next())
                 return rs.getBoolean("mikrotik");
+        } catch (Exception e) {
+            java.util.logging.Logger.getLogger(RaspberryNewDAO.class.getName())
+                .log(java.util.logging.Level.SEVERE, "Error checking if mikrotik: {0}", e.getMessage());
+        } finally {
+            conn.cerrarConexion();
         }
         return false;
     }
@@ -192,6 +222,11 @@ public class RaspberryNewDAO {
             ResultSet rs = ps.executeQuery();
             if (rs.next())
                 return admin ? rs.getString("name_admin") : rs.getString("name_tec");
+        } catch (Exception e) {
+            java.util.logging.Logger.getLogger(RaspberryNewDAO.class.getName())
+                .log(java.util.logging.Level.SEVERE, "Error getting device name: {0}", e.getMessage());
+        } finally {
+            conn.cerrarConexion();
         }
         return null;
     }
@@ -325,6 +360,7 @@ public class RaspberryNewDAO {
             throw e;
         } finally {
             conn.getCnn().setAutoCommit(true);
+            conn.cerrarConexion();
         }
     }
 
@@ -345,6 +381,11 @@ public class RaspberryNewDAO {
                 RaspberryNewDTO dto = buildRaspberryResponse(raspberryId);
                 raspberryList.add(dto);
             }
+        } catch (Exception e) {
+            java.util.logging.Logger.getLogger(RaspberryNewDAO.class.getName())
+                .log(java.util.logging.Level.SEVERE, "Error getting all raspberrys: {0}", e.getMessage());
+        } finally {
+            conn.cerrarConexion();
         }
         return raspberryList;
     }
@@ -374,10 +415,16 @@ public class RaspberryNewDAO {
                 ps.setString(4, operator.getName());
                 ps.setString(5, operator.getDevice());
                 ps.addBatch();
-            }
+            } 
             ps.executeBatch();
             return true;
-        }
+        } catch (Exception e) {
+            java.util.logging.Logger.getLogger(RaspberryNewDAO.class.getName())
+                .log(java.util.logging.Level.SEVERE, "Error creating user raspberry relation: {0}", e.getMessage());
+            return false;
+        } finally {
+            conn.cerrarConexion();
+        }   
     }
 
     // Método para crear una Raspberry solo con los campos de la tabla
@@ -396,7 +443,13 @@ public class RaspberryNewDAO {
             ps.setString(3, dto.getTopic());
             ps.setBoolean(4, dto.isMikrotik());
             return ps.executeUpdate() > 0;
-        }
+        } catch (Exception e) {
+            java.util.logging.Logger.getLogger(RaspberryNewDAO.class.getName())
+                .log(java.util.logging.Level.SEVERE, "Error creating raspberry: {0}", e.getMessage());
+            return false;
+        } finally {
+            conn.cerrarConexion();
+        }   
     }
 
     // Método para obtener todas las Raspberrys solo con los campos de la tabla
@@ -421,6 +474,11 @@ public class RaspberryNewDAO {
                 dto.setMikrotik(rs.getBoolean("mikrotik"));
                 raspberryList.add(dto);
             }
+        } catch (Exception e) {
+            java.util.logging.Logger.getLogger(RaspberryNewDAO.class.getName())
+                .log(java.util.logging.Level.SEVERE, "Error getting all raspberrys simple: {0}", e.getMessage());
+        } finally {
+            conn.cerrarConexion();
         }
         return raspberryList;
     }
@@ -444,7 +502,13 @@ public class RaspberryNewDAO {
             ps.setString(6, dto.getTopic());
             ps.setString(7, dto.getDevice());
             return ps.executeUpdate() > 0;
-        }
+        } catch (Exception e) {
+            java.util.logging.Logger.getLogger(RaspberryNewDAO.class.getName())
+                .log(java.util.logging.Level.SEVERE, "Error creating raspberry user relation: {0}", e.getMessage());
+            return false;
+        } finally {
+            conn.cerrarConexion();
+        }   
     }
 
     // Método para actualizar una Raspberry solo con los campos de la tabla
@@ -464,6 +528,12 @@ public class RaspberryNewDAO {
             ps.setBoolean(4, dto.isMikrotik());
             ps.setInt(5, dto.getId());
             return ps.executeUpdate() > 0;
+        } catch (Exception e) {
+            java.util.logging.Logger.getLogger(RaspberryNewDAO.class.getName())
+                .log(java.util.logging.Level.SEVERE, "Error updating raspberry: {0}", e.getMessage());
+            return false;
+        } finally {
+            conn.cerrarConexion();
         }
     }
 
@@ -493,7 +563,12 @@ public class RaspberryNewDAO {
                 dto.setDevice(rs.getString("device"));
                 relations.add(dto);
             }
-        }
+        } catch (Exception e) {
+            java.util.logging.Logger.getLogger(RaspberryNewDAO.class.getName())
+                .log(java.util.logging.Level.SEVERE, "Error getting raspberry user relations: {0}", e.getMessage());
+        } finally {
+            conn.cerrarConexion();
+        }   
         return relations;
     }
 
@@ -520,7 +595,15 @@ public class RaspberryNewDAO {
                     dto.setMikrotik(rs.getBoolean("mikrotik"));
                     raspberryList.add(dto);
                 }
-            }
+            } catch (Exception e) {
+                java.util.logging.Logger.getLogger(RaspberryNewDAO.class.getName())
+                    .log(java.util.logging.Level.SEVERE, "Error getting raspberrys simple by user ID: {0}", e.getMessage());
+            } 
+        } catch (Exception e) {
+            java.util.logging.Logger.getLogger(RaspberryNewDAO.class.getName())
+                .log(java.util.logging.Level.SEVERE, "Error getting raspberrys simple by user ID: {0}", e.getMessage());
+        } finally {
+            conn.cerrarConexion();
         }
 
         return raspberryList;
@@ -549,6 +632,11 @@ public class RaspberryNewDAO {
                 }
             }
 
+        } catch (Exception e) {
+            java.util.logging.Logger.getLogger(RaspberryNewDAO.class.getName())
+                .log(java.util.logging.Level.SEVERE, "Error getting IPs by raspberry ID: {0}", e.getMessage());
+        } finally {
+            conn.cerrarConexion();
         }
         return list;
     }
@@ -571,7 +659,13 @@ public class RaspberryNewDAO {
                 ps.setInt(4, ipDTO.getId());
                 ps.setInt(5, raspberryId);
                 return ps.executeUpdate() > 0;
-            }
+            } catch (Exception e) {
+                java.util.logging.Logger.getLogger(RaspberryNewDAO.class.getName())
+                    .log(java.util.logging.Level.SEVERE, "Error creating or updating IP: {0}", e.getMessage());
+                return false;
+            } finally {
+                conn.cerrarConexion();
+            }   
         } else {
             // Crear
             conexionBD conn = getConnection();
@@ -587,6 +681,12 @@ public class RaspberryNewDAO {
                 ps.setString(3, ipDTO.getNodo());
                 ps.setString(4, ipDTO.getGroup());
                 return ps.executeUpdate() > 0;
+            } catch (Exception e) {
+                java.util.logging.Logger.getLogger(RaspberryNewDAO.class.getName())
+                    .log(java.util.logging.Level.SEVERE, "Error creating or updating IP: {0}", e.getMessage());
+                return false;
+            } finally {
+                conn.cerrarConexion();
             }
         }
     }
@@ -617,6 +717,11 @@ public class RaspberryNewDAO {
                     list.add(d);
                 }
             }
+        } catch (Exception e) {
+            java.util.logging.Logger.getLogger(RaspberryNewDAO.class.getName())
+                .log(java.util.logging.Level.SEVERE, "Error getting devices by raspberry ID: {0}", e.getMessage());
+        } finally {
+            conn.cerrarConexion();
         }
         return list;
     }
@@ -643,6 +748,12 @@ public class RaspberryNewDAO {
                 ps.setInt(8, Integer.parseInt(deviceDTO.getId())); // Assuming deviceDTO.getId() returns a valid ID
                 ps.setInt(9, raspberryId);
                 return ps.executeUpdate() > 0;
+            } catch (Exception e) {
+                java.util.logging.Logger.getLogger(RaspberryNewDAO.class.getName())
+                    .log(java.util.logging.Level.SEVERE, "Error creating or updating device: {0}", e.getMessage());
+                return false;
+            } finally {
+                conn.cerrarConexion();
             }
         } else {
             // Crear
@@ -663,6 +774,12 @@ public class RaspberryNewDAO {
                 ps.setString(7, deviceDTO.getService());
                 ps.setBoolean(8, deviceDTO.isTypeMicrotik());
                 return ps.executeUpdate() > 0;
+            } catch (Exception e) {
+                java.util.logging.Logger.getLogger(RaspberryNewDAO.class.getName())
+                    .log(java.util.logging.Level.SEVERE, "Error creating or updating device: {0}", e.getMessage());
+                return false;
+            } finally {
+                conn.cerrarConexion();
             }
         }
     }
