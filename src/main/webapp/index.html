@@ -1,10 +1,159 @@
 <!DOCTYPE html>
-<html>
-    <head>
-        <title>Start Page</title>
-        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    </head>
-    <body>
-        <h1>Test 1</h1>
-    </body>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Página de Estado - Dommatos SAS</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: rgb(48, 48, 51);
+            color: white;
+            line-height: 1.6;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .container {
+            background-color: white;
+            border-radius: 12px;
+            width: 100%;
+            max-width: 600px;
+            padding: 40px;
+            text-align: center;
+            position: relative;
+        }
+        
+        .container::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 6px;
+            background-color: rgb(253, 185, 22);
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 25px;
+            color: rgb(48, 48, 51);
+            position: relative;
+            padding-bottom: 15px;
+        }
+        
+        h1::after {
+            content: "";
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 70px;
+            height: 4px;
+            background-color: rgb(253, 185, 22);
+            border-radius: 2px;
+        }
+        
+        .status-icon {
+            font-size: 4rem;
+            margin: 25px 0;
+            color: rgb(253, 185, 22);
+        }
+        
+        p {
+            font-size: 1.2rem;
+            margin: 15px 0;
+            color: rgb(48, 48, 51);
+        }
+        
+        .alert-box {
+            background-color: rgb(48, 48, 51);
+            border-left: 4px solid rgb(253, 185, 22);
+            padding: 15px;
+            margin: 25px 0;
+            border-radius: 0 4px 4px 0;
+            text-align: left;
+            font-weight: 500;
+            color: white;
+        }
+        
+        .alert-box strong {
+            color: rgb(253, 185, 22);
+        }
+        
+        .company-info {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+        }
+        
+        .company-name {
+            font-weight: bold;
+            font-size: 1.3rem;
+            color: rgb(48, 48, 51);
+            letter-spacing: 0.5px;
+        }
+        
+        .footer {
+            margin-top: 25px;
+            color: white;
+            font-size: 0.9rem;
+            text-align: center;
+            max-width: 600px;
+            padding: 15px;
+            background-color: rgb(48, 48, 51);
+            border-radius: 8px;
+            width: 100%;
+        }
+        
+        @media (max-width: 480px) {
+            .container {
+                padding: 25px;
+                margin: 10px;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .status-icon {
+                font-size: 3rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Página de Estado de la Aplicación</h1>
+        <div class="status-icon">⚠️</div>
+        <p>Esta página proporciona información sobre el estado actual de la aplicación.</p>
+        
+        <div class="alert-box">
+            <strong>ADVERTENCIA:</strong> Esta página es exclusivamente informativa y <strong>no puede ejecutar ninguna funcionalidad</strong> de la aplicación. No se pueden realizar operaciones, procesos o transacciones desde esta interfaz.
+        </div>
+        
+        <p>Para acceder a las funcionalidades completas de la aplicación, utilice los canales oficiales autorizados por Dommatos SAS.</p>
+        
+        <div class="company-info">
+            <p>Propiedad exclusiva de:</p>
+            <div class="company-name">DOMMATOS SAS</div>
+        </div>
+    </div>
+    
+    <div class="footer">
+        <p>Página de estado informativa - Sistema de monitoreo interno</p>
+        <p>© 2026 Dommatos SAS. Todos los derechos reservados.</p>
+    </div>
+</body>
 </html>
