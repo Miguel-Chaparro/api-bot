@@ -107,8 +107,8 @@ public class api {
      */
     @POST
     @Path(value = "/domBot")
-    @Produces({ MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN })
-    @Consumes({ MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN })
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
     @Operation(summary = "Bot de preguntas", description = "Procesa preguntas y respuestas del bot.", requestBody = @RequestBody(required = true, content = @Content(schema = @Schema(implementation = questionsAnswersReq.class))), responses = {
             @ApiResponse(responseCode = "200", description = "Respuesta del bot", content = @Content(schema = @Schema(implementation = answerResp.class))),
             @ApiResponse(responseCode = "500", description = "Error interno del servidor")
@@ -149,8 +149,8 @@ public class api {
      */
     @POST
     @Path(value = "/surveyBot")
-    @Produces({ MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN })
-    @Consumes({ MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN })
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
     @Operation(summary = "Bot de encuestas", description = "Procesa encuestas del bot.", requestBody = @RequestBody(required = true, content = @Content(schema = @Schema(implementation = questionsAnswersReq.class))), responses = {
             @ApiResponse(responseCode = "200", description = "Respuesta de la encuesta", content = @Content(schema = @Schema(implementation = answerResp.class))),
             @ApiResponse(responseCode = "500", description = "Error interno del servidor")
@@ -179,8 +179,8 @@ public class api {
      */
     @POST
     @Path(value = "/raspi")
-    @Produces({ MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN })
-    @Consumes({ MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN })
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
     @Operation(summary = "Bot de preguntas para Raspberry Pi", description = "Procesa preguntas y respuestas del bot para dispositivos Raspberry Pi.", requestBody = @RequestBody(required = true, content = @Content(schema = @Schema(implementation = questionsAnswersReq.class))), responses = {
             @ApiResponse(responseCode = "200", description = "Respuesta del bot", content = @Content(schema = @Schema(implementation = answerResp.class))),
             @ApiResponse(responseCode = "500", description = "Error interno del servidor")
@@ -209,7 +209,7 @@ public class api {
      */
     @GET
     @Path(value = "/getProjects")
-    @Produces({ MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN })
+    @Produces(MediaType.APPLICATION_JSON)
     @Operation(summary = "Obtener proyectos del usuario", description = "Devuelve los proyectos asociados al usuario autenticado.", responses = {
             @ApiResponse(responseCode = "200", description = "Lista de proyectos", content = @Content(schema = @Schema(implementation = projectsResp.class))),
             @ApiResponse(responseCode = "401", description = "No autorizado"),
@@ -269,8 +269,8 @@ public class api {
      */
     @POST
     @Path(value = "/getQuestionsAnswers")
-    @Produces({ MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN })
-    @Consumes({ MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN })
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
     @Operation(summary = "Obtener preguntas y respuestas", description = "Devuelve las preguntas y respuestas para un proyecto.", requestBody = @RequestBody(required = true, content = @Content(schema = @Schema(implementation = createProjectsReq.class))), responses = {
             @ApiResponse(responseCode = "200", description = "Preguntas y respuestas", content = @Content(schema = @Schema(implementation = getQuestionsAnswerResp.class))),
             @ApiResponse(responseCode = "500", description = "Error interno del servidor")
@@ -299,8 +299,8 @@ public class api {
      */
     @POST
     @Path(value = "/getQuestions")
-    @Produces({ MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN })
-    @Consumes({ MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN })
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
     @Operation(summary = "Obtener preguntas", description = "Devuelve las preguntas para un proyecto.", requestBody = @RequestBody(required = true, content = @Content(schema = @Schema(implementation = createProjectsReq.class))), responses = {
             @ApiResponse(responseCode = "200", description = "Preguntas", content = @Content(schema = @Schema(implementation = getQuestionsResp.class))),
             @ApiResponse(responseCode = "500", description = "Error interno del servidor")
@@ -329,8 +329,8 @@ public class api {
      */
     @POST
     @Path(value = "/getAnswers")
-    @Produces({ MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN })
-    @Consumes({ MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN })
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
     @Operation(summary = "Obtener respuestas", description = "Devuelve las respuestas para una pregunta de un proyecto.", requestBody = @RequestBody(required = true, content = @Content(schema = @Schema(implementation = answerReq.class))), responses = {
             @ApiResponse(responseCode = "200", description = "Respuestas", content = @Content(schema = @Schema(implementation = getAnswerResp.class))),
             @ApiResponse(responseCode = "500", description = "Error interno del servidor")
@@ -359,8 +359,8 @@ public class api {
      */
     @POST
     @Path(value = "/createProject")
-    @Produces({ MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN })
-    @Consumes({ MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN })
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
     @Operation(summary = "Crear proyecto", description = "Crea un nuevo proyecto.", requestBody = @RequestBody(required = true, content = @Content(schema = @Schema(implementation = projectDTO.class))), responses = {
             @ApiResponse(responseCode = "200", description = "Proyecto creado", content = @Content(schema = @Schema(implementation = projectDTO.class))),
             @ApiResponse(responseCode = "500", description = "Error interno del servidor")
@@ -390,8 +390,8 @@ public class api {
      */
     @POST
     @Path(value = "/createUpdateManyQuestions")
-    @Produces({ MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN })
-    @Consumes({ MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN })
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
     @Operation(summary = "Crear o actualizar muchas preguntas", description = "Crea o actualiza varias preguntas para un proyecto.", requestBody = @RequestBody(required = true, content = @Content(schema = @Schema(implementation = createQuestionsReq.class))), responses = {
             @ApiResponse(responseCode = "200", description = "Preguntas procesadas", content = @Content(schema = @Schema(implementation = createQuestionsResp.class))),
             @ApiResponse(responseCode = "500", description = "Error interno del servidor")
@@ -420,8 +420,8 @@ public class api {
      */
     @POST
     @Path(value = "/createUpdateOneQuestion")
-    @Produces({ MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN })
-    @Consumes({ MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN })
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
     @Operation(summary = "Crear o actualizar una pregunta", description = "Crea o actualiza una pregunta para un proyecto.", requestBody = @RequestBody(required = true, content = @Content(schema = @Schema(implementation = questionsDTO.class))), responses = {
             @ApiResponse(responseCode = "200", description = "Pregunta procesada", content = @Content(schema = @Schema(implementation = msgError.class))),
             @ApiResponse(responseCode = "500", description = "Error interno del servidor")
@@ -450,8 +450,8 @@ public class api {
      */
     @POST
     @Path(value = "/createUpdateOneAnswer")
-    @Produces({ MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN })
-    @Consumes({ MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN })
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
     @Operation(summary = "Crear o actualizar una respuesta", description = "Crea o actualiza una respuesta para una pregunta.", requestBody = @RequestBody(required = true, content = @Content(schema = @Schema(implementation = answerDTO.class))), responses = {
             @ApiResponse(responseCode = "200", description = "Respuesta procesada", content = @Content(schema = @Schema(implementation = msgError.class))),
             @ApiResponse(responseCode = "500", description = "Error interno del servidor")
@@ -480,8 +480,8 @@ public class api {
      */
     @POST
     @Path(value = "/updateProject")
-    @Produces({ MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN })
-    @Consumes({ MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN })
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
     @Operation(summary = "Actualizar proyecto", description = "Actualiza un proyecto existente.", requestBody = @RequestBody(required = true, content = @Content(schema = @Schema(implementation = projectDTO.class))), responses = {
             @ApiResponse(responseCode = "200", description = "Proyecto actualizado", content = @Content(schema = @Schema(implementation = msgError.class))),
             @ApiResponse(responseCode = "500", description = "Error interno del servidor")
@@ -510,8 +510,8 @@ public class api {
      */
     @POST
     @Path(value = "/configDevices")
-    @Produces({ MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN })
-    @Consumes({ MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN })
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
     @Operation(summary = "Obtener configuración de dispositivos", description = "Obtiene la configuración de dispositivos para un proyecto.", requestBody = @RequestBody(required = true, content = @Content(schema = @Schema(implementation = raspiReq.class))), responses = {
             @ApiResponse(responseCode = "200", description = "Configuración de dispositivos", content = @Content(schema = @Schema(implementation = raspiResp.class))),
             @ApiResponse(responseCode = "500", description = "Error interno del servidor")
@@ -539,8 +539,8 @@ public class api {
      */
     @POST
     @Path(value = "/createConfigDevices")
-    @Produces({ MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN })
-    @Consumes({ MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN })
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
     @Operation(summary = "Crear configuración de dispositivos", description = "Crea la configuración de dispositivos para un proyecto.", requestBody = @RequestBody(required = true, content = @Content(schema = @Schema(implementation = raspiDTO.class))), responses = {
             @ApiResponse(responseCode = "200", description = "Configuración creada", content = @Content(schema = @Schema(implementation = msgError.class))),
             @ApiResponse(responseCode = "500", description = "Error interno del servidor")
@@ -567,7 +567,7 @@ public class api {
      */
     @POST
     @Path(value = "/login")
-    @Produces({ MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN })
+    @Produces(MediaType.APPLICATION_JSON)
     @Operation(summary = "Login de usuario con Firebase", description = "Autentica un usuario usando el token de Firebase y retorna información y perfiles.", requestBody = @RequestBody(required = false, description = "No se requiere body, solo el header Authorization: Bearer <firebase-token>"), responses = {
             @ApiResponse(responseCode = "200", description = "Login exitoso", content = @Content(mediaType = "application/json", schema = @Schema(implementation = LoginResponse.class), examples = @ExampleObject(value = "{\n  \"isNewUser\": true,\n  \"created\": true,\n  \"profiles\": [{\n    \"id\": 3,\n    \"name\": \"Cliente Internet\",\n    \"description\": \"Cliente de servicios de internet\",\n    \"active\": true\n  }]\n}"))),
             @ApiResponse(responseCode = "401", description = "No autorizado"),
@@ -635,8 +635,8 @@ public class api {
      */
     @POST
     @Path(value = "/assignProfile")
-    @Produces({ MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN })
-    @Consumes({ MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN })
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
     @Operation(summary = "Asignar perfiles a usuario", description = "Permite a un administrador asignar una lista de perfiles a un usuario. Elimina las relaciones previas y asigna los nuevos perfiles.", requestBody = @RequestBody(required = true, content = @Content(mediaType = "application/json", schema = @Schema(implementation = AssignProfileRequest.class), examples = @ExampleObject(value = "{\n  \"userId\": \"uid123\",\n  \"profileIds\": [1,2,3]\n}"))), responses = {
             @ApiResponse(responseCode = "200", description = "Perfiles asignados correctamente", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = "{\n  \"code\": 0,\n  \"message\": \"Perfiles asignados correctamente\"\n}"))),
             @ApiResponse(responseCode = "400", description = "Solicitud inválida", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = "{\n  \"code\": -1,\n  \"message\": \"No se pudieron asignar los perfiles\"\n}"))),
@@ -700,7 +700,7 @@ public class api {
      */
     @GET
     @Path(value = "/users")
-    @Produces({ MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN })
+    @Produces(MediaType.APPLICATION_JSON)
     @Operation(summary = "Obtener usuarios registrados", description = "Permite a un administrador consultar todos los usuarios registrados.", parameters = {
         @Parameter(name = "page", description = "Página (1-based)", in = ParameterIn.QUERY),
         @Parameter(name = "pageSize", description = "Tamaño de página (máximo 100)", in = ParameterIn.QUERY)
@@ -1005,7 +1005,7 @@ public class api {
      */
     @GET
     @Path(value = "/employees")
-    @Produces({ MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN })
+    @Produces(MediaType.APPLICATION_JSON)
     @Operation(summary = "Obtener usuarios registrados", description = "Permite a un administrador consultar todos los usuarios registrados.", parameters = {
         @Parameter(name = "page", description = "Página (1-based)", in = ParameterIn.QUERY),
         @Parameter(name = "pageSize", description = "Tamaño de página (máximo 100)", in = ParameterIn.QUERY)
@@ -1344,8 +1344,8 @@ public class api {
      */
     @POST
     @Path(value = "/createEmpresa")
-    @Produces({ MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN })
-    @Consumes({ MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN })
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
     @Operation(summary = "Crear empresa", 
         description = "Crea una nueva empresa con información básica y configuración de pasarela de pago.", 
         requestBody = @RequestBody(
@@ -1412,8 +1412,8 @@ public class api {
      */
     @POST
     @Path(value = "/updateEmpresa")
-    @Produces({ MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN })
-    @Consumes({ MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN })
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
     @Operation(summary = "Actualizar empresa", 
         description = "Actualiza los datos de una empresa existente, incluyendo configuración de pasarela de pago y precio base.",
         requestBody = @RequestBody(
@@ -1443,8 +1443,8 @@ public class api {
      */
     @POST
     @Path(value = "/deleteEmpresa")
-    @Produces({ MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN })
-    @Consumes({ MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN })
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
     @Operation(summary = "Eliminar empresa", description = "Elimina una empresa existente.", requestBody = @RequestBody(required = true, content = @Content(schema = @Schema(implementation = EmpresaDTO.class))), responses = {
             @ApiResponse(responseCode = "200", description = "Empresa eliminada", content = @Content(schema = @Schema(implementation = Boolean.class))),
             @ApiResponse(responseCode = "500", description = "Error interno del servidor")
@@ -1462,7 +1462,7 @@ public class api {
      */
     @GET
     @Path("/usersByEmpresa/{empresaId}")
-    @Produces({ MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN })
+    @Produces(MediaType.APPLICATION_JSON)
     @Operation(summary = "Obtener usuarios por empresa", description = "Devuelve los usuarios asociados a una empresa específica.", responses = {
             @ApiResponse(responseCode = "200", description = "Lista de usuarios", content = @Content(mediaType = "application/json", schema = @Schema(implementation = UserDTO.class))),
             @ApiResponse(responseCode = "404", description = "Empresa no encontrada"),
@@ -1503,8 +1503,8 @@ public class api {
      */
     @POST
     @Path(value = "/createUser")
-    @Produces({ MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN })
-    @Consumes({ MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN })
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
     @Operation(
         summary = "Crear usuario individual con contrato",
         description = "Crea un nuevo usuario con perfil y empresa. Si el perfil es 'Customer', automáticamente se genera un contrato con campos de servicio (internet, energía solar, eventos) y movimientos de inventario (serializado o stock) según los datos proporcionados. Para importaciones masivas sin contratos, use /createUsersBatch.",
@@ -1951,8 +1951,8 @@ public class api {
      */
     @POST
     @Path(value = "/updateUser")
-    @Produces({ MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN })
-    @Consumes({ MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN })
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
     @Operation(summary = "Actualizar usuario", description = "Permite actualizar un usuario según reglas de perfil y empresa.", requestBody = @RequestBody(required = true, content = @Content(schema = @Schema(implementation = UserDTO.class))), responses = {
             @ApiResponse(responseCode = "200", description = "Usuario actualizado", content = @Content(schema = @Schema(implementation = Boolean.class))),
             @ApiResponse(responseCode = "403", description = "No tiene permisos para actualizar usuarios"),
@@ -2049,7 +2049,7 @@ public class api {
      */
     @GET
     @Path("/activeProfiles")
-    @Produces({ MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN })
+    @Produces(MediaType.APPLICATION_JSON)
     @Operation(summary = "Obtener perfiles activos", description = "Permite a un usuario con perfil Administrador consultar los perfiles activos. Si el perfil es Administrador y la descripción es 'Administrador', retorna todos los perfiles activos. Si la descripción es diferente, retorna solo los perfiles activos con la misma descripción.", responses = {
             @ApiResponse(responseCode = "200", description = "Lista de perfiles activos", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ProfileDTO.class), examples = @ExampleObject(value = "[{\n  \"id\": 1,\n  \"name\": \"Administrador\",\n  \"description\": \"Administrador\",\n  \"active\": true\n}]"))),
             @ApiResponse(responseCode = "401", description = "No autorizado"),
@@ -2663,8 +2663,8 @@ public class api {
      */
     @POST
     @Path(value = "/createUsersBatch")
-    @Produces({ MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN })
-    @Consumes({ MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN })
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
     @Operation(
         summary = "Crear usuarios en lote (con contratos básicos)",
         description = "Crea múltiples usuarios (hasta 100) con contratos básicos en una sola solicitud. Crea usuarios, asigna perfiles y si el perfil es 'Customer' crea el contrato automáticamente. A diferencia de /createUser, NO crea detalles de contratos ni movimientos de inventario.",
