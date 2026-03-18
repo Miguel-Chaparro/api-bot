@@ -2838,28 +2838,42 @@ public class api {
         if (!created) {
             userDAO.update(newUser);
         }
-        // Asignar perfil
+        // Asignar perfil - CORREGIDO para usar tipoPerfil como en doCreateUser
         int idPerfil = -1;
         String assignedProfileName = null;
         try {
             List<ProfileDTO> perfilesEmpresa = profileDAO.getAllActiveProfiles();
+            String requestedProfile = newUser.getTipoPerfil() != null ? newUser.getTipoPerfil() : "Customer";
+            
+            // Primero: Buscar perfil que coincida con empresa AND nombre solicitado
             for (ProfileDTO perfil : perfilesEmpresa) {
-                if (!perfil.getDescription().equalsIgnoreCase("Administrador") ) {
+                if (!perfil.getDescription().equalsIgnoreCase("Administrador")) {
                     try {
-                        idPerfil = Integer.parseInt(perfil.getDescription());
-                        if (idPerfil == newUser.getEmpresaId()) {
+                        int descAsInt = Integer.parseInt(perfil.getDescription());
+                        // Verificar que coincida empresa Y perfil solicitado
+                        if (descAsInt == newUser.getEmpresaId() && perfil.getName().equalsIgnoreCase(requestedProfile)) {
                             idPerfil = perfil.getId();
                             assignedProfileName = perfil.getName();
                             break;
                         }
                     } catch (NumberFormatException e) {
-                        return Response.status(Response.Status.BAD_REQUEST)
-                                .entity(new msgError(-1,
-                                        "El perfil debe tener una descripción numérica o un nombre válido"))
-                                .build();
+                        // Ignorar si no es número
                     }
                 }
             }
+            
+            // Fallback: Si no encontró por empresa+nombre, buscar solo por nombre solicitado
+            if (idPerfil == -1) {
+                for (ProfileDTO perfil : perfilesEmpresa) {
+                    if (perfil.getName().equalsIgnoreCase(requestedProfile)) {
+                        idPerfil = perfil.getId();
+                        assignedProfileName = perfil.getName();
+                        break;
+                    }
+                }
+            }
+            
+            // Último fallback: Si aún no encuentra, asignar Customer como defecto
             if (idPerfil == -1) {
                 for (ProfileDTO perfil : perfilesEmpresa) {
                     if ("Customer".equalsIgnoreCase(perfil.getName())) {
@@ -2869,6 +2883,7 @@ public class api {
                     }
                 }
             }
+            
             if (idPerfil != -1) {
                 profileDAO.assignProfileToUser(newUser.getId(), idPerfil);
             }
