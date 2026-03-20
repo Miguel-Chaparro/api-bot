@@ -2834,9 +2834,21 @@ public class api {
         newUser.setCreationTime(new java.sql.Timestamp(System.currentTimeMillis()));
         
         boolean created;
+        //tranformar nombre a camelCase para que coincida con el modelo de UserDTO obtenido newUser.getDisplayName()
+        String displayName = newUser.getDisplayName();
+        if (displayName != null && !displayName.isEmpty()) {
+            String[] parts = displayName.split(" ");
+            StringBuilder camelCaseName = new StringBuilder();
+            for (String part : parts) {
+                if (!part.isEmpty()) {
+                    camelCaseName.append(part.substring(0, 1).toUpperCase()).append(part.substring(1).toLowerCase()).append(" ");
+                }
+            }
+            newUser.setDisplayName(camelCaseName.toString().trim());
+        }
         created = userDAO.create(newUser);
         if (!created) {
-            userDAO.update(newUser);
+            created = userDAO.update(newUser);
         }
         // Asignar perfil - SOLO si el usuario fue creado recientemente
         int idPerfil = -1;
@@ -2896,7 +2908,7 @@ public class api {
         }
         
         // Crear contrato en batch (sin detalles ni movimientos)
-        if ("Customer".equalsIgnoreCase(assignedProfileName)) {
+        if (created &&"Customer".equalsIgnoreCase(assignedProfileName)) {
             try {
                 ContratoDAO contratoDAO = new ContratoDAO();
                 ContratoDTO contrato = new ContratoDTO();
