@@ -2838,59 +2838,61 @@ public class api {
         if (!created) {
             userDAO.update(newUser);
         }
-        // Asignar perfil - CORREGIDO para usar tipoPerfil como en doCreateUser
+        // Asignar perfil - SOLO si el usuario fue creado recientemente
         int idPerfil = -1;
         String assignedProfileName = null;
-        try {
-            List<ProfileDTO> perfilesEmpresa = profileDAO.getAllActiveProfiles();
-            String requestedProfile = newUser.getTipoPerfil() != null ? newUser.getTipoPerfil() : "Customer";
-            
-            // Primero: Buscar perfil que coincida con empresa AND nombre solicitado
-            for (ProfileDTO perfil : perfilesEmpresa) {
-                if (!perfil.getDescription().equalsIgnoreCase("Administrador")) {
-                    try {
-                        int descAsInt = Integer.parseInt(perfil.getDescription());
-                        // Verificar que coincida empresa Y perfil solicitado
-                        if (descAsInt == newUser.getEmpresaId() && perfil.getName().equalsIgnoreCase(requestedProfile)) {
+        if (created) {
+            try {
+                List<ProfileDTO> perfilesEmpresa = profileDAO.getAllActiveProfiles();
+                String requestedProfile = newUser.getTipoPerfil() != null ? newUser.getTipoPerfil() : "Customer";
+                
+                // Primero: Buscar perfil que coincida con empresa AND nombre solicitado
+                for (ProfileDTO perfil : perfilesEmpresa) {
+                    if (!perfil.getDescription().equalsIgnoreCase("Administrador")) {
+                        try {
+                            int descAsInt = Integer.parseInt(perfil.getDescription());
+                            // Verificar que coincida empresa Y perfil solicitado
+                            if (descAsInt == newUser.getEmpresaId() && perfil.getName().equalsIgnoreCase(requestedProfile)) {
+                                idPerfil = perfil.getId();
+                                assignedProfileName = perfil.getName();
+                                break;
+                            }
+                        } catch (NumberFormatException e) {
+                            // Ignorar si no es número
+                        }
+                    }
+                }
+                
+                // Fallback: Si no encontró por empresa+nombre, buscar solo por nombre solicitado
+                if (idPerfil == -1) {
+                    for (ProfileDTO perfil : perfilesEmpresa) {
+                        if (perfil.getName().equalsIgnoreCase(requestedProfile)) {
                             idPerfil = perfil.getId();
                             assignedProfileName = perfil.getName();
                             break;
                         }
-                    } catch (NumberFormatException e) {
-                        // Ignorar si no es número
                     }
                 }
-            }
-            
-            // Fallback: Si no encontró por empresa+nombre, buscar solo por nombre solicitado
-            if (idPerfil == -1) {
-                for (ProfileDTO perfil : perfilesEmpresa) {
-                    if (perfil.getName().equalsIgnoreCase(requestedProfile)) {
-                        idPerfil = perfil.getId();
-                        assignedProfileName = perfil.getName();
-                        break;
+                
+                // Último fallback: Si aún no encuentra, asignar Customer como defecto
+                if (idPerfil == -1) {
+                    for (ProfileDTO perfil : perfilesEmpresa) {
+                        if ("Customer".equalsIgnoreCase(perfil.getName())) {
+                            idPerfil = perfil.getId();
+                            assignedProfileName = perfil.getName();
+                            break;
+                        }
                     }
                 }
-            }
-            
-            // Último fallback: Si aún no encuentra, asignar Customer como defecto
-            if (idPerfil == -1) {
-                for (ProfileDTO perfil : perfilesEmpresa) {
-                    if ("Customer".equalsIgnoreCase(perfil.getName())) {
-                        idPerfil = perfil.getId();
-                        assignedProfileName = perfil.getName();
-                        break;
-                    }
+                
+                if (idPerfil != -1) {
+                    profileDAO.assignProfileToUser(newUser.getId(), idPerfil);
                 }
+            } catch (Exception e) {
+                return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                        .entity(new msgError(-1, "Usuario creado pero error asignando perfil: " + e.getMessage()))
+                        .build();
             }
-            
-            if (idPerfil != -1) {
-                profileDAO.assignProfileToUser(newUser.getId(), idPerfil);
-            }
-        } catch (Exception e) {
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                    .entity(new msgError(-1, "Usuario creado pero error asignando perfil: " + e.getMessage()))
-                    .build();
         }
         
         // Crear contrato en batch (sin detalles ni movimientos)
