@@ -20,8 +20,7 @@ public class conexionBD {
 
     private Connection cnn;
     private static final Logger logg = Logger.getLogger(conexionBD.class.getName());
-    private boolean isFromPool = false;
-
+    
     /**
      * Constructor - gets a fresh connection from the pool
      */
@@ -37,7 +36,7 @@ public class conexionBD {
     private void obtenerConexion() {
         try {
             cnn = ConnectionPool.getInstance().getConnection();
-            isFromPool = true;
+            
             if (cnn != null) {
                 logg.info("Conexion a base de datos obtenida del pool ... Ok");
                 logg.info("Pool Status: " + ConnectionPool.getInstance().getPoolStats());
@@ -46,7 +45,6 @@ public class conexionBD {
             logg.log(Level.SEVERE, "ERROR - CRITICAL: Connection pool EXHAUSTED! All 20 connections busy or timeout. Database unreachable. Error: {0}", ex.getMessage());
             logg.log(Level.SEVERE, "This usually means connections are not being properly closed. Check for connection leaks in DAO methods.", ex);
             cnn = null;
-            isFromPool = false;
             // DO NOT throw - let caller deal with null connection
         }
     }
@@ -84,7 +82,6 @@ public class conexionBD {
             logg.log(Level.WARNING, "Error closing connection: ", ex);
         } finally {
             cnn = null;
-            isFromPool = false;
         }
         logg.info("*** Fin cerrarConexion ***");
     }

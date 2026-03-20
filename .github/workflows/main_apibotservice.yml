@@ -32,6 +32,7 @@ jobs:
         with:
           name: war
           path: target/*.war
+          retention-days: 1
 
   deploy:
     runs-on: ubuntu-latest
