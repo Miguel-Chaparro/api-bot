@@ -2896,7 +2896,7 @@ public class api {
         }
         
         // Crear contrato en batch (sin detalles ni movimientos)
-        if (created && "Customer".equalsIgnoreCase(assignedProfileName)) {
+        if ("Customer".equalsIgnoreCase(assignedProfileName)) {
             try {
                 ContratoDAO contratoDAO = new ContratoDAO();
                 ContratoDTO contrato = new ContratoDTO();
