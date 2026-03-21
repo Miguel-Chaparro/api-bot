@@ -2922,7 +2922,7 @@ public class api {
                 contrato.setFechaInicio(new Date(System.currentTimeMillis()));
                 contrato.setFechaFin(null);
                 contrato.setDireccionInstalacion(newUser.getDireccion());
-                contrato.setEstado("inactivo");
+                contrato.setEstado("activo");
                 contrato.setPrecioMensual(newUser.getPrecioMensual());
                 Calendar cal = Calendar.getInstance();
                 int dia = cal.get(Calendar.DAY_OF_MONTH) + 1;
