@@ -53,21 +53,13 @@ jobs:
           chmod 600 ~/.ssh/id_ed25519
           ssh-keyscan -H ${{ secrets.VM_HOST }} >> ~/.ssh/known_hosts
 
-          - name: Upload WAR to /tmp
+      - name: Upload WAR to /tmp
         run: |
-          # Añadimos un espacio claro después de cada opción -o
-          scp -i ~/.ssh/id_ed25519 \
-              -o StrictHostKeyChecking=no \
-              -o UserKnownHostsFile=/dev/null \
-              *.war ${{ secrets.VM_USER }}@${{ secrets.VM_HOST }}:/tmp/app.war
+          scp *.war ${{ secrets.VM_USER }}@${{ secrets.VM_HOST }}:/tmp/app.war
 
       - name: Deploy WAR with sudo and restart Tomcat
         run: |
-          # El espacio entre /dev/null y el usuario es vital
-          ssh -i ~/.ssh/id_ed25519 \
-              -o StrictHostKeyChecking=no \
-              -o UserKnownHostsFile=/dev/null \
-              ${{ secrets.VM_USER }}@${{ secrets.VM_HOST }} "
-                sudo mv /tmp/app.war /opt/tomcat/webapps/ROOT.war &&
-                sudo systemctl restart tomcat
-              "
+          ssh ${{ secrets.VM_USER }}@${{ secrets.VM_HOST }} "
+            sudo mv /tmp/app.war /opt/tomcat/webapps/ROOT.war &&
+            sudo systemctl restart tomcat
+          "
