@@ -47,17 +47,17 @@ jobs:
       - name: Configure SSH
         run: |
           mkdir -p ~/.ssh
-          echo "${{ secrets.VM_SSH_KEY }}" > ~/.ssh/id_rsa
-          chmod 600 ~/.ssh/id_rsa
+          echo "${{ secrets.VM_SSH_KEY }}" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
           ssh-keyscan -H ${{ secrets.VM_HOST }} >> ~/.ssh/known_hosts
 
       - name: Upload WAR to /tmp
         run: |
-          scp *.war ${{ secrets.VM_USER }}@${{ secrets.VM_HOST }}:/tmp/app.war
+           scp -i ~/.ssh/id_ed25519 -o StrictHostKeyChecking=no *.war ${{ secrets.VM_USER }}@${{ secrets.VM_HOST }}:/tmp/app.war
 
       - name: Deploy WAR with sudo and restart Tomcat
         run: |
-          ssh ${{ secrets.VM_USER }}@${{ secrets.VM_HOST }} "
+          ssh -i ~/.ssh/id_ed25519 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null${{ secrets.VM_USER }}@${{ secrets.VM_HOST }} "
             sudo mv /tmp/app.war /opt/tomcat/webapps/ROOT.war &&
             sudo systemctl restart tomcat
           "
